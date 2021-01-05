@@ -78,9 +78,9 @@ class Sigmoid:
         #   オーバーフロー対策
         sigmoid_range = 34.538776394910684
         if x <= -sigmoid_range:
-            x = 1e-15
+            return 1e-15
         if x >= sigmoid_range:
-            x = 1.0 - 1e-15 
+            return 1.0 - 1e-15 
 
         self.mul = Mul()    
         self.exp = Exp()
