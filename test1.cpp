@@ -101,6 +101,7 @@ private:
 
 class Log {
 public:
+	double x;
 	Log() {
 		x = NULL;
 	}
@@ -120,7 +121,6 @@ public:
 		return dout * (1 / x);
 	}
 private:
-	double x;
 	bool __isInf = false;
 	const double C = 1.0e+100;
 };
@@ -161,6 +161,9 @@ private:
 
 class Softmax {
 public:
+	double* y;
+	double* result;
+
 	Softmax() {}
 	~Softmax() {
 		// 動的にメモリを作成したので配列の先頭ポインタを削除
@@ -238,12 +241,13 @@ private:
 	Add* adds;
 	Div div;
 	Mul* muls;
-	double* y;
-	double* result;
 };
 
 class CrossEntropyError {
 public:
+	double* result;
+	double E = 0.0;
+
 	CrossEntropyError() {}
 	~CrossEntropyError() {
 		delete[] logs;
@@ -274,7 +278,6 @@ public:
 		adds = new Add[SIZE1];
 		double log_x;
 		double m;
-		double E = 0.0;
 
 		for (int i = 0; i < (int)SIZE1; i++) {
 			// アンダーフロー回避
@@ -312,7 +315,6 @@ private:
 	Mul* muls;
 	Add* adds;
 	Mul mul;
-	double* result;
 	int size;
 	const double delta = 1e-10;
 };
