@@ -8,16 +8,20 @@ using namespace std;
 class Add {
 public:
 	Add() {}
-	~Add() {}
+	~Add() {
+		delete[] result;
+	}
 	double forward(double a, double b) {
 		return a + b;
 	}
 	double* backward(double dout) {
-		static double result[2];
+		result = new double[2];
 		result[0] = dout * 1.0;
 		result[1] = dout * 1.0;
 		return result;
 	}
+private:
+	double* result;
 };
 
 class Mul {
@@ -26,14 +30,16 @@ public:
 		x = NULL;
 		y = NULL;
 	}
-	~Mul(){}
+	~Mul(){
+		delete[] result;
+	}
 	double forward(double a, double b) {
 		x = a;
 		y = b;
 		return a * b;
 	}
 	double* backward(double dout) {
-		static double result[2];
+		result = new double[2];
 		result[0] = dout * y;
 		result[1] = dout * x;
 		return result;
@@ -41,6 +47,7 @@ public:
 private:
 	double x;
 	double y;
+	double* result;
 };
 
 class Div {
@@ -129,19 +136,18 @@ public:
 		if (x >= SIGMOID_RANGE) {
 			return 1.0 - DBL_MIN;
 		}
-
-		static double a = mul.forward(x, -1);
-		static double b = exp.forward(a);
-		static double c = add.forward(b, 1);
-		static double d = div.forward(c);
+		double a = mul.forward(x, -1);
+		double b = exp.forward(a);
+		double c = add.forward(b, 1);
+		double d = div.forward(c);
 
 		return d;
 	}
 	double backward(double dout) {
-		static double ddx = div.backward(dout);
-		static double* dc = add.backward(ddx);
-		static double dbx = exp.backward(dc[0]);
-		static double* da = mul.backward(dbx);
+		double ddx = div.backward(dout);
+		double* dc = add.backward(ddx);
+		double dbx = exp.backward(dc[0]);
+		double* da = mul.backward(dbx);
 
 		return da[0];
 	}
@@ -161,26 +167,27 @@ public:
 		delete[] exps;
 		delete[] adds;
 		delete[] muls;
+		delete[] y;
+		delete[] result;
 	}
 	template <class TYPE,size_t SIZE> 
-	TYPE* forward(const TYPE (&x)[SIZE]) {
+	double* forward(TYPE (&x)[SIZE]) {
 		// 配列の動的メモリ割り当て
 		exps = new Exp[SIZE];
 		adds = new Add[SIZE];
 		muls = new Mul[SIZE];
-		static TYPE y[SIZE];
-		static TYPE exp_a[SIZE];
-		static TYPE exp_sum = 0.0;
-		static TYPE exp_div;
+		y = new double[SIZE];
+		TYPE exp_a[SIZE];
+		TYPE exp_sum = 0.0;
+		TYPE exp_div;
 
 		// オーバーフロー対策
-		static TYPE Cmax = x[0];
+		TYPE Cmax = x[0];
 		for (int i = 0; i < (int)SIZE; i++) {
 			if (Cmax < x[i]) {
 				Cmax = x[i];
 			}
 		}
-
 		// ソフトマックス関数の分子分母
 		for (int i = 0; i < (int)SIZE; i++) {
 			exp_a[i] = exps[i].forward(x[i]- Cmax);
@@ -201,14 +208,14 @@ public:
 		return y;
 	}
 	template <class TYPE,size_t SIZE>
-	TYPE* backward(const TYPE(&dout)[SIZE]) {
-		static TYPE* dexp_as[SIZE];
-		static TYPE* dexp_asdiv[SIZE];
-		static TYPE dexp_a[SIZE];
-		static TYPE result[SIZE];
-		static TYPE dexp_sum = 0.0;
-		static TYPE dexp_div;
-		static TYPE tmp;
+	double* backward(TYPE (&dout)[SIZE]) {
+		TYPE* dexp_as[SIZE];
+		TYPE* dexp_asdiv[SIZE];
+		TYPE dexp_a[SIZE];
+		result = new double[SIZE];
+		TYPE dexp_sum = 0.0;
+		TYPE dexp_div;
+		TYPE tmp;
 
 		for (int i = 0; i < (int)SIZE; i++) {
 			dexp_as[i] = muls[i].backward(dout[i]);
@@ -235,6 +242,8 @@ private:
 	Add* adds;
 	Div div;
 	Mul* muls;
+	double* y;
+	double* result;
 };
 
 class CrossEntropyError {
@@ -267,9 +276,9 @@ public:
 		logs = new Log[SIZE1];
 		muls = new Mul[SIZE1];
 		adds = new Add[SIZE1];
-		static double log_x;
-		static double m;
-		static double E = 0.0;
+		double log_x;
+		double m;
+		double E = 0.0;
 
 		for (int i = 0; i < (int)SIZE1; i++) {
 			// アンダーフロー回避
@@ -289,10 +298,10 @@ public:
 	}
 	double* backward(double dout) {
 		result = new double[size];
-		static double* tmp;
-		static double dlog_x;
+		double* tmp;
+		double dlog_x;
 
-		static double* de = mul.backward(dout);
+		double* de = mul.backward(dout);
 		for (int i = 0; i < size; i++) {
 			tmp = adds[i].backward(de[1]);
 			tmp = muls[i].backward(tmp[1]);
@@ -315,18 +324,184 @@ private:
 class SimpleNet {
 public:
 	SimpleNet(
-		double input_size,
-		double hidden_size,
-		double output_size) {
-		cout << "初期化スタート" << endl;
+		int input_size,
+		int hidden_size,
+		int output_size) {
+		_input_size = input_size;
+		_hidden_size = hidden_size;
+		_output_size = output_size;
+
+		// 重み配列の作成（入力層と中間層の間）
+		weight1 = new double* [hidden_size];
+		for (int i = 0; i < hidden_size; i++) {
+			weight1[i] = new double[input_size];
+		}
+
+		// 重み配列の作成（中間層と出力層の間）
+		weight2 = new double* [output_size];
+		for (int i = 0; i < output_size; i++) {
+			weight2[i] = new double[hidden_size];
+		}
+
+		// 中間層の入力ノードに対するバイアス
+		bias1 = new double[hidden_size];
+
+		// 出力層の入力ノードに対するバイアス
+		bias2 = new double[output_size];
+
+		// 中間層の出力ノード
+		hidden_out = new double[hidden_size];
+
+		// 出力層の出力ノード
+		output_out = new double[output_size];
+
+		// ランダムに初期化
+		random_device rd;
+		mt19937 gen(rd());
+		uniform_real_distribution<double> dist(-1, 1);
 		
+		// 重み1をランダムに初期化
+		for (int i = 0; i < hidden_size; i++) {
+			for (int j = 0; j < input_size; j++) {
+				weight1[i][j] = dist(gen);
+				// printf("weight1[%d][%d] = %lf\n", i, j, weight1[i][j]);
+			}
+		}
+
+		// 重み2をランダムに初期化
+		for (int i = 0; i < output_size; i++) {
+			for (int j = 0; j < hidden_size; j++) {
+				weight2[i][j] = dist(gen);
+				// printf("weight2[%d][%d] = %lf\n", i, j, weight2[i][j]);
+			}
+		}
+
+		// バイアス1を0で初期化
+		for (int i = 0; i < hidden_size; i++) {
+			bias1[i] = 0.0;
+			// printf("bias1[%d] = %lf\n", i, bias1[i]);
+		}
+
+		// バイアス2を0で初期化
+		for (int i = 0; i < output_size; i++) {
+			bias2[i] = 0.0;
+			// printf("bias2[%d] = %lf\n", i, bias2[i]);
+		}
+		cout << "初期化終了" << endl;
 	}
 	~SimpleNet() {
+		// 動的に割り当てたメモリを開放する
+		for (int i = 0; i < _hidden_size; i++) {
+			delete weight1[i];
+			delete[] muls_fc1[i];
+			delete[] adds1_fc1[i];
+		}
+		
+		for (int i = 0; i < _output_size; i++) {
+			delete weight2[i];
+			delete[] muls_fc2[i];
+			delete[] adds1_fc2[i];
+		}
+		delete[] weight1;
+		delete[] weight2;
+		delete[] bias1;
+		delete[] bias2;
+		delete[] hidden_out;
+		delete[] output_out;
+		delete[] muls_fc1;
+		delete[] adds1_fc1;
+		delete[] adds2_fc1;
+		delete[] sigmoids_fc1;
+		delete[] muls_fc2;
+		delete[] adds1_fc2;
+	}
 
+	template <class TYPE,size_t SIZE>
+	void forward(const TYPE(&x)[SIZE]) {
+		fc1(x);
+		fc2();
+		cout << output_out[0] << endl;
+		cout << output_out[1] << endl;
 	}
 private:
 	double** weight1;
 	double** weight2;
+	double* bias1;
+	double* bias2;
+	double* hidden_out;
+	double* output_out;
+	int _input_size;
+	int _hidden_size;
+	int _output_size;
+	Mul** muls_fc1;
+	Add** adds1_fc1;
+	Add* adds2_fc1;
+	Sigmoid* sigmoids_fc1;
+	Mul** muls_fc2;
+	Add** adds1_fc2;
+	Add* adds2_fc2;
+	Softmax softmax;
+	double* y;
+
+	template <class TYPE, size_t SIZE>
+	void fc1(const TYPE(&x)[SIZE]) {
+
+		muls_fc1 = new Mul * [_hidden_size];
+		adds1_fc1 = new Add * [_hidden_size];
+
+		for (int i = 0; i < _hidden_size; i++) {
+			muls_fc1[i] = new Mul[_input_size];
+			adds1_fc1[i] = new Add[_input_size];
+		}
+
+		adds2_fc1 = new Add[_hidden_size];
+		sigmoids_fc1 = new Sigmoid[_hidden_size];
+
+		double tmp;
+		double a;
+		for (int i = 0; i < _hidden_size; i++) {
+			tmp = 0.0;
+			for (int j = 0; j < _input_size; j++) {
+				a = muls_fc1[i][j].forward(x[j], weight1[i][j]);
+				tmp = adds1_fc1[i][j].forward(tmp, a);
+			}
+			hidden_out[i] = adds2_fc1[i].forward(tmp, bias1[i]);
+			hidden_out[i] = sigmoids_fc1[i].forward(hidden_out[i]);
+		}
+
+		cout << "fc1順伝搬完了" << endl;
+	}
+
+	void fc2(void) {
+		muls_fc2 = new Mul * [_output_size];
+		adds1_fc2 = new Add * [_output_size];
+		for (int i = 0; i < _output_size; i++) {
+			muls_fc2[i] = new Mul[_hidden_size];
+			adds1_fc2[i] = new Add[_hidden_size];
+		}
+		adds2_fc2 = new Add[_output_size];
+
+		double tmp;
+		double a;
+		for (int i = 0; i < _output_size; i++) {
+			tmp = 0.0;
+			for (int j = 0; j < _hidden_size; j++) {
+				a = muls_fc2[i][j].forward(hidden_out[j], weight2[i][j]);
+				tmp = adds1_fc2[i][j].forward(tmp, a);
+			}
+			output_out[i] = adds2_fc2[i].forward(tmp, bias2[i]);
+		}
+
+		cout << "fc2順伝搬完了" << endl;
+	}
+
+	// 逆伝搬
+	/*template <class TYPE,size_t SIZE>
+	TYPE*** dfc1(TYPE(&dout)[SIZE]) {
+
+
+	}*/
+
 };
 
 #pragma region TEST
@@ -413,8 +588,8 @@ void testSoftmax(void) {
 	double* dx = softmax.backward(darr);
 
 	for (int i = 0; i < 10; i++) {
-		//printf("y[%d] = %lf\n", i, y[i]);
-		printf("dx[%d] = %lf\n", i, dx[i]);
+		printf("y[%d] = %lf\n", i, y[i]);
+		//printf("dx[%d] = %lf\n", i, dx[i]);
 	}
 }
 
@@ -442,11 +617,16 @@ void testPointer(void) {
 
 void testSimpleNet(void) {
 	SimpleNet model(2,3,2);
+	double x[2] = { 1.0,2.0 };
+	double t[2] = { 1,0 };
+
+	model.forward(x);
 }
 
 #pragma endregion
 
 int main(void) {
-	testPointer();
+	testSoftmax();
+	//testSimpleNet();
 	return 0;
 }
