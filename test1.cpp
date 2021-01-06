@@ -30,7 +30,7 @@ public:
 		x = NULL;
 		y = NULL;
 	}
-	~Mul(){
+	~Mul() {
 		delete[] result;
 	}
 	double forward(double a, double b) {
@@ -58,15 +58,15 @@ public:
 	~Div() {}
 	double forward(double x) {
 		// ゼロ除算回避
-		if (x > DBL_MIN/C) {
+		if (x > DBL_MIN / C) {
 			y = 1 / x;
 		}
-		else if (x < -DBL_MIN/C) {
+		else if (x < -DBL_MIN / C) {
 			y = 1 / x;
 		}
 		else {
 			isInf = true;
-			y = DBL_MAX/C;
+			y = DBL_MAX / C;
 		}
 		return y;
 	}
@@ -74,12 +74,12 @@ public:
 		if (isInf == true) {
 			return dout * (-DBL_MAX / C);
 		}
-		return  dout * (-1 * y * y); 
+		return  dout * (-1 * y * y);
 	}
 private:
 	double y;
-	bool isInf=false;
-	const double C=1.0e+100;
+	bool isInf = false;
+	const double C = 1.0e+100;
 };
 
 class Exp {
@@ -87,7 +87,7 @@ public:
 	Exp() {
 		out = NULL;
 	}
-	~Exp(){}
+	~Exp() {}
 	double forward(double a) {
 		out = exp(a);
 		return out;
@@ -127,8 +127,8 @@ private:
 
 class Sigmoid {
 public:
-	Sigmoid()	{}
-	~Sigmoid()	{}
+	Sigmoid() {}
+	~Sigmoid() {}
 	double forward(double x) {
 		if (x <= -SIGMOID_RANGE) {
 			return DBL_MIN;
@@ -162,7 +162,7 @@ private:
 class Softmax {
 public:
 	Softmax() {}
-	~Softmax(){
+	~Softmax() {
 		// 動的にメモリを作成したので配列の先頭ポインタを削除
 		delete[] exps;
 		delete[] adds;
@@ -170,73 +170,69 @@ public:
 		delete[] y;
 		delete[] result;
 	}
-	template <class TYPE,size_t SIZE> 
-	double* forward(TYPE (&x)[SIZE]) {
-		// 配列の動的メモリ割り当て
-		exps = new Exp[SIZE];
-		adds = new Add[SIZE];
-		muls = new Mul[SIZE];
-		y = new double[SIZE];
-		TYPE exp_a[SIZE];
-		TYPE exp_sum = 0.0;
-		TYPE exp_div;
+	double* forward(double* x,size_t size) {
+		exps = new Exp[size];
+		adds = new Add[size];
+		muls = new Mul[size];
+		y = new double[size];
+		double* exp_a = new double[size];
+		double exp_sum = 0.0;
+		double exp_div;
 
 		// オーバーフロー対策
-		TYPE Cmax = x[0];
-		for (int i = 0; i < (int)SIZE; i++) {
+		double Cmax = x[0];
+		for (int i = 0; i < (int)size; i++) {
 			if (Cmax < x[i]) {
 				Cmax = x[i];
 			}
 		}
+
 		// ソフトマックス関数の分子分母
-		for (int i = 0; i < (int)SIZE; i++) {
-			exp_a[i] = exps[i].forward(x[i]- Cmax);
-			exp_sum = adds[i].forward(exp_sum,exp_a[i]);
-			//printf("exp_a[%d] = %lf   ", i, exp_a[i]);
-			//printf("exp_sum = %lf\n", exp_sum);
+		for (int i = 0; i < (int)size; i++) {
+			exp_a[i] = exps[i].forward(x[i] - Cmax);
+			exp_sum = adds[i].forward(exp_sum, exp_a[i]);
 		}
 
 		// ソフトマックス関数の分母
 		exp_div = div.forward(exp_sum);
-		//printf("exp_div = %lf\n", exp_div);
 
-		for (int i = 0; i < (int)SIZE; i++) {
+		for (int i = 0; i < (int)size; i++) {
 			y[i] = muls[i].forward(exp_a[i], exp_div);
-			//printf("y[%d] = %lf\n", i, y[i]);
 		}
-
+		delete[] exp_a;
 		return y;
 	}
-	template <class TYPE,size_t SIZE>
-	double* backward(TYPE (&dout)[SIZE]) {
-		TYPE* dexp_as[SIZE];
-		TYPE* dexp_asdiv[SIZE];
-		TYPE dexp_a[SIZE];
-		result = new double[SIZE];
-		TYPE dexp_sum = 0.0;
-		TYPE dexp_div;
-		TYPE tmp;
 
-		for (int i = 0; i < (int)SIZE; i++) {
+	double* backward(double* dout, size_t size) {
+		double** dexp_as = new double*[size];
+		double** dexp_asdiv = new double*[size];
+		double* dexp_a = new double[size];
+		result = new double[size];
+		double dexp_sum = 0.0;
+		double dexp_div;
+		double tmp;
+
+		for (int i = 0; i < (int)size; i++) {
 			dexp_as[i] = muls[i].backward(dout[i]);
-			//printf("dexp_a[%d][0] = %lf,dexp_a[%d][1] = %lf\n", i, dexp_as[i][0], i, dexp_as[i][1]);
-			// 分子の値（乗算の逆伝播）
 			dexp_a[i] = dexp_as[i][0];
-			// 分母の値（乗算の逆伝播）
 			dexp_sum += dexp_as[i][1];
+			delete[] dexp_as[i];
 		}
-		// 分母の値（除算の逆伝播）
+		delete[] dexp_as;
 		dexp_div = div.backward(dexp_sum);
-		
-		for (int i = 0; i < (int)SIZE; i++) {
+		for (int i = 0; i < (int)size; i++) {
 			dexp_asdiv[i] = adds[i].backward(dexp_div);
 			tmp = dexp_asdiv[i][1] + dexp_a[i];
-			//cout << tmp << endl;
 			tmp = exps[i].backward(tmp);
 			result[i] = tmp;
+			delete[] dexp_asdiv[i];
 		}
+		delete[] dexp_asdiv;
+		delete[] dexp_a;
+		
 		return result;
 	}
+
 private:
 	Exp* exps;
 	Add* adds;
@@ -248,8 +244,8 @@ private:
 
 class CrossEntropyError {
 public:
-	CrossEntropyError(){}
-	~CrossEntropyError(){
+	CrossEntropyError() {}
+	~CrossEntropyError() {
 		delete[] logs;
 		delete[] muls;
 		delete[] adds;
@@ -261,8 +257,8 @@ public:
 		class TYPE2,
 		size_t SIZE2
 	> double forward(
-		TYPE1 (&x)[SIZE1],
-		TYPE2 (&t)[SIZE2]
+		TYPE1(&x)[SIZE1],
+		TYPE2(&t)[SIZE2]
 	) {
 		if (SIZE1 != SIZE2) {
 			cout << "正解ラベルのサイズと";
@@ -321,6 +317,8 @@ private:
 	const double delta = 1e-10;
 };
 
+
+
 class SimpleNet {
 public:
 	SimpleNet(
@@ -355,11 +353,14 @@ public:
 		// 出力層の出力ノード
 		output_out = new double[output_size];
 
+		// 最終的な出力
+		y = new double[output_size];
+
 		// ランダムに初期化
 		random_device rd;
 		mt19937 gen(rd());
 		uniform_real_distribution<double> dist(-1, 1);
-		
+
 		// 重み1をランダムに初期化
 		for (int i = 0; i < hidden_size; i++) {
 			for (int j = 0; j < input_size; j++) {
@@ -396,7 +397,7 @@ public:
 			delete[] muls_fc1[i];
 			delete[] adds1_fc1[i];
 		}
-		
+
 		for (int i = 0; i < _output_size; i++) {
 			delete weight2[i];
 			delete[] muls_fc2[i];
@@ -414,15 +415,18 @@ public:
 		delete[] sigmoids_fc1;
 		delete[] muls_fc2;
 		delete[] adds1_fc2;
+		delete[] y;
 	}
-
-	template <class TYPE,size_t SIZE>
-	void forward(const TYPE(&x)[SIZE]) {
+	
+	double* y;
+	double* predict(double* x) {
 		fc1(x);
 		fc2();
-		cout << output_out[0] << endl;
-		cout << output_out[1] << endl;
+		y = softmax.forward(output_out, _output_size);
+		return y;
 	}
+
+
 private:
 	double** weight1;
 	double** weight2;
@@ -441,10 +445,8 @@ private:
 	Add** adds1_fc2;
 	Add* adds2_fc2;
 	Softmax softmax;
-	double* y;
 
-	template <class TYPE, size_t SIZE>
-	void fc1(const TYPE(&x)[SIZE]) {
+	void fc1(double* x) {
 
 		muls_fc1 = new Mul * [_hidden_size];
 		adds1_fc1 = new Add * [_hidden_size];
@@ -494,13 +496,6 @@ private:
 
 		cout << "fc2順伝搬完了" << endl;
 	}
-
-	// 逆伝搬
-	/*template <class TYPE,size_t SIZE>
-	TYPE*** dfc1(TYPE(&dout)[SIZE]) {
-
-
-	}*/
 
 };
 
@@ -584,8 +579,8 @@ void testSoftmax(void) {
 		0.98,
 		15.3
 	};
-	double* y = softmax.forward(arr);
-	double* dx = softmax.backward(darr);
+	double* y = softmax.forward(arr,10);
+	double* dx = softmax.backward(darr,10);
 
 	for (int i = 0; i < 10; i++) {
 		printf("y[%d] = %lf\n", i, y[i]);
@@ -616,17 +611,19 @@ void testPointer(void) {
 }
 
 void testSimpleNet(void) {
-	SimpleNet model(2,3,2);
+	SimpleNet model(2, 3, 2);
 	double x[2] = { 1.0,2.0 };
 	double t[2] = { 1,0 };
 
-	model.forward(x);
+	double* y = model.predict(x);
+	cout << y[0] << endl;
+	cout << y[1] << endl;
 }
 
 #pragma endregion
 
 int main(void) {
-	testSoftmax();
-	//testSimpleNet();
+	//testSoftmax();
+	testSimpleNet();
 	return 0;
 }
