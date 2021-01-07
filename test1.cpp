@@ -173,7 +173,7 @@ public:
 		delete[] y;
 		delete[] result;
 	}
-	double* forward(double* x,size_t size) {
+	double* forward(double* x, size_t size) {
 		exps = new Exp[size];
 		adds = new Add[size];
 		muls = new Mul[size];
@@ -207,8 +207,8 @@ public:
 	}
 
 	double* backward(double* dout, size_t size) {
-		double** dexp_as = new double*[size];
-		double** dexp_asdiv = new double*[size];
+		double** dexp_as = new double* [size];
+		double** dexp_asdiv = new double* [size];
 		double* dexp_a = new double[size];
 		result = new double[size];
 		double dexp_sum = 0.0;
@@ -232,7 +232,7 @@ public:
 		}
 		delete[] dexp_asdiv;
 		delete[] dexp_a;
-		
+
 		return result;
 	}
 
@@ -255,44 +255,29 @@ public:
 		delete[] adds;
 		delete[] result;
 	}
-	template <
-		class TYPE1,
-		size_t SIZE1,
-		class TYPE2,
-		size_t SIZE2
-	> double forward(
-		TYPE1(&x)[SIZE1],
-		TYPE2(&t)[SIZE2]
-	) {
-		if (SIZE1 != SIZE2) {
-			cout << "³‰ðƒ‰ƒxƒ‹‚ÌƒTƒCƒY‚Æ";
-			cout << "o—ÍƒŒƒCƒ„‚ÌƒTƒCƒY‚ª";
-			cout << "ˆÙ‚È‚è‚Ü‚·B" << endl;
-			return 0.0;
-		}
 
-		size = SIZE1;
-
-		logs = new Log[SIZE1];
-		muls = new Mul[SIZE1];
-		adds = new Add[SIZE1];
+	double forward(double* x, double* t, size_t x_size) {
+		size = x_size;
+		logs = new Log[size];
+		muls = new Mul[size];
+		adds = new Add[size];
 		double log_x;
 		double m;
-
-		for (int i = 0; i < (int)SIZE1; i++) {
+		E = 0.0;
+		for (int i = 0; i < (int)size; i++) {
 			// ƒAƒ“ƒ_[ƒtƒ[‰ñ”ð
 			if (x[i] <= delta && x[i] >= -delta) {
 				x[i] = delta;
 			}
 			log_x = logs[i].forward(x[i]);
-			//cout << log_x << endl;
-			m = muls[i].forward(log_x, t[i]);
-			//cout << m << endl;
+			// cout << log_x << endl;
+			m = muls[i].forward(log_x,t[i]);
+			// cout << m << endl;
 			E = adds[i].forward(E, m);
-			//cout << E << endl;
+			// cout << E << endl;
 		}
 		E = mul.forward(-1, E);
-		//cout << E << endl;
+		// cout << E << endl;
 		return E;
 	}
 	double* backward(double dout) {
@@ -323,6 +308,13 @@ private:
 
 class SimpleNet {
 public:
+	double* y;
+	double _loss;
+	double** dweight2;
+	double** dweight1;
+	double* dbias2;
+	double* dbias1;
+
 	SimpleNet(
 		int input_size,
 		int hidden_size,
@@ -398,12 +390,14 @@ public:
 			delete weight1[i];
 			delete[] muls_fc1[i];
 			delete[] adds1_fc1[i];
+			delete[] dweight1[i];
 		}
 
 		for (int i = 0; i < _output_size; i++) {
 			delete weight2[i];
 			delete[] muls_fc2[i];
 			delete[] adds1_fc2[i];
+			delete[] dweight2[i];
 		}
 		delete[] weight1;
 		delete[] weight2;
@@ -418,9 +412,12 @@ public:
 		delete[] muls_fc2;
 		delete[] adds1_fc2;
 		delete[] y;
+		delete[] dweight2;
+		delete[] dbias2;
+		delete[] dhidden_out;
+		delete[] dweight1;
+		delete[] dbias1;
 	}
-	
-	double* y;
 	double* predict(double* x) {
 		fc1(x);
 		fc2();
@@ -428,6 +425,23 @@ public:
 		return y;
 	}
 
+	double loss(double* x, double* t) {
+		double* y = predict(x);
+		_loss = cee.forward(y, t,_output_size);
+		cout << "‡“`”ÀŠ®—¹" << endl;
+		return _loss;
+	}
+
+	void backward(double dout) {
+		// ‘¹Ž¸ŠÖ”‚Ì‹t“`”À
+		double* result_arr = cee.backward(dout);
+		// ƒ\ƒtƒgƒ}ƒbƒNƒXŠÖ”‚Ì‹t“`”À
+		result_arr = softmax.backward(result_arr,_output_size);
+		// fc2‚Ì‹t“`”À
+		dfc2(result_arr);
+		// fc1‚Ì‹t“`”À
+		dfc1();
+	}
 
 private:
 	double** weight1;
@@ -447,6 +461,8 @@ private:
 	Add** adds1_fc2;
 	Add* adds2_fc2;
 	Softmax softmax;
+	CrossEntropyError cee;
+	double* dhidden_out;
 
 	void fc1(double* x) {
 
@@ -472,8 +488,6 @@ private:
 			hidden_out[i] = adds2_fc1[i].forward(tmp, bias1[i]);
 			hidden_out[i] = sigmoids_fc1[i].forward(hidden_out[i]);
 		}
-
-		cout << "fc1‡“`”ÀŠ®—¹" << endl;
 	}
 
 	void fc2(void) {
@@ -495,10 +509,57 @@ private:
 			}
 			output_out[i] = adds2_fc2[i].forward(tmp, bias2[i]);
 		}
-
-		cout << "fc2‡“`”ÀŠ®—¹" << endl;
 	}
 
+	void dfc2(double* dout) {
+		// “®“I‚Éƒƒ‚ƒŠ‚ðŠ„‚è“–‚Ä‚é
+		dbias2 = new double[_output_size];
+		dweight2 = new double* [_output_size];
+		for (int i = 0; i < _output_size; i++) {
+			dweight2[i] = new double[_hidden_size];
+		}
+		dhidden_out = new double[_hidden_size];
+		double* dtmp_bias2;
+		double* dtmp_da;
+		double* dhidden_out_dweight2;
+		for (int i = 0; i < _hidden_size; i++) {
+			dhidden_out[i] = 0.0;
+		}
+		for (int i = 0; i < _output_size; i++) {
+			dtmp_bias2 = adds2_fc2[i].backward(dout[i]);
+			dbias2[i] = dtmp_bias2[1];
+			for (int j = 0; j < _hidden_size; j++) {
+				dtmp_da = adds1_fc2[i][j].backward(dtmp_bias2[0]);
+				dhidden_out_dweight2 = muls_fc2[i][j].backward(dtmp_da[1]);
+				// printf("%lf   %lf\n", dhidden_out_dweight2[0], dhidden_out_dweight2[1]);
+				dweight2[i][j] = dhidden_out_dweight2[1];
+				dhidden_out[j] += dhidden_out_dweight2[0];
+				// printf("dweight2[%d][%d] = %lf\n", i, j, dweight2[i][j]);
+			}
+		}
+	}
+
+	void dfc1(void) {
+		dbias1 = new double[_hidden_size];
+		dweight1 = new double* [_hidden_size];
+		for (int i = 0; i < _hidden_size; i++) {
+			dweight1[i] = new double[_input_size];
+		}
+		double tmp;
+		double* dtmp_bias1;
+		double* dtmp_da;
+		double* dx_dweight1;
+		for (int i = 0; i < _hidden_size; i++) {
+			tmp = sigmoids_fc1[i].backward(dhidden_out[i]);
+			dtmp_bias1 = adds2_fc1[i].backward(tmp);
+			dbias1[i] = dtmp_bias1[1];
+			for (int j = 0; j < _input_size; j++) {
+				dtmp_da = adds1_fc1[i][j].backward(dtmp_bias1[0]);
+				dx_dweight1 = muls_fc1[i][j].backward(dtmp_da[1]);
+			}
+		}
+		cout << "ok!" << endl;
+	}
 };
 
 #pragma region TEST
@@ -581,8 +642,8 @@ void testSoftmax(void) {
 		0.98,
 		15.3
 	};
-	double* y = softmax.forward(arr,10);
-	double* dx = softmax.backward(darr,10);
+	double* y = softmax.forward(arr, 10);
+	double* dx = softmax.backward(darr, 10);
 
 	for (int i = 0; i < 10; i++) {
 		printf("y[%d] = %lf\n", i, y[i]);
@@ -595,7 +656,7 @@ void testCrossEntropyError(void) {
 	double x[2] = { 1.23,3.0 };
 	double t[2] = { 1,0 };
 
-	double E = cee.forward(x, t);
+	double E = cee.forward(x,t,2);
 	double* result = cee.backward(1);
 	//cout << E << endl;
 }
@@ -617,9 +678,11 @@ void testSimpleNet(void) {
 	double x[2] = { 1.0,2.0 };
 	double t[2] = { 1,0 };
 
-	double* y = model.predict(x);
-	cout << y[0] << endl;
-	cout << y[1] << endl;
+	// double* y = model.predict(x);
+
+	double loss = model.loss(x, t);
+
+	model.backward(1.0);
 }
 
 #pragma endregion
