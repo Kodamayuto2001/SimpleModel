@@ -2,11 +2,10 @@
 #include <float.h>
 #include <random>
 #include <cmath>
-
 using namespace std;
-
 class Add {
 public:
+	double* result;
 	Add() {}
 	~Add() {
 		delete[] result;
@@ -21,15 +20,13 @@ public:
 		return result;
 	}
 private:
-	double* result;
 };
-
 class Mul {
 public:
-	Mul() {
-		x = NULL;
-		y = NULL;
-	}
+	double* result;
+	double x;
+	double y;
+	Mul() {}
 	~Mul() {
 		delete[] result;
 	}
@@ -45,13 +42,10 @@ public:
 		return result;
 	}
 private:
-	double x;
-	double y;
-	double* result;
 };
-
 class Div {
 public:
+	double y;
 	Div() {
 		y = NULL;
 	}
@@ -77,13 +71,12 @@ public:
 		return  dout * (-1 * y * y);
 	}
 private:
-	double y;
 	bool isInf = false;
 	const double C = 1.0e+100;
 };
-
 class Exp {
 public:
+	double out;
 	Exp() {
 		out = NULL;
 	}
@@ -96,9 +89,7 @@ public:
 		return dout * out;
 	}
 private:
-	double out;
 };
-
 class Log {
 public:
 	double x;
@@ -124,7 +115,6 @@ private:
 	bool __isInf = false;
 	const double C = 1.0e+100;
 };
-
 class Sigmoid {
 public:
 	Sigmoid() {}
@@ -158,7 +148,6 @@ private:
 	Add add;
 	Div div;
 };
-
 class Softmax {
 public:
 	double* y;
@@ -242,7 +231,6 @@ private:
 	Div div;
 	Mul* muls;
 };
-
 class CrossEntropyError {
 public:
 	double* result;
@@ -303,9 +291,6 @@ private:
 	int size;
 	const double delta = 1e-10;
 };
-
-
-
 class SimpleNet {
 public:
 	double* y;
@@ -314,6 +299,7 @@ public:
 	double** dweight1;
 	double* dbias2;
 	double* dbias1;
+	double*** params;
 
 	SimpleNet(
 		int input_size,
@@ -417,6 +403,21 @@ public:
 		delete[] dhidden_out;
 		delete[] dweight1;
 		delete[] dbias1;
+		
+		//delete params[0][0];
+		//delete params[0][1];
+		//delete params[0][2];
+		//delete params[1][0];
+		//delete params[1][1];
+		//delete params[2][0];
+		//delete params[2][1];
+
+		//delete[] params[0];
+		//delete[] params[1];
+		//delete[] params[2];
+
+		//delete[] params;
+		cout << "ごめん開放できてない。" << endl;
 	}
 	double* predict(double* x) {
 		fc1(x);
@@ -441,6 +442,16 @@ public:
 		dfc2(result_arr);
 		// fc1の逆伝搬
 		dfc1();
+	}
+
+	double*** get_dW1_dW2_db1_db2(void) {
+		params = new double** [3];
+		params[2] = new double* [2];
+		params[0] = dweight1;
+		params[1] = dweight2;
+		params[2][0] = dbias1;
+		params[2][1] = dbias2;
+		return params;
 	}
 
 private:
@@ -555,13 +566,19 @@ private:
 			dbias1[i] = dtmp_bias1[1];
 			for (int j = 0; j < _input_size; j++) {
 				dtmp_da = adds1_fc1[i][j].backward(dtmp_bias1[0]);
+				// Runtime Library
+				// Debug Assetion Failed!
+				// Expression: _CrtlsVaildHeapPointer(block)
+				// メモリ破壊によるエラー
+				// コードのどこかでメモリ破壊をしているプログラムがある
 				dx_dweight1 = muls_fc1[i][j].backward(dtmp_da[1]);
+				dweight1[i][j] = dx_dweight1[1];
+				//printf("muls_fc1[%d][%d] = %lf\n", i, j, dweight1[i][j]);
 			}
 		}
-		cout << "ok!" << endl;
+		cout << "逆伝搬終了" << endl;
 	}
 };
-
 #pragma region TEST
 
 void testAdd(void) {
@@ -678,17 +695,82 @@ void testSimpleNet(void) {
 	double x[2] = { 1.0,2.0 };
 	double t[2] = { 1,0 };
 
-	// double* y = model.predict(x);
-
+	// 順伝搬そして損失値
 	double loss = model.loss(x, t);
 
+	// 逆伝搬
 	model.backward(1.0);
+
+	// 勾配減少
+	double*** params = model.get_dW1_dW2_db1_db2();
+	//// 重み１の勾配
+	//cout << params[0][0][0] << endl;
+	//cout << params[0][0][1] << endl;
+	//cout << params[0][1][0] << endl;
+	//cout << params[0][1][1] << endl;
+	//cout << params[0][2][0] << endl;
+	//cout << params[0][2][1] << endl;
+	//// 重み２の勾配
+	//cout << params[1][0][0] << endl;
+	//cout << params[1][0][1] << endl;
+	//cout << params[1][0][2] << endl;
+	//cout << params[1][1][0] << endl;
+	//cout << params[1][1][1] << endl;
+	//cout << params[1][1][2] << endl;
+	//// バイアス１の勾配
+	//cout << params[2][0][0] << endl;
+	//cout << params[2][0][1] << endl;
+	//cout << params[2][0][2] << endl;
+	//// バイアス２の勾配
+	//cout << params[2][1][0] << endl;
+	//cout << params[2][1][1] << endl;
+
+}
+
+void testMul2(void) {
+	//Mul** mul_test;
+	//mul_test = new Mul * [10000000];
+	//for (int i = 0; i < 10000000; i++) {
+	//	mul_test[i] = new Mul[500000];
+	//}
+	cout << "ok!" << endl;
+	// 問題はアドレスを開放するときに発生している
+	//for (int i = 0; i < 10; i++) {
+	//	delete[] mul_test[i];
+	//}
+	//delete[] mul_test;
+	cout << "testMul2" << endl;
 }
 
 #pragma endregion
 
+
+
 int main(void) {
-	//testSoftmax();
-	testSimpleNet();
+	// モデルのインスタンス化
+	SimpleNet model(2,3,2);
+
+	// 教師データ
+	double x[2] = { 1.0,2.0 };
+
+	// 正解ラベル
+	double t[2] = { 1,0 };
+
+	// 損失値
+	double loss = model.loss(x, t);
+
+	// 誤差逆伝搬
+	model.backward(1.0);
+
+	// パラメータ
+	double*** params = model.get_dW1_dW2_db1_db2();
+	
 	return 0;
 }
+
+
+
+
+
+
+
