@@ -48,7 +48,7 @@ public:
 	double y = 0.0;
 	double forward(double x) {
 		y = 1 / x;
-		// 0�����Z���邱�Ƃ͂ł��Ȃ�
+		// 0を除算することはできない
 		if (y == float(INFINITY)) {
 			y = DBL_MAX / D;
 		}
@@ -63,8 +63,8 @@ public:
 	double out = 0.0;
 	double forward(double a) {
 		out = exp(a);
-		// �l�C�s�A�̐��̓��Ȃ̂ŃI�[�o�[�t���[���������₷��
-		// �I�[�o�[�t���[�΍�
+		// ネイピアの数の二乗なのでオーバーフローが発生しやすい
+		// オーバーフロー対策
 		if (out == float(INFINITY)) {
 			out = DBL_MAX / C;
 		}
@@ -78,8 +78,8 @@ class Log {
 public:
 	double x = 1.0;
 	double forward(double x) {
-		// �ɏ��l�̂Ƃ��A���_�[�t���[����������
-		// �A���_�[�t���[�΍�
+		// 極小値のときアンダーフローが発生する
+		// アンダーフロー対策
 		if (x <= DBL_MIN) {
 			isInf = true;
 			x = DBL_MIN;
@@ -148,13 +148,13 @@ public:
 			}
 		}
 
-		// �\�t�g�}�b�N�X�֐��̕��q����
+		// ソフトマックス関数の分子分母
 		for (int i = 0; i < (int)size; i++) {
 			exp_a[i] = exps[i].forward(x[i] - Cmax);
 			exp_sum = adds[i].forward(exp_sum, exp_a[i]);
 		}
 
-		// �\�t�g�}�b�N�X�֐��̕��q����
+		// ソフトマックス関数の分子分母
 		exp_div = div.forward(exp_sum);
 
 		for (int i = 0; i < (int)size; i++) {
@@ -400,7 +400,7 @@ public:
 		cee.del();
 		softmax.del();
 
-		cout << "����ɉ������܂����I" << endl;
+		cout << "正常に解放されました！" << endl;
 	}
 
 	double* predict(double* x) {
@@ -417,13 +417,13 @@ public:
 	}
 
 	void backward(double dout = 1.0) {
-		// �����֐��̋t�`�d
+		// 損失関数の逆伝播
 		double* result_arr = cee.backward(dout);
-		// �\�t�g�}�b�N�X�֐��̋t�`�d
+		// ソフトマックス関数の逆伝播
 		result_arr = softmax.backward(result_arr);
-		// fc2�̋t�`�d
+		// fc2の逆伝播
 		_dfc2(result_arr);
-		// fc1�̋t�`�d
+		// fc1の逆伝播
 		_dfc1();
 	}
 
@@ -431,7 +431,7 @@ public:
 		ofstream ofs(fileName);
 
 		if (!ofs) {
-			cout << "�t�@�C�����J���܂���ł����B" << endl;
+			cout << "ファイルが開けませんでした。" << endl;
 			cin.get();
 		}
 
@@ -462,7 +462,7 @@ public:
 		{
 			ifstream ifs(fileName);
 			if (!ifs) {
-				cout << "�t�@�C�����J���܂���ł����B" << endl;
+				cout << "ファイルが開けませんでした。" << endl;
 				cin.get();
 			}
 			string buf;
@@ -505,7 +505,7 @@ public:
 				fc2.weight[data[a + 3] - 48][data[a + 4] - 48] = stod(tmp);
 			}
 			if (tmp == "b1_") {
-				cnt = a + 5;
+				cnt = a + 4;
 				tmp = data[cnt];
 				while (true)
 				{
@@ -516,7 +516,7 @@ public:
 				fc1.bias[data[a + 3] - 48] = stod(tmp);
 			}
 			if (tmp == "b2_") {
-				cnt = a + 5;
+				cnt = a + 4;
 				tmp = data[cnt];
 				while (true)
 				{
@@ -612,18 +612,18 @@ public:
 
 	void step(SimpleNet model) {
 		for (int i = 0; i < model.hidden_size; i++) {
-			// �o�C�A�X1�̍X�V
+			// バイアス1の更新
 			model.fc1.bias[i] -= lr * model.dfc1.dbias[i];
 			for (int j = 0; j < model.input_size; j++) {
-				// �d��1�̍X�V
+				// 重み1の更新
 				model.fc1.weight[i][j] -= lr * model.dfc1.dweight[i][j];
 			}
 		}
 		for (int i = 0; i < model.output_size; i++) {
-			// �o�C�A�X2�̍X�V
+			// バイアス2の更新
 			model.fc2.bias[i] -= lr * model.dfc2.dbias[i];
 			for (int j = 0; j < model.hidden_size; j++) {
-				// �d��2�̍X�V
+				// 重み2の更新
 				model.fc2.weight[i][j] -= lr * model.dfc2.dweight[i][j];
 			}
 		}
