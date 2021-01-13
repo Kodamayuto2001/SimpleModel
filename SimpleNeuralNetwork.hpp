@@ -6,11 +6,12 @@
 #include<string>
 #include<random>
 #include<cmath>
-
 using namespace std;
 const double C = 1.0e+100;
 const double D = 1.0e+200;
 
+/*-----‚Ç‚ñ‚È‚É“ï‚µ‚¢”®‚à‡¬ŠÖ”‚Å‚Å‚«‚Ä‚¢‚é-----*/
+/*-----Šî‘bŠÖ”ƒNƒ‰ƒX-----*/
 class Add {
 public:
 	double result[2];
@@ -48,7 +49,7 @@ public:
 	double y = 0.0;
 	double forward(double x) {
 		y = 1 / x;
-		// 0ã‚’é™¤ç®—ã™ã‚‹ã“ã¨ã¯ã§ããªã„
+		// 0‚ğœZ‚·‚é‚±‚Æ‚Í‚Å‚«‚È‚¢
 		if (y == float(INFINITY)) {
 			y = DBL_MAX / D;
 		}
@@ -63,8 +64,8 @@ public:
 	double out = 0.0;
 	double forward(double a) {
 		out = exp(a);
-		// ãƒã‚¤ãƒ”ã‚¢ã®æ•°ã®äºŒä¹—ãªã®ã§ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ãŒç™ºç”Ÿã—ã‚„ã™ã„
-		// ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼å¯¾ç­–
+		// ƒlƒCƒsƒA‚Ì”‚Ì“ñæ‚È‚Ì‚ÅƒI[ƒo[ƒtƒ[‚ª”­¶‚µ‚â‚·‚¢
+		// ƒI[ƒo[ƒtƒ[‘Îô
 		if (out == float(INFINITY)) {
 			out = DBL_MAX / C;
 		}
@@ -78,8 +79,8 @@ class Log {
 public:
 	double x = 1.0;
 	double forward(double x) {
-		// æ¥µå°å€¤ã®ã¨ãã‚¢ãƒ³ãƒ€ãƒ¼ãƒ•ãƒ­ãƒ¼ãŒç™ºç”Ÿã™ã‚‹
-		// ã‚¢ãƒ³ãƒ€ãƒ¼ãƒ•ãƒ­ãƒ¼å¯¾ç­–
+		// ‹É¬’l‚Ì‚Æ‚«ƒAƒ“ƒ_[ƒtƒ[‚ª”­¶‚·‚é
+		// ƒAƒ“ƒ_[ƒtƒ[‘Îô
 		if (x <= DBL_MIN) {
 			isInf = true;
 			x = DBL_MIN;
@@ -96,6 +97,10 @@ public:
 private:
 	bool isInf = false;
 };
+
+
+/*-----Šˆ«‰»ŠÖ”-----*/
+/*-----Šî‘bŠÖ”ƒNƒ‰ƒX‚ğ—˜—p-----*/
 class Sigmoid {
 public:
 	double forward(double x) {
@@ -127,10 +132,25 @@ private:
 	Div div;
 	double y;
 };
+class ReLU {
+public:
+	double forward(double x) {
+		ReLU::x = x;
+		if (x > 0.0) { return x; }
+		return 0.0;
+	}
+	double backward(double dout) {
+		if (x > 0.0) { return dout; }
+		return 0;
+	}
+private:
+	double x;
+};
 class Softmax {
 public:
 	double* y;
 	double* dr;
+
 	double* forward(double* x, size_t size) {
 		exps = new Exp[size];
 		adds = new Add[size];
@@ -148,13 +168,11 @@ public:
 			}
 		}
 
-		// ã‚½ãƒ•ãƒˆãƒãƒƒã‚¯ã‚¹é–¢æ•°ã®åˆ†å­åˆ†æ¯
 		for (int i = 0; i < (int)size; i++) {
 			exp_a[i] = exps[i].forward(x[i] - Cmax);
 			exp_sum = adds[i].forward(exp_sum, exp_a[i]);
 		}
 
-		// ã‚½ãƒ•ãƒˆãƒãƒƒã‚¯ã‚¹é–¢æ•°ã®åˆ†å­åˆ†æ¯
 		exp_div = div.forward(exp_sum);
 
 		for (int i = 0; i < (int)size; i++) {
@@ -163,6 +181,7 @@ public:
 		delete[] exp_a;
 		return y;
 	}
+
 	double* backward(double* dout) {
 		double* dexp_a = new double[size];
 		double dexp_sum = 0.0;
@@ -186,6 +205,7 @@ public:
 
 		return dr;
 	}
+
 	void del() {
 		delete[] exps;
 		delete[] adds;
@@ -200,23 +220,26 @@ private:
 };
 class CrossEntropyError {
 public:
+	double* dx;
+
 	double forward(double* x, double* t, size_t size) {
 		logs = new Log[size];
 		muls = new Mul[size];
 		adds = new Add[size];
 		CrossEntropyError::size = size;
 		double log_x;
-		double m;
 		double E = 0.0;
 		for (int i = 0; i < (int)size; i++) {
 			log_x = logs[i].forward(x[i]);
-			m = muls[i].forward(log_x, t[i]);
-			E = adds[i].forward(E, m);
+			E = adds[i].forward(
+				E,
+				muls[i].forward(log_x, t[i])
+			);
 		}
 		E = mul.forward(-1, E);
 		return E;
 	}
-	double* dx;
+
 	double* backward(double dout = 1.0) {
 		dx = new double[size];
 		double de = *(mul.backward(dout) + 1);
@@ -228,6 +251,7 @@ public:
 		}
 		return dx;
 	}
+
 	void del() {
 		delete[] logs;
 		delete[] muls;
@@ -241,45 +265,14 @@ private:
 	Mul mul;
 	size_t size;
 };
-class SoftmaxWithLossLayer {
-public:
-	double forward(double* x, double* t, size_t size) {
-		Softmax softmax;
-		CrossEntropyError cee;
-		SoftmaxWithLossLayer::t = t;
-		SoftmaxWithLossLayer::size = size;
-		y = new double[size];
-		for (int i = 0; i < (int)size; i++) {
-			y[i] = *(softmax.forward(x, size) + i);
-		}
-		double loss = cee.forward(y, t, size);
-		softmax.del();
-		cee.del();
-		return loss;
-	}
-	double* dx;
-	double* backward(double dout = 1.0) {
-		dx = new double[size];
-		for (int i = 0; i < (int)size; i++) {
-			dx[i] = y[i] - t[i];
-		}
-		return dx;
-	}
-	void del() {
-		delete[] y;
-		delete[] dx;
-	}
-private:
-	double* y;
-	double* t;
-	size_t size;
-};
+
+
+/*-----3‘w‚Ìƒ‚ƒfƒ‹ƒNƒ‰ƒX-----*/
+template<class A1, class A2, class LOSS>
 class SimpleNet {
 public:
-	size_t input_size;
-	size_t hidden_size;
-	size_t output_size;
-	class V {
+#pragma region •Ï”éŒ¾
+	class Forward {
 	public:
 		double** weight;
 		double* bias;
@@ -289,30 +282,40 @@ public:
 		Add* adds_one;
 	};
 
-	V fc1, fc2;
-	class DF {
+	class Backward {
 	public:
 		double** dweight;
 		double* dbias;
 		double* dnode_out;
 	};
-	DF dfc1, dfc2;
-	double* y;
-	double loss;
 
-	SimpleNet(size_t input_size, size_t hidden_size, size_t output_size) {
+	size_t input_size;
+	size_t hidden_size;
+	size_t output_size;
+	Forward fc1, fc2;
+	Backward dfc1, dfc2;
+
+#pragma endregion
+
+	SimpleNet(size_t input_size, size_t hidden_size, size_t output_size)
+	{
 		SimpleNet::input_size = input_size;
 		SimpleNet::hidden_size = hidden_size;
 		SimpleNet::output_size = output_size;
 
 		fc1.weight = new double* [hidden_size];
 		fc2.weight = new double* [output_size];
+		dfc1.dweight = new double* [hidden_size];
+		dfc2.dweight = new double* [output_size];
 
 		fc1.bias = new double[hidden_size];
 		fc2.bias = new double[output_size];
+		dfc1.dbias = new double[hidden_size];
+		dfc2.dbias = new double[output_size];
 
 		fc1.node_out = new double[hidden_size];
 		fc2.node_out = new double[output_size];
+		dfc2.dnode_out = new double[hidden_size];
 
 		fc1.muls_two = new Mul * [hidden_size];
 		fc1.adds_two = new Add * [hidden_size];
@@ -322,108 +325,57 @@ public:
 		fc2.adds_two = new Add * [output_size];
 		fc2.adds_one = new Add[output_size];
 
-		sigmoid = new Sigmoid[hidden_size];
-
-		y = new double[output_size];
-
-		dfc1.dweight = new double* [hidden_size];
-		dfc2.dweight = new double* [output_size];
-
-		dfc1.dbias = new double[hidden_size];
-		dfc2.dbias = new double[output_size];
-
-		dfc2.dnode_out = new double[hidden_size];
+		// ’†ŠÔ‘w‚ÌŠˆ«‰»ŠÖ”
+		activations = new A1[hidden_size];
 
 		random_device rd;
 		mt19937 gen(rd());
 		uniform_real_distribution<double> dist(-1, 1);
 
-		for (int i = 0; i < (int)hidden_size; i++) {
+		int i, j;
+		for (i = 0; i < (int)hidden_size; i++) {
 			fc1.weight[i] = new double[input_size];
 			fc1.muls_two[i] = new Mul[input_size];
 			fc1.adds_two[i] = new Add[input_size];
-			fc1.bias[i] = 0.0;
-			dfc2.dnode_out[i] = 0.0;
 			dfc1.dweight[i] = new double[input_size];
+			fc1.bias[i] = 0.0;
 			dfc1.dbias[i] = 0.0;
-			for (int j = 0; j < (int)input_size; j++) {
+			// ‹t“`”À’†ŠÔ‘w‚Ìƒm[ƒh‚ğ‰Šú‰»
+			dfc2.dnode_out[i] = 0.0;
+			for (j = 0; j < (int)input_size; j++) {
 				fc1.weight[i][j] = dist(gen);
 				dfc1.dweight[i][j] = 0.0;
 			}
 		}
-
-		for (int i = 0; i < (int)output_size; i++) {
+		for (i = 0; i < (int)output_size; i++) {
 			fc2.weight[i] = new double[hidden_size];
 			fc2.muls_two[i] = new Mul[hidden_size];
 			fc2.adds_two[i] = new Add[hidden_size];
-			fc2.bias[i] = 0.0;
 			dfc2.dweight[i] = new double[hidden_size];
+			fc2.bias[i] = 0.0;
 			dfc2.dbias[i] = 0.0;
-			dfc2.dnode_out[i] = 0.0;
-			for (int j = 0; j < (int)hidden_size; j++) {
+			for (j = 0; j < (int)hidden_size; j++) {
 				fc2.weight[i][j] = dist(gen);
 				dfc2.dweight[i][j] = 0.0;
 			}
 		}
 	}
-	void del() {
-		for (int i = 0; i < (int)hidden_size; i++) {
-			delete[] fc1.weight[i];
-			delete[] fc1.muls_two[i];
-			delete[] fc1.adds_two[i];
-			delete[] dfc1.dweight[i];
-		}
-		for (int i = 0; i < (int)output_size; i++) {
-			delete[] fc2.weight[i];
-			delete[] fc2.muls_two[i];
-			delete[] fc2.adds_two[i];
-			delete[] dfc2.dweight[i];
-		}
-		delete[] fc1.weight;
-		delete[] fc1.muls_two;
-		delete[] fc1.adds_two;
-		delete[] dfc1.dweight;
-		delete[] fc1.bias;
-		delete[] fc1.node_out;
-
-		delete[] fc2.weight;
-		delete[] fc2.muls_two;
-		delete[] fc2.adds_two;
-		delete[] dfc2.dweight;
-		delete[] fc2.bias;
-		delete[] fc2.node_out;
-
-		delete[] sigmoid;
-		delete[] y;
-
-		delete[] dfc2.dnode_out;
-		cee.del();
-		softmax.del();
-
-		cout << "æ­£å¸¸ã«è§£æ”¾ã•ã‚Œã¾ã—ãŸï¼" << endl;
-	}
 
 	double* predict(double* x) {
 		_fc1(x);
 		_fc2();
-		y = softmax.forward(fc2.node_out, output_size);
-		return y;
+		return activationOut.forward(fc2.node_out, output_size);
 	}
 
-	double Loss(double* x, double* t) {
+	double forward(double* x, double* t) {
 		double* y = predict(x);
-		loss = cee.forward(y, t, output_size);
-		return loss;
+		return lossFunc.forward(y, t, output_size);
 	}
 
 	void backward(double dout = 1.0) {
-		// æå¤±é–¢æ•°ã®é€†ä¼æ’­
-		double* result_arr = cee.backward(dout);
-		// ã‚½ãƒ•ãƒˆãƒãƒƒã‚¯ã‚¹é–¢æ•°ã®é€†ä¼æ’­
-		result_arr = softmax.backward(result_arr);
-		// fc2ã®é€†ä¼æ’­
+		double* result_arr = lossFunc.backward(dout);
+		result_arr = activationOut.backward(result_arr);
 		_dfc2(result_arr);
-		// fc1ã®é€†ä¼æ’­
 		_dfc1();
 	}
 
@@ -431,13 +383,13 @@ public:
 		ofstream ofs(fileName);
 
 		if (!ofs) {
-			cout << "ãƒ•ã‚¡ã‚¤ãƒ«ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚" << endl;
+			cout << "ƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B" << endl;
 			cin.get();
 		}
 
 		for (int i = 0; i < hidden_size; i++) {
 			for (int j = 0; j < input_size; j++) {
-				
+
 				ofs << "W1_" << i << j << fc1.weight[i][j] << "_";
 			}
 		}
@@ -462,7 +414,7 @@ public:
 		{
 			ifstream ifs(fileName);
 			if (!ifs) {
-				cout << "ãƒ•ã‚¡ã‚¤ãƒ«ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚" << endl;
+				cout << "ƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B" << endl;
 				cin.get();
 			}
 			string buf;
@@ -472,7 +424,7 @@ public:
 				data += buf + "\n";
 			}
 		}
-		
+
 		int a = 0;
 		int cnt = 0;
 		string tmp = "W1_W2_b1_b2_";
@@ -482,6 +434,7 @@ public:
 			tmp = data[a + 0];
 			tmp += data[a + 1];
 			tmp += data[a + 2];
+
 			if (tmp == "W1_") {
 				cnt = a + 5;
 				tmp = data[cnt];
@@ -530,26 +483,63 @@ public:
 		}
 	}
 
+	void del() {
+		int i;
+		for (i = 0; i < (int)hidden_size; i++) {
+			delete[] fc1.weight[i];
+			delete[] fc1.muls_two[i];
+			delete[] fc1.adds_two[i];
+			delete[] dfc1.dweight[i];
+		}
+		for (i = 0; i < (int)output_size; i++) {
+			delete[] fc2.weight[i];
+			delete[] fc2.muls_two[i];
+			delete[] fc2.adds_two[i];
+			delete[] dfc2.dweight[i];
+		}
+		delete[] fc1.weight;
+		delete[] fc1.bias;
+		delete[] fc1.node_out;
+		delete[] fc1.muls_two;
+		delete[] fc1.adds_two;
+		delete[] fc1.adds_one;
+		delete[] dfc1.dweight;
+		delete[] dfc1.dbias;
+		delete[] dfc1.dnode_out;
+
+		delete[] fc2.weight;
+		delete[] fc2.bias;
+		delete[] fc2.node_out;
+		delete[] fc2.muls_two;
+		delete[] fc2.adds_two;
+		delete[] fc2.adds_one;
+		delete[] dfc2.dweight;
+		delete[] dfc2.dbias;
+		delete[] dfc2.dnode_out;
+
+		delete[] activations;
+
+		activationOut.del();
+		lossFunc.del();
+
+		cout << "³í‚É‰ğ•ú‚³‚ê‚Ü‚µ‚½I" << endl;
+	}
+
 private:
-	Sigmoid* sigmoid;
-	Softmax softmax;
-	CrossEntropyError cee;
+	A1* activations;
+	A2 activationOut;
+	LOSS lossFunc;
 
 	void _fc1(double* x) {
 		double tmp, a, s;
 		for (int i = 0; i < hidden_size; i++) {
 			tmp = 0.0;
 			for (int j = 0; j < input_size; j++) {
-				a = fc1.muls_two[i][j].forward(
-					x[j], fc1.weight[i][j]
-				);
+				a = fc1.muls_two[i][j].forward(x[j], fc1.weight[i][j]);
 				tmp = fc1.adds_two[i][j].forward(tmp, a);
 			}
-			s = fc1.adds_one[i].forward(
-				tmp,
-				fc1.bias[i]
-			);
-			fc1.node_out[i] = sigmoid[i].forward(s);
+			s = fc1.adds_one[i].forward(tmp, fc1.bias[i]);
+			fc1.node_out[i] = activations[i].forward(s);
 		}
 	}
 
@@ -564,10 +554,7 @@ private:
 				);
 				tmp = fc2.adds_two[i][j].forward(tmp, a);
 			}
-			fc2.node_out[i] = fc2.adds_one[i].forward(
-				tmp,
-				fc2.bias[i]
-			);
+			fc2.node_out[i] = fc2.adds_one[i].forward(tmp, fc2.bias[i]);
 		}
 	}
 
@@ -593,7 +580,7 @@ private:
 		double* dtmp_da;
 		double* dx_dweight1;
 		for (int i = 0; i < hidden_size; i++) {
-			tmp = sigmoid[i].backward(dfc2.dnode_out[i]);
+			tmp = activations[i].backward(dfc2.dnode_out[i]);
 			dtmp_bias1 = fc1.adds_one[i].backward(tmp);
 			dfc1.dbias[i] = dtmp_bias1[1];
 			for (int j = 0; j < input_size; j++) {
@@ -604,26 +591,28 @@ private:
 		}
 	}
 };
+
+template<class Net>
 class SGD {
 public:
 	SGD(double lr = 0.01) {
 		SGD::lr = lr;
 	}
 
-	void step(SimpleNet model) {
+	void step(Net model) {
 		for (int i = 0; i < model.hidden_size; i++) {
-			// ãƒã‚¤ã‚¢ã‚¹1ã®æ›´æ–°
+			// ƒoƒCƒAƒX1‚ÌXV
 			model.fc1.bias[i] -= lr * model.dfc1.dbias[i];
 			for (int j = 0; j < model.input_size; j++) {
-				// é‡ã¿1ã®æ›´æ–°
+				// d‚İ1‚ÌXV
 				model.fc1.weight[i][j] -= lr * model.dfc1.dweight[i][j];
 			}
 		}
 		for (int i = 0; i < model.output_size; i++) {
-			// ãƒã‚¤ã‚¢ã‚¹2ã®æ›´æ–°
+			// ƒoƒCƒAƒX2‚ÌXV
 			model.fc2.bias[i] -= lr * model.dfc2.dbias[i];
 			for (int j = 0; j < model.hidden_size; j++) {
-				// é‡ã¿2ã®æ›´æ–°
+				// d‚İ2‚ÌXV
 				model.fc2.weight[i][j] -= lr * model.dfc2.dweight[i][j];
 			}
 		}
@@ -631,4 +620,11 @@ public:
 private:
 	double lr;
 };
+
+/*-----–¢À‘•-----*/
+class LogSoftmax {};
+class Nll_Loss {};
+class Momentum {};
+class AdaGrad {};	// <- RMSProp
+class Adam {};
 #endif // !_H_

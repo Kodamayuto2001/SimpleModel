@@ -1,12 +1,9 @@
 #include "SimpleNeuralNetwork.hpp"
 
 void train() {
-	// モデルのインスタンス化（入力層、中間層、出力層）
-	SimpleNet model(2, 3, 2);
-
-	// 最適化アルゴリズムのインスタンス化（学習率）
-	SGD optimizer(0.01);
-
+	SimpleNet<ReLU, Softmax, CrossEntropyError> model(2, 3, 2);
+	SGD<SimpleNet<ReLU, Softmax, CrossEntropyError>> optimizer(0.01);
+	
 	double x[2] = { 2.35,4.97 };	// 教師データ
 	double t[2] = { 1,0 };			// 正解ラベル
 
@@ -15,11 +12,11 @@ void train() {
 
 	double loss;
 	for (int e = 0; e < epoch; e++) {
-		// 順伝搬
-		loss = model.Loss(x, t);
+		// 順伝播
+		loss = model.forward(x, t);
 
-		// 逆伝搬
-		model.backward();
+		// 逆伝播
+		model.backward(1.0);
 
 		// 更新
 		optimizer.step(model);
@@ -31,31 +28,30 @@ void train() {
 	// 学習したモデルのパラメータを保存
 	model.save("model.txt");
 
-	// メモリの開放
+	// メモリの解放
 	model.del();
 }
 
 void test() {
-	// モデルのインスタンス化
-	SimpleNet model(2, 3, 2);
+	SimpleNet<ReLU, Softmax, CrossEntropyError> ai(2, 3, 2);
 
 	// 保存したモデルをロード
-	model.load("model.txt");
+	ai.load("model.txt");
 
 	// 検証データ
 	double x[2] = { 2.5,5.0 };
 
 	// 順伝搬
-	double* y = model.predict(x);
-	
+	double* y = ai.predict(x);
+
 	// 予測値
-	printf("y[0] = %lf ％\n",y[0]*100);
-	
+	printf("y[0] = %lf ％\n", y[0] * 100);
+
 	// メモリの開放
-	model.del();
+	ai.del();
 }
 
-int main(void) {
+int main() {
 	train();
 	test();
 	return 0;
