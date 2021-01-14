@@ -10,8 +10,8 @@ using namespace std;
 const double C = 1.0e+100;
 const double D = 1.0e+200;
 
-/*-----‚Ç‚ñ‚È‚É“ï‚µ‚¢”®‚à‡¬ŠÖ”‚Å‚Å‚«‚Ä‚¢‚é-----*/
-/*-----Šî‘bŠÖ”ƒNƒ‰ƒX-----*/
+/*-----ã©ã‚“ãªã«é›£ã—ã„æ•°å¼ã‚‚åˆæˆé–¢æ•°ã§ã§ãã¦ã„ã‚‹-----*/
+/*-----åŸºç¤é–¢æ•°ã‚¯ãƒ©ã‚¹-----*/
 class Add {
 public:
 	double result[2];
@@ -49,7 +49,7 @@ public:
 	double y = 0.0;
 	double forward(double x) {
 		y = 1 / x;
-		// 0‚ğœZ‚·‚é‚±‚Æ‚Í‚Å‚«‚È‚¢
+		// 0ã‚’é™¤ç®—ã™ã‚‹ã“ã¨ã¯ã§ããªã„
 		if (y == float(INFINITY)) {
 			y = DBL_MAX / D;
 		}
@@ -64,8 +64,8 @@ public:
 	double out = 0.0;
 	double forward(double a) {
 		out = exp(a);
-		// ƒlƒCƒsƒA‚Ì”‚Ì“ñæ‚È‚Ì‚ÅƒI[ƒo[ƒtƒ[‚ª”­¶‚µ‚â‚·‚¢
-		// ƒI[ƒo[ƒtƒ[‘Îô
+		// ãƒã‚¤ãƒ”ã‚¢ã®æ•°ã®äºŒä¹—ãªã®ã§ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ãŒç™ºç”Ÿã—ã‚„ã™ã„
+		// ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼å¯¾ç­–
 		if (out == float(INFINITY)) {
 			out = DBL_MAX / C;
 		}
@@ -79,8 +79,8 @@ class Log {
 public:
 	double x = 1.0;
 	double forward(double x) {
-		// ‹É¬’l‚Ì‚Æ‚«ƒAƒ“ƒ_[ƒtƒ[‚ª”­¶‚·‚é
-		// ƒAƒ“ƒ_[ƒtƒ[‘Îô
+		// æ¥µå°å€¤ã®ã¨ãã‚¢ãƒ³ãƒ€ãƒ¼ãƒ•ãƒ­ãƒ¼ãŒç™ºç”Ÿã™ã‚‹
+		// ã‚¢ãƒ³ãƒ€ãƒ¼ãƒ•ãƒ­ãƒ¼å¯¾ç­–
 		if (x <= DBL_MIN) {
 			isInf = true;
 			x = DBL_MIN;
@@ -99,8 +99,8 @@ private:
 };
 
 
-/*-----Šˆ«‰»ŠÖ”-----*/
-/*-----Šî‘bŠÖ”ƒNƒ‰ƒX‚ğ—˜—p-----*/
+/*-----æ´»æ€§åŒ–é–¢æ•°-----*/
+/*-----åŸºç¤é–¢æ•°ã‚¯ãƒ©ã‚¹ã‚’åˆ©ç”¨-----*/
 class Sigmoid {
 public:
 	double forward(double x) {
@@ -267,11 +267,11 @@ private:
 };
 
 
-/*-----3‘w‚Ìƒ‚ƒfƒ‹ƒNƒ‰ƒX-----*/
+/*-----3å±¤ã®ãƒ¢ãƒ‡ãƒ«ã‚¯ãƒ©ã‚¹-----*/
 template<class A1, class A2, class LOSS>
 class SimpleNet {
 public:
-#pragma region •Ï”éŒ¾
+#pragma region å¤‰æ•°å®£è¨€
 	class Forward {
 	public:
 		double** weight;
@@ -325,7 +325,7 @@ public:
 		fc2.adds_two = new Add * [output_size];
 		fc2.adds_one = new Add[output_size];
 
-		// ’†ŠÔ‘w‚ÌŠˆ«‰»ŠÖ”
+		// ä¸­é–“å±¤ã®æ´»æ€§åŒ–é–¢æ•°
 		activations = new A1[hidden_size];
 
 		random_device rd;
@@ -340,7 +340,7 @@ public:
 			dfc1.dweight[i] = new double[input_size];
 			fc1.bias[i] = 0.0;
 			dfc1.dbias[i] = 0.0;
-			// ‹t“`”À’†ŠÔ‘w‚Ìƒm[ƒh‚ğ‰Šú‰»
+			// é€†ä¼æ¬ä¸­é–“å±¤ã®ãƒãƒ¼ãƒ‰ã‚’åˆæœŸåŒ–
 			dfc2.dnode_out[i] = 0.0;
 			for (j = 0; j < (int)input_size; j++) {
 				fc1.weight[i][j] = dist(gen);
@@ -383,7 +383,7 @@ public:
 		ofstream ofs(fileName);
 
 		if (!ofs) {
-			cout << "ƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B" << endl;
+			cout << "ãƒ•ã‚¡ã‚¤ãƒ«ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚" << endl;
 			cin.get();
 		}
 
@@ -414,7 +414,7 @@ public:
 		{
 			ifstream ifs(fileName);
 			if (!ifs) {
-				cout << "ƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B" << endl;
+				cout << "ãƒ•ã‚¡ã‚¤ãƒ«ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚" << endl;
 				cin.get();
 			}
 			string buf;
@@ -522,7 +522,7 @@ public:
 		activationOut.del();
 		lossFunc.del();
 
-		cout << "³í‚É‰ğ•ú‚³‚ê‚Ü‚µ‚½I" << endl;
+		cout << "æ­£å¸¸ã«è§£æ”¾ã•ã‚Œã¾ã—ãŸï¼" << endl;
 	}
 
 private:
@@ -601,18 +601,18 @@ public:
 
 	void step(Net model) {
 		for (int i = 0; i < model.hidden_size; i++) {
-			// ƒoƒCƒAƒX1‚ÌXV
+			// ãƒã‚¤ã‚¢ã‚¹1ã®æ›´æ–°
 			model.fc1.bias[i] -= lr * model.dfc1.dbias[i];
 			for (int j = 0; j < model.input_size; j++) {
-				// d‚İ1‚ÌXV
+				// é‡ã¿1ã®æ›´æ–°
 				model.fc1.weight[i][j] -= lr * model.dfc1.dweight[i][j];
 			}
 		}
 		for (int i = 0; i < model.output_size; i++) {
-			// ƒoƒCƒAƒX2‚ÌXV
+			// ãƒã‚¤ã‚¢ã‚¹2ã®æ›´æ–°
 			model.fc2.bias[i] -= lr * model.dfc2.dbias[i];
 			for (int j = 0; j < model.hidden_size; j++) {
-				// d‚İ2‚ÌXV
+				// é‡ã¿2ã®æ›´æ–°
 				model.fc2.weight[i][j] -= lr * model.dfc2.dweight[i][j];
 			}
 		}
@@ -621,10 +621,121 @@ private:
 	double lr;
 };
 
-/*-----–¢À‘•-----*/
+template <class Net>
+class Momentum {
+public:
+	Momentum(double lr = 0.01, double momentum = 0.9) {
+		Momentum::lr = lr;
+		Momentum::momentum = momentum;
+	}
+
+	void step(Net model) {
+		input_size = model.input_size;
+		hidden_size = model.hidden_size;
+		output_size = model.output_size;
+		int i, j;
+		if (v_w1 == NULL || v_w2 == NULL || v_b1 == NULL || v_b2 == NULL) {
+			v_w1 = new double* [hidden_size];
+			v_w2 = new double* [output_size];
+			v_b1 = new double[hidden_size];
+			v_b2 = new double[output_size];
+			for (i = 0; i < hidden_size; i++) {
+				v_w1[i] = new double[input_size];
+				v_b1[i] = 0.0;
+				for (j = 0; j < input_size; j++) {
+					v_w1[i][j] = 0.0;
+				}
+			}
+			for (i = 0; i < output_size; i++) {
+				v_w2[i] = new double[hidden_size];
+				v_b2[i] = 0.0;
+				for (j = 0; j < hidden_size; j++) {
+					v_w2[i][j] = 0.0;
+				}
+			}
+		}
+		for (i = 0; i < hidden_size; i++) {
+			v_b1[i] = momentum * v_b1[i] - lr * model.dfc1.dbias[i];
+			model.fc1.bias[i] += v_b1[i];
+			for (j = 0; j < input_size; j++) {
+				v_w1[i][j] = 
+					momentum * v_w1[i][j]
+					- lr * model.dfc1.dweight[i][j];
+				model.fc1.weight[i][j] += v_w1[i][j];
+			}
+		}
+		for (i = 0; i < output_size; i++) {
+			v_b2[i] = momentum * v_b2[i] - lr * model.dfc2.dbias[i];
+			model.fc1.bias[i] += v_b2[i];
+			for (j = 0; j < hidden_size; j++) {
+				v_w2[i][j] =
+					momentum * v_w2[i][j]
+					- lr * model.dfc2.dweight[i][j];
+				model.fc2.weight[i][j] += v_w2[i][j];
+			}
+		}
+	}
+
+	~Momentum() {
+		int i;
+		for (i = 0; i < hidden_size; i++) {
+			delete[] v_w1[i];
+		}
+		for (i = 0; i < output_size; i++) {
+			delete[] v_w2[i];
+		}
+		delete[] v_b1;
+		delete[] v_b2;
+		delete[] v_w1;
+		delete[] v_w2;
+		cout << "æ­£å¸¸ã«è§£æ”¾ã—ã¾ã—ãŸï¼ˆMomentumï¼‰" << endl;
+	}
+private:
+	double lr;
+	double momentum;
+	double** v_w1;
+	double** v_w2;
+	double* v_b1;
+	double* v_b2;
+	size_t input_size;
+	size_t hidden_size;
+	size_t output_size;
+};
+
+template <class Net>
+class AdaGrad {
+public:
+	AdaGrad(double lr = 0.01) {
+		AdaGrad::lr = lr;
+	}
+
+	void step(Net model) {
+		input_size = model.input_size;
+		hidden_size = model.hidden_size;
+		output_size = model.output_size;
+		int i, j;
+		if (h_w1 == NULL || h_w2 == NULL || h_b1 == NULL || h_b2 == NULL) {
+			h_w1 = new double* [hidden_size];
+			h_w2 = new double* [output_size];
+			h_b1 = new double[hidden_size];
+			h_b2 = new double[output_size];
+			for (i = 0; i < hidden_size; i++) {
+
+			}
+		}
+	}
+private:
+	double lr;
+	double** h_w1;
+	double** h_w2;
+	double* h_b1;
+	double* h_b2;
+	size_t input_size;
+	size_t hidden_size;
+	size_t output_size;
+};
+/*-----æœªå®Ÿè£…-----*/
 class LogSoftmax {};
 class Nll_Loss {};
-class Momentum {};
-class AdaGrad {};	// <- RMSProp
 class Adam {};
 #endif // !_H_
