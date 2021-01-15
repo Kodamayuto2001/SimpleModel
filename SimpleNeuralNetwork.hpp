@@ -739,24 +739,24 @@ public:
 			h_b1[i] += model.dfc1.dbias[i] * model.dfc1.dbias[i];
 			// 0で除算することを防ぐためにDeltaを足している
 			model.fc1.bias[i] -=
-				lr / sqrt(h_b1[i] + Delta)
+				lr / (sqrt(h_b1[i])+Delta)
 				* model.dfc1.dbias[i];
 			for (j = 0; j < input_size; j++) {
 				h_w1[i][j] += model.dfc1.dweight[i][j] * model.dfc1.dweight[i][j];
 				model.fc1.weight[i][j] -=
-					lr / sqrt(h_w1[i][j] + Delta)
+					lr / (sqrt(h_w1[i][j])+Delta)
 					* model.dfc1.dweight[i][j];
 			}
 		}
 		for (i = 0; i < output_size; i++) {
 			h_b2[i] += model.dfc2.dbias[i] * model.dfc2.dbias[i];
 			model.fc2.bias[i] -=
-				lr / sqrt(h_b2[i] + Delta)
+				lr / (sqrt(h_b2[i])+Delta)
 				* model.dfc2.dbias[i];
 			for (j = 0; j < hidden_size; j++) {
 				h_w2[i][j] += model.dfc2.dweight[i][j] * model.dfc2.dweight[i][j];
 				model.fc2.weight[i][j] -=
-					lr / sqrt(h_w2[i][j] + Delta)
+					lr / (sqrt(h_w2[i][j]) + Delta)
 					* model.dfc2.dweight[i][j];
 			}
 		}
@@ -785,8 +785,213 @@ private:
 	size_t hidden_size;
 	size_t output_size;
 };
-/*-----未実装-----*/
+
+template<class Net>
+class RMSProp {
+public:
+	RMSProp(double lr=0.01,double decay_rate=0.99){
+		RMSProp::lr = lr;
+		RMSProp::decay_rate = decay_rate;
+	}
+	void step(Net model) {
+		input_size = model.input_size;
+		hidden_size = model.hidden_size;
+		output_size = model.output_size;
+		int i, j;
+		if (h_w1 == NULL || h_w2 == NULL || h_b1 == NULL || h_b2 == NULL) {
+			h_w1 = new double* [hidden_size];
+			h_w2 = new double* [output_size];
+			h_b1 = new double[hidden_size];
+			h_b2 = new double[output_size];
+			for (i = 0; i < hidden_size; i++) {
+				h_w1[i] = new double[input_size];
+				h_b1[i] = 0.0;
+				for (j = 0; j < input_size; j++) {
+					h_w1[i][j] = 0.0;
+				}
+			}
+			for (i = 0; i < output_size; i++) {
+				h_w2[i] = new double[hidden_size];
+				h_b2[i] = 0.0;
+				for (j = 0; j < hidden_size; j++) {
+					h_w2[i][j] = 0.0;
+				}
+			}
+		}
+		for (i = 0; i < hidden_size; i++) {
+			h_b1[i] *= decay_rate;
+			h_b1[i] += (1 - decay_rate) 
+				* model.dfc1.dbias[i] * model.dfc1.dbias[i];
+			model.fc1.bias[i] -= lr * model.dfc1.dbias[i]
+				/ (sqrt(h_b1[i]) + Delta);
+			for (j = 0; j < input_size; j++) {
+				h_w1[i][j] *= decay_rate;
+				h_w1[i][j] += (1 - decay_rate)
+					* model.dfc1.dweight[i][j] * model.dfc1.dweight[i][j];
+				model.fc1.weight[i][j] -= lr * model.dfc1.dweight[i][j]
+					/ (sqrt(h_w1[i][j]) + Delta);
+			}
+		}
+		for (i = 0; i < output_size; i++) {
+			h_b2[i] *= decay_rate;
+			h_b2[i] += (1 - decay_rate)
+				* model.dfc2.dbias[i] * model.dfc2.dbias[i];
+			model.fc2.bias[i] -= lr * model.dfc2.dbias[i]
+				/ (sqrt(h_b2[i]) + Delta);
+			for (j = 0; j < hidden_size; j++) {
+				h_w2[i][j] *= decay_rate;
+				h_w2[i][j] += (1 - decay_rate)
+					* model.dfc2.dweight[i][j] * model.dfc2.dweight[i][j];
+				model.fc2.weight[i][j] -= lr * model.dfc2.dweight[i][j]
+					/ (sqrt(h_w2[i][j]) + Delta);
+			}
+		}
+	}
+	~RMSProp() {
+		int i;
+		for (i = 0; i < hidden_size; i++) {
+			delete[] h_w1[i];
+		}
+		for (i = 0; i < output_size; i++) {
+			delete[] h_w2[i];
+		}
+		delete[] h_w1;
+		delete[] h_w2;
+		delete[] h_b1;
+		delete[] h_b2;
+		cout << "正常に開放されました（RMSProp）" << endl;
+	}
+private:
+	double lr;
+	double decay_rate;
+	double** h_w1;
+	double** h_w2;
+	double* h_b1;
+	double* h_b2;
+	size_t input_size;
+	size_t hidden_size;
+	size_t output_size;
+};
+
+/*エラー発生！！！！！！！！！！！！！！！！！！！！！！*/
+template<class Net>
+class Adam {
+public:
+	Adam(double lr=0.001,double beta1=0.9,double beta2=0.999) {
+		Adam::lr = lr;
+		Adam::beta1 = beta1;
+		Adam::beta2 = beta2;
+	}
+
+	void step(Net model) {
+		input_size = model.input_size;
+		hidden_size = model.hidden_size;
+		output_size = model.output_size;
+		int i, j;
+		if (m_w1 == NULL || m_w2 == NULL || m_b1 == NULL || m_b2 == NULL|| v_w1 == NULL || v_w2 == NULL || v_b1 == NULL || v_b2 == NULL) {
+			m_w1 = new double* [hidden_size];
+			m_w2 = new double* [output_size];
+			m_b1 = new double[hidden_size];
+			m_b2 = new double[output_size];
+			v_w1 = new double* [hidden_size];
+			v_w2 = new double* [output_size];
+			v_b1 = new double[hidden_size];
+			v_b2 = new double[output_size];
+			for (i = 0; i < hidden_size; i++) {
+				m_w1[i] = new double[input_size];
+				m_b1[i] = 0.0;
+				v_w1[i] = new double[input_size];
+				v_b1[i] = 0.0;
+				for (j = 0; j < input_size; j++) {
+					m_w1[i][j] = 0.0;
+					v_w1[i][j] = 0.0;
+				}
+			}
+			for (i = 0; i < output_size; i++) {
+				m_w2[i] = new double[hidden_size];
+				m_b2[i] = 0.0;
+				v_w2[i] = new double[hidden_size];
+				v_b2[i] = 0.0;
+				for (j = 0; j < hidden_size; j++) {
+					m_w2[i][j] = 0.0;
+					v_w2[i][j] = 0.0;
+				}
+			}
+		}
+		iter += 1.0;
+		double lr_t = 
+			lr * sqrt(1.0 - pow(beta2, iter)) 
+			/ (1.0 - pow(beta1, iter));
+		for (i = 0; i < hidden_size; i++) {
+			m_b1[i] += (1 - beta1) * (model.dfc1.dbias[i] - m_b1[i]);
+			v_b1[i] += (1 - beta2) * (pow(model.dfc1.dbias[i], 2.0) - v_b1[i]);
+			model.fc1.bias[i] -= lr_t * m_b1[i] / (sqrt(v_b1[i]) + Delta);
+			for (j = 0; j < input_size; j++) {
+				m_w1[i][j] += 
+					(1 - beta1) * 
+					(model.dfc1.dweight[i][j] - m_w1[i][j]);
+				v_w2[i][j] +=
+					(1 - beta2) * (
+						pow(model.dfc1.dweight[i][j], 2.0)
+						- v_w1[i][j]
+						);
+				model.fc1.weight[i][j] -= lr_t * m_w1[i][j]
+					/ (sqrt(v_w1[i][j]) + Delta);
+			}
+		}
+		for (i = 0; i < output_size; i++) {
+			m_b2[i] += (1 - beta1) * (model.dfc2.dbias[i] - m_b2[i]);
+			v_b2[i] += (1 - beta2) * (pow(model.dfc2.dbias[i], 2.0) - v_b2[i]);
+			model.fc2.bias[i] -= lr_t * m_b2[i] / (sqrt(v_b2[i]) + Delta);
+			for (j = 0; j < hidden_size; j++) {
+				m_w2[i][j] += (1 - beta1) *
+					(model.dfc2.dweight[i][j] - m_w2[i][j]);
+				v_w2[i][j] += (1 - beta2) *
+					(pow(model.dfc2.dweight[i][j], 2.0) - v_w2[i][j]);
+				model.fc2.weight[i][j] -= lr_t * m_w2[i][j]
+					/ (sqrt(v_w2[i][j]) + Delta);
+			}
+		}
+	}
+
+	~Adam() {
+		int i;
+		for (i = 0; i < hidden_size; i++) {
+			delete[] m_w1[i];
+			delete[] v_w1[i];
+		}
+		for (i = 0; i < output_size; i++) {
+			delete[] m_w2[i];
+			delete[] v_w2[i];
+		}
+		delete[] m_w1;
+		delete[] v_w1;
+		delete[] m_w2;
+		delete[] v_w2;
+		delete[] m_b1;
+		delete[] m_b2;
+		delete[] v_b1;
+		delete[] v_b2;
+		cout << "正常に開放されました（Adam）" << endl;
+	}
+private:
+	double lr;
+	double beta1;
+	double beta2;
+	double** m_w1;
+	double** m_w2;
+	double* m_b1;
+	double* m_b2;
+	double** v_w1;
+	double** v_w2;
+	double* v_b1;
+	double* v_b2;
+	size_t input_size;
+	size_t hidden_size;
+	size_t output_size;
+	double iter = 0.0;
+};
+
 class LogSoftmax {};
 class Nll_Loss {};
-class Adam {};
 #endif // !_SimpleNeuralNetwork_H_
