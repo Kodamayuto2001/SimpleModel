@@ -1,58 +1,94 @@
 #include "SimpleNeuralNetwork.hpp"
 
-void train() {
-	SimpleNet<ReLU, Softmax, CrossEntropyError> model(2, 3, 2);
-	SGD<SimpleNet<ReLU, Softmax, CrossEntropyError>> optimizer(0.01);
-	
-	double x[2] = { 2.35,4.97 };	// ‹³tƒf[ƒ^
-	double t[2] = { 1,0 };			// ³‰ğƒ‰ƒxƒ‹
+typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
 
-	// ŠwK‰ñ”
-	int epoch = 1000;
+Net model(2, 3, 2);
+double x[2] = { 2.35,4.97 };
+double t[2] = { 1,0 };
+int epoch = 1000;
+double loss;
 
-	double loss;
+void trainSGD() {
+	SGD<Net> optimizer;
 	for (int e = 0; e < epoch; e++) {
-		// ‡“`”d
 		loss = model.forward(x, t);
-
-		// ‹t“`”d
-		model.backward(1.0);
-
-		// XV
+		model.backward();
 		optimizer.step(model);
-
-		// ‘¹¸’l
 		printf("loss = %lf\n", loss);
 	}
-
-	// ŠwK‚µ‚½ƒ‚ƒfƒ‹‚Ìƒpƒ‰ƒ[ƒ^‚ğ•Û‘¶
 	model.save("model.txt");
+	model.del();
+}
 
-	// ƒƒ‚ƒŠ‚Ì‰ğ•ú
+void trainMomentum() {
+	Momentum<Net> optimizer;
+	for (int e = 0; e < epoch; e++) {
+		loss = model.forward(x, t);
+		model.backward();
+		optimizer.step(model);
+		printf("loss = %lf\n", loss);
+	}
+	model.save("model.txt");
+	model.del();
+}
+
+void trainAdaGrad() {
+	AdaGrad<Net> optimizer;
+	for (int e = 0; e < epoch; e++) {
+		loss = model.forward(x, t);
+		model.backward();
+		optimizer.step(model);
+		printf("loss = %lf\n", loss);
+	}
+	model.save("model.txt");
+	model.del();
+}
+
+void trainRMSProp() {
+	RMSProp<Net> optimizer;
+	for (int e = 0; e < epoch; e++) {
+		loss = model.forward(x, t);
+		model.backward();
+		optimizer.step(model);
+		printf("loss = %lf\n", loss);
+	}
+	model.save("model.txt");
+	model.del();
+}
+
+void trainAdam() {
+	Adam<Net> optimizer;
+	for (int e = 0; e < epoch; e++) {
+		loss = model.forward(x, t);
+		model.backward();
+		optimizer.step(model);
+		printf("loss = %lf\n", loss);
+	}
+	model.save("model.txt");
 	model.del();
 }
 
 void test() {
-	SimpleNet<ReLU, Softmax, CrossEntropyError> ai(2, 3, 2);
+	Net ai(2, 3, 2);
 
-	// •Û‘¶‚µ‚½ƒ‚ƒfƒ‹‚ğƒ[ƒh
+	// ä¿å­˜ã—ãŸãƒ¢ãƒ‡ãƒ«ã‚’ãƒ­ãƒ¼ãƒ‰
 	ai.load("model.txt");
 
-	// ŒŸØƒf[ƒ^
+	// æ¤œè¨¼ãƒ‡ãƒ¼ã‚¿
 	double x[2] = { 2.5,5.0 };
 
-	// ‡“`”À
+	// é †ä¼æ¬
 	double* y = ai.predict(x);
 
-	// —\‘ª’l
-	printf("y[0] = %lf “\n", y[0] * 100);
+	// äºˆæ¸¬å€¤
+	printf("y[0] = %lf ï¼…\n", y[0] * 100);
 
-	// ƒƒ‚ƒŠ‚ÌŠJ•ú
+	// ãƒ¡ãƒ¢ãƒªã®é–‹æ”¾
 	ai.del();
 }
 
 int main() {
-	train();
+	trainAdam();
 	test();
 	return 0;
 }
