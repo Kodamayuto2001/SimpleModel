@@ -1,5 +1,5 @@
-#ifndef _H_
-#define _H_
+#ifndef _SimpleNeuralNetwork_H_
+#define _SimpleNeuralNetwork_H_
 #include<iostream>
 #include<fstream>
 #include<float.h>
@@ -9,6 +9,7 @@
 using namespace std;
 const double C = 1.0e+100;
 const double D = 1.0e+200;
+const double Delta = 1.0e-300;
 
 /*-----どんなに難しい数式も合成関数でできている-----*/
 /*-----基礎関数クラス-----*/
@@ -658,7 +659,7 @@ public:
 			v_b1[i] = momentum * v_b1[i] - lr * model.dfc1.dbias[i];
 			model.fc1.bias[i] += v_b1[i];
 			for (j = 0; j < input_size; j++) {
-				v_w1[i][j] = 
+				v_w1[i][j] =
 					momentum * v_w1[i][j]
 					- lr * model.dfc1.dweight[i][j];
 				model.fc1.weight[i][j] += v_w1[i][j];
@@ -688,7 +689,7 @@ public:
 		delete[] v_b2;
 		delete[] v_w1;
 		delete[] v_w2;
-		cout << "正常に解放しました（Momentum）" << endl;
+		cout << "正常に解放されました（Momentum）" << endl;
 	}
 private:
 	double lr;
@@ -720,9 +721,59 @@ public:
 			h_b1 = new double[hidden_size];
 			h_b2 = new double[output_size];
 			for (i = 0; i < hidden_size; i++) {
-
+				h_w1[i] = new double[input_size];
+				h_b1[i] = 0.0;
+				for (j = 0; j < hidden_size; j++) {
+					h_w1[i][j] = 0.0;
+				}
+			}
+			for (i = 0; i < output_size; i++) {
+				h_w2[i] = new double[hidden_size];
+				h_b2[i] = 0.0;
+				for (j = 0; j < hidden_size; j++) {
+					h_w2[i][j] = 0.0;
+				}
 			}
 		}
+		for (i = 0; i < hidden_size; i++) {
+			h_b1[i] += model.dfc1.dbias[i] * model.dfc1.dbias[i];
+			// 0で除算することを防ぐためにDeltaを足している
+			model.fc1.bias[i] -= 
+				lr / sqrt(h_b1[i] + Delta) 
+				* model.dfc1.dbias[i];
+			for (j = 0; j < input_size; j++) {
+				h_w1[i][j] += model.dfc1.dweight[i][j] * model.dfc1.dweight[i][j];
+				model.fc1.weight[i][j] -=
+					lr / sqrt(h_w1[i][j] + Delta)
+					* model.dfc1.dweight[i][j];
+			}
+		}
+		for (i = 0; i < output_size; i++) {
+			h_b2[i] += model.dfc2.dbias[i] * model.dfc2.dbias[i];
+			model.fc2.bias[i] -=
+				lr / sqrt(h_b2[i] + Delta)
+				* model.dfc2.dbias[i];
+			for (j = 0; j < hidden_size; j++) {
+				h_w2[i][j] += model.dfc2.dweight[i][j] * model.dfc2.dweight[i][j];
+				model.fc2.weight[i][j] -=
+					lr / sqrt(h_w2[i][j] + Delta)
+					* model.dfc2.dweight[i][j];
+			}
+		}
+	}
+	~AdaGrad() {
+		int i;
+		for (i = 0; i < hidden_size; i++) {
+			delete[] h_w1[i];
+		}
+		for (i = 0; i < output_size; i++) {
+			delete[] h_w2[i];
+		}
+		delete[] h_b1;
+		delete[] h_b2;
+		delete[] h_w1;
+		delete[] h_w2;
+		cout << "正常に解放されました（AdaGrad）" << endl;
 	}
 private:
 	double lr;
@@ -738,4 +789,4 @@ private:
 class LogSoftmax {};
 class Nll_Loss {};
 class Adam {};
-#endif // !_H_
+#endif // !_SimpleNeuralNetwork_H_
