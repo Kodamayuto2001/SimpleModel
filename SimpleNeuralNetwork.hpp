@@ -723,7 +723,7 @@ public:
 			for (i = 0; i < hidden_size; i++) {
 				h_w1[i] = new double[input_size];
 				h_b1[i] = 0.0;
-				for (j = 0; j < hidden_size; j++) {
+				for (j = 0; j < input_size; j++) {
 					h_w1[i][j] = 0.0;
 				}
 			}
@@ -738,8 +738,8 @@ public:
 		for (i = 0; i < hidden_size; i++) {
 			h_b1[i] += model.dfc1.dbias[i] * model.dfc1.dbias[i];
 			// 0で除算することを防ぐためにDeltaを足している
-			model.fc1.bias[i] -= 
-				lr / sqrt(h_b1[i] + Delta) 
+			model.fc1.bias[i] -=
+				lr / sqrt(h_b1[i] + Delta)
 				* model.dfc1.dbias[i];
 			for (j = 0; j < input_size; j++) {
 				h_w1[i][j] += model.dfc1.dweight[i][j] * model.dfc1.dweight[i][j];
