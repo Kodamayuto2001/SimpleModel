@@ -739,19 +739,19 @@ public:
 			h_b1[i] += model.dfc1.dbias[i] * model.dfc1.dbias[i];
 			// 0で除算することを防ぐためにDeltaを足している
 			model.fc1.bias[i] -=
-				lr / (sqrt(h_b1[i])+Delta)
+				lr / (sqrt(h_b1[i]) + Delta)
 				* model.dfc1.dbias[i];
 			for (j = 0; j < input_size; j++) {
 				h_w1[i][j] += model.dfc1.dweight[i][j] * model.dfc1.dweight[i][j];
 				model.fc1.weight[i][j] -=
-					lr / (sqrt(h_w1[i][j])+Delta)
+					lr / (sqrt(h_w1[i][j]) + Delta)
 					* model.dfc1.dweight[i][j];
 			}
 		}
 		for (i = 0; i < output_size; i++) {
 			h_b2[i] += model.dfc2.dbias[i] * model.dfc2.dbias[i];
 			model.fc2.bias[i] -=
-				lr / (sqrt(h_b2[i])+Delta)
+				lr / (sqrt(h_b2[i]) + Delta)
 				* model.dfc2.dbias[i];
 			for (j = 0; j < hidden_size; j++) {
 				h_w2[i][j] += model.dfc2.dweight[i][j] * model.dfc2.dweight[i][j];
@@ -789,7 +789,7 @@ private:
 template<class Net>
 class RMSProp {
 public:
-	RMSProp(double lr=0.01,double decay_rate=0.99){
+	RMSProp(double lr = 0.01, double decay_rate = 0.99) {
 		RMSProp::lr = lr;
 		RMSProp::decay_rate = decay_rate;
 	}
@@ -820,7 +820,7 @@ public:
 		}
 		for (i = 0; i < hidden_size; i++) {
 			h_b1[i] *= decay_rate;
-			h_b1[i] += (1 - decay_rate) 
+			h_b1[i] += (1 - decay_rate)
 				* model.dfc1.dbias[i] * model.dfc1.dbias[i];
 			model.fc1.bias[i] -= lr * model.dfc1.dbias[i]
 				/ (sqrt(h_b1[i]) + Delta);
@@ -873,11 +873,10 @@ private:
 	size_t output_size;
 };
 
-/*エラー発生！！！！！！！！！！！！！！！！！！！！！！*/
 template<class Net>
 class Adam {
 public:
-	Adam(double lr=0.001,double beta1=0.9,double beta2=0.999) {
+	Adam(double lr = 0.001, double beta1 = 0.9, double beta2 = 0.999) {
 		Adam::lr = lr;
 		Adam::beta1 = beta1;
 		Adam::beta2 = beta2;
@@ -888,7 +887,7 @@ public:
 		hidden_size = model.hidden_size;
 		output_size = model.output_size;
 		int i, j;
-		if (m_w1 == NULL || m_w2 == NULL || m_b1 == NULL || m_b2 == NULL|| v_w1 == NULL || v_w2 == NULL || v_b1 == NULL || v_b2 == NULL) {
+		if (m_w1 == NULL || m_w2 == NULL || m_b1 == NULL || m_b2 == NULL || v_w1 == NULL || v_w2 == NULL || v_b1 == NULL || v_b2 == NULL) {
 			m_w1 = new double* [hidden_size];
 			m_w2 = new double* [output_size];
 			m_b1 = new double[hidden_size];
@@ -919,37 +918,25 @@ public:
 			}
 		}
 		iter += 1.0;
-		double lr_t = 
-			lr * sqrt(1.0 - pow(beta2, iter)) 
-			/ (1.0 - pow(beta1, iter));
+		double lr_t = lr * sqrt(1.0 - pow(beta2, iter)) / (1.0 - pow(beta1, iter));
 		for (i = 0; i < hidden_size; i++) {
 			m_b1[i] += (1 - beta1) * (model.dfc1.dbias[i] - m_b1[i]);
-			v_b1[i] += (1 - beta2) * (pow(model.dfc1.dbias[i], 2.0) - v_b1[i]);
+			v_b1[i] += (1 - beta2) * (model.dfc1.dbias[i] * model.dfc1.dbias[i] - v_b1[i]);
 			model.fc1.bias[i] -= lr_t * m_b1[i] / (sqrt(v_b1[i]) + Delta);
 			for (j = 0; j < input_size; j++) {
-				m_w1[i][j] += 
-					(1 - beta1) * 
-					(model.dfc1.dweight[i][j] - m_w1[i][j]);
-				v_w2[i][j] +=
-					(1 - beta2) * (
-						pow(model.dfc1.dweight[i][j], 2.0)
-						- v_w1[i][j]
-						);
-				model.fc1.weight[i][j] -= lr_t * m_w1[i][j]
-					/ (sqrt(v_w1[i][j]) + Delta);
+				m_w1[i][j] += (1 - beta1) * (model.dfc1.dweight[i][j] - m_w1[i][j]);
+				v_w1[i][j] += (1 - beta2) * (model.dfc1.dweight[i][j] * model.dfc1.dweight[i][j] - v_w1[i][j]);
+				model.fc1.weight[i][j] -= lr_t * m_w1[i][j] / (sqrt(v_w1[i][j]) + Delta);
 			}
 		}
 		for (i = 0; i < output_size; i++) {
 			m_b2[i] += (1 - beta1) * (model.dfc2.dbias[i] - m_b2[i]);
-			v_b2[i] += (1 - beta2) * (pow(model.dfc2.dbias[i], 2.0) - v_b2[i]);
+			v_b2[i] += (1 - beta2) * (model.dfc2.dbias[i] * model.dfc2.dbias[i] - v_b2[i]);
 			model.fc2.bias[i] -= lr_t * m_b2[i] / (sqrt(v_b2[i]) + Delta);
 			for (j = 0; j < hidden_size; j++) {
-				m_w2[i][j] += (1 - beta1) *
-					(model.dfc2.dweight[i][j] - m_w2[i][j]);
-				v_w2[i][j] += (1 - beta2) *
-					(pow(model.dfc2.dweight[i][j], 2.0) - v_w2[i][j]);
-				model.fc2.weight[i][j] -= lr_t * m_w2[i][j]
-					/ (sqrt(v_w2[i][j]) + Delta);
+				m_w2[i][j] += (1 - beta1) * (model.dfc2.dweight[i][j] - m_w2[i][j]);
+				v_w2[i][j] += (1 - beta2) * (model.dfc2.dweight[i][j] * model.dfc2.dweight[i][j] - v_w2[i][j]);
+				model.fc2.weight[i][j] -= lr_t * m_w2[i][j] / (sqrt(v_w2[i][j]) + Delta);
 			}
 		}
 	}
