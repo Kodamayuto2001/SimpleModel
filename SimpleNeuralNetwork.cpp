@@ -1,4 +1,5 @@
 #include "SimpleNeuralNetwork.hpp"
+#include "dataset.hpp"
 
 typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
 
@@ -71,24 +72,28 @@ void trainAdam() {
 void test() {
 	Net ai(2, 3, 2);
 
-	// ä¿å­˜ã—ãŸãƒ¢ãƒ‡ãƒ«ã‚’ãƒ­ãƒ¼ãƒ‰
+	// •Û‘¶‚µ‚½ƒ‚ƒfƒ‹‚ğƒ[ƒh
 	ai.load("model.txt");
 
-	// æ¤œè¨¼ãƒ‡ãƒ¼ã‚¿
+	// ŒŸØƒf[ƒ^
 	double x[2] = { 2.5,5.0 };
 
-	// é †ä¼æ¬
+	// ‡“`”À
 	double* y = ai.predict(x);
 
-	// äºˆæ¸¬å€¤
-	printf("y[0] = %lf ï¼…\n", y[0] * 100);
+	// —\‘ª’l
+	printf("y[0] = %lf “\n", y[0] * 100);
 
-	// ãƒ¡ãƒ¢ãƒªã®é–‹æ”¾
+	// ƒƒ‚ƒŠ‚ÌŠJ•ú
 	ai.del();
 }
 
+void MakeDataFunc() {
+	DataSet ds;
+	ds.MakeDataSet(100);
+}
+
 int main() {
-	trainAdam();
-	test();
+	MakeDataFunc();
 	return 0;
 }

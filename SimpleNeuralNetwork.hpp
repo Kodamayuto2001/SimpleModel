@@ -11,8 +11,8 @@ const double C = 1.0e+100;
 const double D = 1.0e+200;
 const double Delta = 1.0e-300;
 
-/*-----ã©ã‚“ãªã«é›£ã—ã„æ•°å¼ã‚‚åˆæˆé–¢æ•°ã§ã§ãã¦ã„ã‚‹-----*/
-/*-----åŸºç¤é–¢æ•°ã‚¯ãƒ©ã‚¹-----*/
+/*-----‚Ç‚ñ‚È‚É“ï‚µ‚¢”®‚à‡¬ŠÖ”‚Å‚Å‚«‚Ä‚¢‚é-----*/
+/*-----Šî‘bŠÖ”ƒNƒ‰ƒX-----*/
 class Add {
 public:
 	double result[2];
@@ -50,7 +50,7 @@ public:
 	double y = 0.0;
 	double forward(double x) {
 		y = 1 / x;
-		// 0ã‚’é™¤ç®—ã™ã‚‹ã“ã¨ã¯ã§ããªã„
+		// 0‚ğœZ‚·‚é‚±‚Æ‚Í‚Å‚«‚È‚¢
 		if (y == float(INFINITY)) {
 			y = DBL_MAX / D;
 		}
@@ -65,8 +65,8 @@ public:
 	double out = 0.0;
 	double forward(double a) {
 		out = exp(a);
-		// ãƒã‚¤ãƒ”ã‚¢ã®æ•°ã®äºŒä¹—ãªã®ã§ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ãŒç™ºç”Ÿã—ã‚„ã™ã„
-		// ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼å¯¾ç­–
+		// ƒlƒCƒsƒA‚Ì”‚Ì“ñæ‚È‚Ì‚ÅƒI[ƒo[ƒtƒ[‚ª”­¶‚µ‚â‚·‚¢
+		// ƒI[ƒo[ƒtƒ[‘Îô
 		if (out == float(INFINITY)) {
 			out = DBL_MAX / C;
 		}
@@ -80,8 +80,8 @@ class Log {
 public:
 	double x = 1.0;
 	double forward(double x) {
-		// æ¥µå°å€¤ã®ã¨ãã‚¢ãƒ³ãƒ€ãƒ¼ãƒ•ãƒ­ãƒ¼ãŒç™ºç”Ÿã™ã‚‹
-		// ã‚¢ãƒ³ãƒ€ãƒ¼ãƒ•ãƒ­ãƒ¼å¯¾ç­–
+		// ‹É¬’l‚Ì‚Æ‚«ƒAƒ“ƒ_[ƒtƒ[‚ª”­¶‚·‚é
+		// ƒAƒ“ƒ_[ƒtƒ[‘Îô
 		if (x <= DBL_MIN) {
 			isInf = true;
 			x = DBL_MIN;
@@ -100,8 +100,8 @@ private:
 };
 
 
-/*-----æ´»æ€§åŒ–é–¢æ•°-----*/
-/*-----åŸºç¤é–¢æ•°ã‚¯ãƒ©ã‚¹ã‚’åˆ©ç”¨-----*/
+/*-----Šˆ«‰»ŠÖ”-----*/
+/*-----Šî‘bŠÖ”ƒNƒ‰ƒX‚ğ—˜—p-----*/
 class Sigmoid {
 public:
 	double forward(double x) {
@@ -268,11 +268,11 @@ private:
 };
 
 
-/*-----3å±¤ã®ãƒ¢ãƒ‡ãƒ«ã‚¯ãƒ©ã‚¹-----*/
+/*-----3‘w‚Ìƒ‚ƒfƒ‹ƒNƒ‰ƒX-----*/
 template<class A1, class A2, class LOSS>
 class SimpleNet {
 public:
-#pragma region å¤‰æ•°å®£è¨€
+#pragma region •Ï”éŒ¾
 	class Forward {
 	public:
 		double** weight;
@@ -326,7 +326,7 @@ public:
 		fc2.adds_two = new Add * [output_size];
 		fc2.adds_one = new Add[output_size];
 
-		// ä¸­é–“å±¤ã®æ´»æ€§åŒ–é–¢æ•°
+		// ’†ŠÔ‘w‚ÌŠˆ«‰»ŠÖ”
 		activations = new A1[hidden_size];
 
 		random_device rd;
@@ -341,7 +341,7 @@ public:
 			dfc1.dweight[i] = new double[input_size];
 			fc1.bias[i] = 0.0;
 			dfc1.dbias[i] = 0.0;
-			// é€†ä¼æ¬ä¸­é–“å±¤ã®ãƒãƒ¼ãƒ‰ã‚’åˆæœŸåŒ–
+			// ‹t“`”À’†ŠÔ‘w‚Ìƒm[ƒh‚ğ‰Šú‰»
 			dfc2.dnode_out[i] = 0.0;
 			for (j = 0; j < (int)input_size; j++) {
 				fc1.weight[i][j] = dist(gen);
@@ -384,7 +384,7 @@ public:
 		ofstream ofs(fileName);
 
 		if (!ofs) {
-			cout << "ãƒ•ã‚¡ã‚¤ãƒ«ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚" << endl;
+			cout << "ƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B" << endl;
 			cin.get();
 		}
 
@@ -415,7 +415,7 @@ public:
 		{
 			ifstream ifs(fileName);
 			if (!ifs) {
-				cout << "ãƒ•ã‚¡ã‚¤ãƒ«ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚" << endl;
+				cout << "ƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B" << endl;
 				cin.get();
 			}
 			string buf;
@@ -523,7 +523,7 @@ public:
 		activationOut.del();
 		lossFunc.del();
 
-		cout << "æ­£å¸¸ã«è§£æ”¾ã•ã‚Œã¾ã—ãŸï¼" << endl;
+		cout << "³í‚É‰ğ•ú‚³‚ê‚Ü‚µ‚½I" << endl;
 	}
 
 private:
@@ -602,18 +602,18 @@ public:
 
 	void step(Net model) {
 		for (int i = 0; i < model.hidden_size; i++) {
-			// ãƒã‚¤ã‚¢ã‚¹1ã®æ›´æ–°
+			// ƒoƒCƒAƒX1‚ÌXV
 			model.fc1.bias[i] -= lr * model.dfc1.dbias[i];
 			for (int j = 0; j < model.input_size; j++) {
-				// é‡ã¿1ã®æ›´æ–°
+				// d‚İ1‚ÌXV
 				model.fc1.weight[i][j] -= lr * model.dfc1.dweight[i][j];
 			}
 		}
 		for (int i = 0; i < model.output_size; i++) {
-			// ãƒã‚¤ã‚¢ã‚¹2ã®æ›´æ–°
+			// ƒoƒCƒAƒX2‚ÌXV
 			model.fc2.bias[i] -= lr * model.dfc2.dbias[i];
 			for (int j = 0; j < model.hidden_size; j++) {
-				// é‡ã¿2ã®æ›´æ–°
+				// d‚İ2‚ÌXV
 				model.fc2.weight[i][j] -= lr * model.dfc2.dweight[i][j];
 			}
 		}
@@ -689,7 +689,7 @@ public:
 		delete[] v_b2;
 		delete[] v_w1;
 		delete[] v_w2;
-		cout << "æ­£å¸¸ã«è§£æ”¾ã•ã‚Œã¾ã—ãŸï¼ˆMomentumï¼‰" << endl;
+		cout << "³í‚É‰ğ•ú‚³‚ê‚Ü‚µ‚½iMomentumj" << endl;
 	}
 private:
 	double lr;
@@ -737,7 +737,7 @@ public:
 		}
 		for (i = 0; i < hidden_size; i++) {
 			h_b1[i] += model.dfc1.dbias[i] * model.dfc1.dbias[i];
-			// 0ã§é™¤ç®—ã™ã‚‹ã“ã¨ã‚’é˜²ããŸã‚ã«Deltaã‚’è¶³ã—ã¦ã„ã‚‹
+			// 0‚ÅœZ‚·‚é‚±‚Æ‚ğ–h‚®‚½‚ß‚ÉDelta‚ğ‘«‚µ‚Ä‚¢‚é
 			model.fc1.bias[i] -=
 				lr / (sqrt(h_b1[i]) + Delta)
 				* model.dfc1.dbias[i];
@@ -773,7 +773,7 @@ public:
 		delete[] h_b2;
 		delete[] h_w1;
 		delete[] h_w2;
-		cout << "æ­£å¸¸ã«è§£æ”¾ã•ã‚Œã¾ã—ãŸï¼ˆAdaGradï¼‰" << endl;
+		cout << "³í‚É‰ğ•ú‚³‚ê‚Ü‚µ‚½iAdaGradj" << endl;
 	}
 private:
 	double lr;
@@ -859,7 +859,7 @@ public:
 		delete[] h_w2;
 		delete[] h_b1;
 		delete[] h_b2;
-		cout << "æ­£å¸¸ã«é–‹æ”¾ã•ã‚Œã¾ã—ãŸï¼ˆRMSPropï¼‰" << endl;
+		cout << "³í‚ÉŠJ•ú‚³‚ê‚Ü‚µ‚½iRMSPropj" << endl;
 	}
 private:
 	double lr;
@@ -959,7 +959,7 @@ public:
 		delete[] m_b2;
 		delete[] v_b1;
 		delete[] v_b2;
-		cout << "æ­£å¸¸ã«é–‹æ”¾ã•ã‚Œã¾ã—ãŸï¼ˆAdamï¼‰" << endl;
+		cout << "³í‚ÉŠJ•ú‚³‚ê‚Ü‚µ‚½iAdamj" << endl;
 	}
 private:
 	double lr;
