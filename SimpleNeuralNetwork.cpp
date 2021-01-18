@@ -1,5 +1,6 @@
 #include "SimpleNeuralNetwork.hpp"
 #include "dataset.hpp"
+#include "dataloader.hpp"
 
 typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
 
@@ -93,7 +94,12 @@ void MakeDataFunc() {
 	ds.MakeDataSet(100);
 }
 
+void LoadDataSet() {
+	DataLoader dl;
+	dl.test();
+}
+
 int main() {
-	MakeDataFunc();
+	LoadDataSet();
 	return 0;
 }
