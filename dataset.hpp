@@ -43,17 +43,17 @@ using namespace cv;
 //		vector<Rect> faces;
 //		cascade.detectMultiScale(imgGray, faces, 1.1, 3, 0, Size(20, 20));
 //		
-//		for (int i = 0; i < faces.size(); i++) //æ¤œå‡ºã—ãŸé¡”ã®å€‹æ•°"faces.size()"åˆ†ãƒ«ãƒ¼ãƒ—ã‚’è¡Œã†
+//		for (int i = 0; i < faces.size(); i++) //ŒŸo‚µ‚½Šç‚ÌŒÂ”"faces.size()"•ªƒ‹[ƒv‚ğs‚¤
 //		{
-//			rectangle(img, Point(faces[i].x, faces[i].y), Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height), Scalar(0, 0, 255), 3, CV_AA); //æ¤œå‡ºã—ãŸé¡”ã‚’èµ¤è‰²çŸ©å½¢ã§å›²ã‚€
+//			rectangle(img, Point(faces[i].x, faces[i].y), Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height), Scalar(0, 0, 255), 3, CV_AA); //ŒŸo‚µ‚½Šç‚ğÔF‹éŒ`‚ÅˆÍ‚Ş
 //		}
 //		cout << "ok!!!" << endl;
 //	}
 //	void test3() {
 //		Mat img = imread("lena.jpg");
-//		// 0è¡Œç›®
+//		// 0s–Ú
 //		Vec3b* src = img.ptr<Vec3b>(0);
-//		// 0ç•ªç›®
+//		// 0”Ô–Ú
 //		src[0];
 //		cout << src[0] << endl;
 //
@@ -71,7 +71,7 @@ using namespace cv;
 //		}
 //	}
 //	void test5() {
-//		// filesystem ã‚’ä½¿ã†ã«ã¯ã€VisualC++ã®è¨€èªã‚’C++17ã¨ã™ã‚‹å¿…è¦ãŒã‚ã‚‹
+//		// filesystem ‚ğg‚¤‚É‚ÍAVisualC++‚ÌŒ¾Œê‚ğC++17‚Æ‚·‚é•K—v‚ª‚ ‚é
 //		namespace fs = std::filesystem;
 //		fs::path path = fs::current_path();
 //		// cout << path << endl;
@@ -99,7 +99,7 @@ using namespace cv;
 //		const string CASCADE_PATH = "haarcascades/haarcascade_frontalface_default.xml";
 //		CascadeClassifier cascade;
 //		if (!cascade.load(CASCADE_PATH))
-//			cout << "èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸã€‚" << endl;
+//			cout << "“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½B" << endl;
 //		
 //		Mat img,imgGray;
 //		vector<Rect> facerect;
@@ -118,31 +118,31 @@ using namespace cv;
 //		}
 //	}
 //	void test8() {
-//		// é¡”æ¤œå‡ºå¯¾è±¡ã®ç”»åƒãƒ‡ãƒ¼ã‚¿ç”¨
+//		// ŠçŒŸo‘ÎÛ‚Ì‰æ‘œƒf[ƒ^—p
 //		IplImage* tarImg;
 //
-//		// æ¤œå‡ºå¯¾è±¡ã®ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
+//		// ŒŸo‘ÎÛ‚Ì‰æ‘œƒtƒ@ƒCƒ‹ƒpƒX
 //		char tarFilePath[] = "lena.jpg";
 //
-//		// ç”»åƒãƒ‡ãƒ¼ã‚¿ã®èª­ã¿è¾¼ã¿
+//		// ‰æ‘œƒf[ƒ^‚Ì“Ç‚İ‚İ
 //		tarImg = cvLoadImage(tarFilePath, CV_LOAD_IMAGE_ANYDEPTH | CV_LOAD_IMAGE_ANYCOLOR);
 //
-//		// æ­£é¢é¡”æ¤œå‡ºå™¨ã®èª­ã¿è¾¼ã¿
+//		// ³–ÊŠçŒŸoŠí‚Ì“Ç‚İ‚İ
 //		CvHaarClassifierCascade* cvHCC = (CvHaarClassifierCascade*)cvLoad("haarcascade_frontalface_default.xml");
 //
-//		// æ¤œå‡ºã«å¿…è¦ãªãƒ¡ãƒ¢ãƒªã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ã‚’ç”¨æ„ã™ã‚‹
+//		// ŒŸo‚É•K—v‚Èƒƒ‚ƒŠƒXƒgƒŒ[ƒW‚ğ—pˆÓ‚·‚é
 //		CvMemStorage* cvMStr = cvCreateMemStorage(0);
 //
-//		// æ¤œå‡ºæƒ…å ±ã‚’å—ã‘å–ã‚‹ãŸã‚ã®ã‚·ãƒ¼ã‚±ãƒ³ã‚¹ã‚’ç”¨æ„ã™ã‚‹
+//		// ŒŸoî•ñ‚ğó‚¯æ‚é‚½‚ß‚ÌƒV[ƒPƒ“ƒX‚ğ—pˆÓ‚·‚é
 //		CvSeq* face;
 //
-//		// ç”»åƒä¸­ã‹ã‚‰æ¤œå‡ºå¯¾è±¡ã®æƒ…å ±ã‚’å–å¾—ã™ã‚‹
+//		// ‰æ‘œ’†‚©‚çŒŸo‘ÎÛ‚Ìî•ñ‚ğæ“¾‚·‚é
 //		face = cvHaarDetectObjects(tarImg, cvHCC, cvMStr);
 //
 //		for (int i = 0; i < face->total; i++) {
 //			CvRect* faceRect = (CvRect*)cvGetSeqElem(face, i);
 //
-//			// å–å¾—ã—ãŸé¡”ã®ä½ç½®æƒ…å ±ã«åŸºã¥ãã€çŸ©å½¢æç”»ã‚’è¡Œã†
+//			// æ“¾‚µ‚½Šç‚ÌˆÊ’uî•ñ‚ÉŠî‚Ã‚«A‹éŒ`•`‰æ‚ğs‚¤
 //			cvRectangle(tarImg,
 //				cvPoint(faceRect->x, faceRect->y),
 //				cvPoint(faceRect->x + faceRect->width, faceRect->y + faceRect->height),
@@ -150,55 +150,55 @@ using namespace cv;
 //				3, CV_AA);
 //		}
 //
-//		// é¡”ä½ç½®ã«çŸ©å½¢æç”»ã‚’æ–½ã—ãŸç”»åƒã‚’è¡¨ç¤º
+//		// ŠçˆÊ’u‚É‹éŒ`•`‰æ‚ğ{‚µ‚½‰æ‘œ‚ğ•\¦
 //		cvNamedWindow("face_detect");
 //		cvShowImage("face_detect", tarImg);
 //
-//		// ã‚­ãƒ¼å…¥åŠ›å¾…ã¡
+//		// ƒL[“ü—Í‘Ò‚¿
 //		cvWaitKey(0);
 //
-//		// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ç ´æ£„
+//		// ƒEƒBƒ“ƒhƒE‚Ì”jŠü
 //		cvDestroyWindow("face_detect");
 //
-//		// ç”¨æ„ã—ãŸãƒ¡ãƒ¢ãƒªã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ã‚’è§£æ”¾
+//		// —pˆÓ‚µ‚½ƒƒ‚ƒŠƒXƒgƒŒ[ƒW‚ğ‰ğ•ú
 //		cvReleaseMemStorage(&cvMStr);
 //
-//		// ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰è­˜åˆ¥å™¨ã®è§£æ”¾
+//		// ƒJƒXƒP[ƒh¯•ÊŠí‚Ì‰ğ•ú
 //		cvReleaseHaarClassifierCascade(&cvHCC);
 //
-//		// ã‚¤ãƒ¡ãƒ¼ã‚¸ã®è§£æ”¾
+//		// ƒCƒ[ƒW‚Ì‰ğ•ú
 //		cvReleaseImage(&tarImg);
 //	}
 //	void test9() {
 //		const char* imagename = "lena.jpg";
 //		Mat img = imread(imagename);
 //		if (img.empty()) 
-//			cout << "ç”»åƒã‚’èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "‰æ‘œ‚ğ“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //
 //		double scale = 4.0;
 //		Mat gray, smallImg(saturate_cast<int>(img.rows / scale), saturate_cast<int>(img.cols / scale), CV_8UC1);
-//		// ã‚°ãƒ¬ãƒ¼ã‚¹ã‚±ãƒ¼ãƒ«ç”»åƒã«å¤‰æ›
+//		// ƒOƒŒ[ƒXƒP[ƒ‹‰æ‘œ‚É•ÏŠ·
 //		cvtColor(img, gray, CV_BGR2GRAY);
-//		// å‡¦ç†æ™‚é–“çŸ­ç¸®ã®ãŸã‚ã«ç”»åƒã‚’ç¸®å°
+//		// ˆ—ŠÔ’Zk‚Ì‚½‚ß‚É‰æ‘œ‚ğk¬
 //		resize(gray, smallImg, smallImg.size(), 0, 0, INTER_LINEAR);
 //		equalizeHist(smallImg, smallImg);
 //
-//		// åˆ†é¡å™¨ã®èª­ã¿è¾¼ã¿
+//		// •ª—ŞŠí‚Ì“Ç‚İ‚İ
 //		std::string cascadeName = "haarcascades/haarcascade_frontalface_default.xml";
 //		//std::string cascadeName = "./lbpcascade_frontalface.xml"; // LBP
 //		CascadeClassifier cascade;
 //		if (!cascade.load(cascadeName))
-//			cout << "èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //
 //		std::vector<Rect> faces;
-//		/// ãƒãƒ«ãƒã‚¹ã‚±ãƒ¼ãƒ«ï¼ˆé¡”ï¼‰æ¢ç´¢xo
-//		// ç”»åƒï¼Œå‡ºåŠ›çŸ©å½¢ï¼Œç¸®å°ã‚¹ã‚±ãƒ¼ãƒ«ï¼Œæœ€ä½çŸ©å½¢æ•°ï¼Œï¼ˆãƒ•ãƒ©ã‚°ï¼‰ï¼Œæœ€å°çŸ©å½¢
+//		/// ƒ}ƒ‹ƒ`ƒXƒP[ƒ‹iŠçj’Tõxo
+//		// ‰æ‘œCo—Í‹éŒ`Ck¬ƒXƒP[ƒ‹CÅ’á‹éŒ`”Ciƒtƒ‰ƒOjCÅ¬‹éŒ`
 //		cascade.detectMultiScale(smallImg, faces,
 //			1.1, 2,
 //			CV_HAAR_SCALE_IMAGE,
 //			Size(30, 30));
 //
-//		// çµæœã®æç”»
+//		// Œ‹‰Ê‚Ì•`‰æ
 //		std::vector<Rect>::const_iterator r = faces.begin();
 //		for (; r != faces.end(); ++r) {
 //			Point center;
@@ -240,7 +240,7 @@ using namespace cv;
 //		string cascadeName = "haarcascades\\haarcascade_frontalface_alt.xml";
 //		CascadeClassifier cascade;
 //		if (!cascade.load(cascadeName)) {
-//			cout << "èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //		}
 //		vector<Rect> faces;
 //		cascade.detectMultiScale(imgGray, faces, 1.1, 3, 0, Size(20, 20));
@@ -252,7 +252,7 @@ using namespace cv;
 //		cout << faces[1] << endl;		// [57 x 57 from (188, 86)]
 //		cout << faces[2] << endl;		// [84 x 84 from (171, 75)]
 //		
-//		// [å•é¡Œ]æ¤œå‡ºã—ãŸé¡”ã®å€‹æ•°ãŒç‹‚ã£ã¦ã„ã‚‹
+//		// [–â‘è]ŒŸo‚µ‚½Šç‚ÌŒÂ”‚ª‹¶‚Á‚Ä‚¢‚é
 //		cout << faces.size() << endl;	// 18446743881536058925
 //
 //		int i = 0;
@@ -274,7 +274,7 @@ using namespace cv;
 //		const string cascadeName = "haarcascades\\haarcascade_frontalface_alt.xml";
 //		CascadeClassifier cascade;
 //		if (!cascade.load(cascadeName)) {
-//			cout << "èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //		}
 //		Mat img, imgGray;
 //		vector<Rect> facerect;
@@ -299,9 +299,9 @@ using namespace cv;
 //		}
 //	}
 //	// https://dixq.net/forum/viewtopic.php?t=10263
-//	// ãªãœã‚«ã‚¹ã‚±ãƒ¼ãƒ‰åˆ†é¡å™¨ãŒå‹•ã‹ãªã‹ã£ãŸã®ã‹
-//	// Debugãƒ¢ãƒ¼ãƒ‰ã§ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹ã¨ã†ã¾ãã„ã‹ãšã€
-//	// Releaseãƒ¢ãƒ¼ãƒ‰ã ã¨ã†ã¾ãã„ã
+//	// ‚È‚ºƒJƒXƒP[ƒh•ª—ŞŠí‚ª“®‚©‚È‚©‚Á‚½‚Ì‚©
+//	// Debugƒ‚[ƒh‚ÅƒRƒ“ƒpƒCƒ‹‚·‚é‚Æ‚¤‚Ü‚­‚¢‚©‚¸A
+//	// Releaseƒ‚[ƒh‚¾‚Æ‚¤‚Ü‚­‚¢‚­
 //	void test13() {
 //		VideoCapture cap(0);
 //		cap.set(CV_CAP_PROP_FRAME_WIDTH, 192);
@@ -309,7 +309,7 @@ using namespace cv;
 //		/*const string cascadeName = "haarcascades\\haarcascade_frontalface_alt.xml";
 //		CascadeClassifier cascade;
 //		if (!cascade.load(cascadeName)) {
-//			cout << "èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //		}*/
 //		Mat img, imgGray;
 //		/*vector<Rect> facerect;
@@ -342,7 +342,7 @@ using namespace cv;
 //		string cascadeName = "haarcascades\\haarcascade_frontalface_alt.xml";
 //		CascadeClassifier cascade;
 //		if (!cascade.load(cascadeName)) {
-//			cout << "èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //		}
 //		vector<Rect> faces;
 //
@@ -382,10 +382,10 @@ using namespace cv;
 //		namespace fs = std::filesystem;
 //		bool result = fs::create_directory("saveDir");
 //		if (result == 0) {
-//			cout << "ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’æ–°ãŸã«ä½œæˆã§ãã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "ƒfƒBƒŒƒNƒgƒŠ‚ğV‚½‚Éì¬‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //		}
 //		else {
-//			cout << "æ–°ã—ã„ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ä½œæˆã§ãã¾ã—ãŸ" << endl;
+//			cout << "V‚µ‚¢ƒfƒBƒŒƒNƒgƒŠ‚ğì¬‚Å‚«‚Ü‚µ‚½" << endl;
 //		}
 //	}
 //	void test16() {
@@ -394,16 +394,16 @@ using namespace cv;
 //		namespace fs = std::filesystem;
 //		bool result = fs::create_directory(saveDir);
 //		if (result == 0) {
-//			cout << "ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’æ–°ãŸã«ä½œæˆã§ãã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "ƒfƒBƒŒƒNƒgƒŠ‚ğV‚½‚Éì¬‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //		}
 //		else {
-//			cout << "æ–°ã—ã„ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ä½œæˆã§ãã¾ã—ãŸ" << endl;
+//			cout << "V‚µ‚¢ƒfƒBƒŒƒNƒgƒŠ‚ğì¬‚Å‚«‚Ü‚µ‚½" << endl;
 //		}
 //
 //		string cascadeName = "haarcascades\\haarcascade_frontalface_alt.xml";
 //		CascadeClassifier cascade;
 //		if (!cascade.load(cascadeName)) {
-//			cout << "èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //		}
 //		vector<Rect> faces;
 //
@@ -503,16 +503,16 @@ using namespace cv;
 //		namespace fs = std::filesystem;
 //		bool result = fs::create_directory(saveDir);
 //		if (result == 0) {
-//			cout << "ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’æ–°ãŸã«ä½œæˆã§ãã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "ƒfƒBƒŒƒNƒgƒŠ‚ğV‚½‚Éì¬‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //		}
 //		else {
-//			cout << "æ–°ã—ã„ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ä½œæˆã§ãã¾ã—ãŸ" << endl;
+//			cout << "V‚µ‚¢ƒfƒBƒŒƒNƒgƒŠ‚ğì¬‚Å‚«‚Ü‚µ‚½" << endl;
 //		}
 //
 //		string cascadeName = "haarcascades\\haarcascade_frontalface_alt.xml";
 //		CascadeClassifier cascade;
 //		if (!cascade.load(cascadeName)) {
-//			cout << "èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+//			cout << "“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 //		}
 //		vector<Rect> faces;
 //
@@ -595,14 +595,14 @@ public:
 		namespace fs = std::filesystem;
 		bool isExist = fs::create_directory(saveDir);
 		if (isExist == 0) {
-			cout << "ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã¯ä½œæˆã—ã¦ã„ã¾ã›ã‚“ã€‚" << endl;
+			cout << "ƒfƒBƒŒƒNƒgƒŠ‚Íì¬‚µ‚Ä‚¢‚Ü‚¹‚ñB" << endl;
 		}
 		else {
-			cout << "ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ä½œæˆã—ã¾ã—ãŸã€‚" << endl;
+			cout << "ƒfƒBƒŒƒNƒgƒŠ‚ğì¬‚µ‚Ü‚µ‚½B" << endl;
 		}
 		CascadeClassifier cascade;
 		if (!cascade.load(cascadePath)) {
-			cout << "ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰åˆ†é¡å™¨ã‚’èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+			cout << "ƒJƒXƒP[ƒh•ª—ŞŠí‚ğ“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 		}
 
 		vector<Rect> faces;
@@ -628,6 +628,7 @@ public:
 		while (1)
 		{
 			cap >> img;
+			cap >> resultImg;
 			cvtColor(img, imgGray, CV_RGB2GRAY);
 			cascade.detectMultiScale(imgGray, faces, 1.1, 3, 0, Size(100, 100));
 			for (i = 0; i < faces.size(); i++) {
@@ -639,7 +640,7 @@ public:
 					CV_AA
 				);
 				if (cnt <= dataMax) { cnt++; }
-				Mat tri(img, Rect(faces[i].x, faces[i].y, faces[i].width, faces[i].height));
+				Mat tri(resultImg, Rect(faces[i].x, faces[i].y, faces[i].width, faces[i].height));
 				resultImg = tri;
 			}
 			if (cnt > dataMax) { break; }
@@ -682,4 +683,3 @@ private:
 };
 
 #endif // !_DATASET_H_
-
