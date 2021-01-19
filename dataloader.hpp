@@ -64,8 +64,6 @@ public:
 				for (k = 0; k < width; k++) {
 					for (l = 0; l < channelSize; l++) {
 						imgList[i][j][k][l] = (double)img.ptr<Vec3b>(j)[k][l];
-						
-						// ê≥ãKâªÇ∑ÇÈ
 						imgList[i][j][k][l] /= 255;
 					}
 				}
