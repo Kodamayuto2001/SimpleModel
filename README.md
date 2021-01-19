@@ -1,10 +1,37 @@
 # SimpleModel
 
-- SimpleNeuralNetwork.hpp
-##### シンプルなニューラルネットワークのライブラリです。
+### SimpleNeuralNetwork.hpp
+##### Activation Func
+  - ReLU              class
+  - Sigmoid           class
+  - Softmax           class
+  - CrossEntropyError class
 
-- SimpleNeuralNetwork.cpp
-##### 上のライブラリを使って学習と推論するためのサンプルプログラムがあります。
+##### Model
+  - SimpleNet         class
+
+##### Optimizer
+  - SGD               class
+  - Momentum          class
+  - AdaGrad           class
+  - RNSProp           class
+  - Adam              class
+
+##### Func
+  - Add               class
+  - Mul               class
+  - Div               class
+  - Exp               class
+  - Log               class
+
+### dataset.hpp
+  - DataSet           class
+
+### dataloader.hpp
+  - DataLoader        class
+
+### SimpleNeuralNetwork.cpp
+  - sample
 
 ### 開発環境
 - VisualStudio2019
