@@ -82,6 +82,7 @@ public:
 	double** vecImg() {
 		if (Vimages == NULL) {
 			load();
+			del();
 		}
 		return Vimages;
 	}
@@ -96,10 +97,10 @@ public:
 				delete[] imgList[i][j];
 			}
 			delete[] imgList[i];
-			delete[] Vimages[i];
+			if(Vimages != NULL){ delete[] Vimages[i]; }
 		}
 		delete[] imgList;
-		delete[] Vimages;
+		if(Vimages != NULL){ delete[] Vimages; }
 	}
 
 private:
