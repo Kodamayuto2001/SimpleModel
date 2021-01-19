@@ -118,14 +118,37 @@ void MakeDataFunc() {
 }
 
 void LoadDataSet() {
-	DataLoader dl("DataSet/",100,3,160,160);
+	DataLoader dl("DataSet/", 100, 3, 160, 160);
 	double**** tmp = dl.load();
+	double** vectorImg = dl.vecImg();
 	cout << "‰æ‘œ‚ð“Ç‚Ýž‚ß‚Ü‚µ‚½" << endl;
-	dl.del_loadImgList(tmp);
+	dl.del();
 }
 
+void trainFromDataSet() {
+	DataLoader dl("DataSet/", 100, 3, 160, 160);
+	double** x = dl.vecImg();
+	double t[2] = { 1,0 };
+
+	typedef SimpleNet<Sigmoid, Softmax, CrossEntropyError> Net;
+	Net model(3 * 160 * 160, 320, 2);
+
+	int epoch = 40;
+	double loss;
+	Adam<Net> optimizer;
+	for (int e = 0; e < epoch; e++) {
+		for (int i = 0; i < 100; i++) {
+			loss = model.forward(x[i], t);
+			model.backward();
+			optimizer.step(model);
+			printf("loss = %lf\n", loss);
+		}
+	}
+	model.save("model.txt");
+	model.del();
+}
 
 int main() {
-	LoadDataSet();
+	trainFromDataSet();
 	return 0;
 }
