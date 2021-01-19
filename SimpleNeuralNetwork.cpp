@@ -95,8 +95,10 @@ void MakeDataFunc() {
 }
 
 void LoadDataSet() {
-	DataLoader dl;
-	dl.test();
+	DataLoader dl("DataSet/",100,3,160,160);
+	double**** tmp = dl.load();
+	cout << tmp[0][0][0][0] << endl;
+	dl.del_loadImgList(tmp);
 }
 
 int main() {
