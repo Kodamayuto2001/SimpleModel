@@ -56,6 +56,7 @@ public:
 		for (const auto& f : fs::directory_iterator(dirPath)) {
 			img = imread(f.path().string(), 0);
 
+			resize(img, img, Size(), (double)width / img.cols, (double)height / img.rows);
 
 			for (j = 0; j < height; j++) {
 				for (k = 0; k < width; k++) {
