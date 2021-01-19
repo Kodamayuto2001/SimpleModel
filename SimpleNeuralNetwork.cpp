@@ -2,15 +2,13 @@
 #include "dataset.hpp"
 #include "dataloader.hpp"
 
-typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
-
-Net model(2, 3, 2);
-double x[2] = { 2.35,4.97 };
-double t[2] = { 1,0 };
-int epoch = 1000;
-double loss;
-
 void trainSGD() {
+	typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
+	Net model(2, 3, 2);
+	double x[2] = { 2.35,4.97 };
+	double t[2] = { 1,0 };
+	int epoch = 1000;
+	double loss;
 	SGD<Net> optimizer;
 	for (int e = 0; e < epoch; e++) {
 		loss = model.forward(x, t);
@@ -23,6 +21,12 @@ void trainSGD() {
 }
 
 void trainMomentum() {
+	typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
+	Net model(2, 3, 2);
+	double x[2] = { 2.35,4.97 };
+	double t[2] = { 1,0 };
+	int epoch = 1000;
+	double loss;
 	Momentum<Net> optimizer;
 	for (int e = 0; e < epoch; e++) {
 		loss = model.forward(x, t);
@@ -35,6 +39,12 @@ void trainMomentum() {
 }
 
 void trainAdaGrad() {
+	typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
+	Net model(2, 3, 2);
+	double x[2] = { 2.35,4.97 };
+	double t[2] = { 1,0 };
+	int epoch = 1000;
+	double loss;
 	AdaGrad<Net> optimizer;
 	for (int e = 0; e < epoch; e++) {
 		loss = model.forward(x, t);
@@ -47,6 +57,12 @@ void trainAdaGrad() {
 }
 
 void trainRMSProp() {
+	typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
+	Net model(2, 3, 2);
+	double x[2] = { 2.35,4.97 };
+	double t[2] = { 1,0 };
+	int epoch = 1000;
+	double loss;
 	RMSProp<Net> optimizer;
 	for (int e = 0; e < epoch; e++) {
 		loss = model.forward(x, t);
@@ -59,6 +75,12 @@ void trainRMSProp() {
 }
 
 void trainAdam() {
+	typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
+	Net model(2, 3, 2);
+	double x[2] = { 2.35,4.97 };
+	double t[2] = { 1,0 };
+	int epoch = 1000;
+	double loss;
 	Adam<Net> optimizer;
 	for (int e = 0; e < epoch; e++) {
 		loss = model.forward(x, t);
@@ -71,6 +93,7 @@ void trainAdam() {
 }
 
 void test() {
+	typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
 	Net ai(2, 3, 2);
 
 	// ï€ë∂ÇµÇΩÉÇÉfÉãÇÉçÅ[Éh
@@ -97,9 +120,10 @@ void MakeDataFunc() {
 void LoadDataSet() {
 	DataLoader dl("DataSet/",100,3,160,160);
 	double**** tmp = dl.load();
-	cout << tmp[0][0][0][0] << endl;
+	cout << "âÊëúÇì«Ç›çûÇﬂÇ‹ÇµÇΩ" << endl;
 	dl.del_loadImgList(tmp);
 }
+
 
 int main() {
 	LoadDataSet();

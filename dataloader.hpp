@@ -48,9 +48,11 @@ public:
 		}
 	}
 
+
 	double**** load() {
 		Mat img,ch[3];
 		Vec3b pix;
+	
 		
 		int i = 0, j, k, l;
 		for (const auto& f : fs::directory_iterator(dirPath)) {
@@ -62,6 +64,9 @@ public:
 				for (k = 0; k < width; k++) {
 					for (l = 0; l < channelSize; l++) {
 						imgList[i][j][k][l] = (double)img.ptr<Vec3b>(j)[k][l];
+						
+						// ê≥ãKâªÇ∑ÇÈ
+						imgList[i][j][k][l] /= 255;
 					}
 				}
 			}
