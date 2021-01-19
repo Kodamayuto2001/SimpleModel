@@ -53,9 +53,7 @@ public:
 
 
 	double**** load() {
-		Mat img, ch[3];
-		Vec3b pix;
-
+		Mat img;
 
 		int i = 0, j, k, l, v;
 		for (const auto& f : fs::directory_iterator(dirPath)) {
