@@ -7,9 +7,9 @@
 #include<random>
 #include<cmath>
 using namespace std;
-const double C = 1.0e+100;
-const double D = 1.0e+200;
-const double Delta = 1.0e-300;
+constexpr double C = 1.0e+100;
+constexpr double D = 1.0e+200;
+constexpr double Delta = 1.0e-300;
 
 /*-----どんなに難しい数式も合成関数でできている-----*/
 /*-----基礎関数クラス-----*/
@@ -49,9 +49,7 @@ class Div {
 public:
 	double y = 0.0;
 	double forward(double x) {
-		y = 1 / x;
-		// 0を除算することはできない
-		if (y == float(INFINITY)) {
+		if ((y = 1 / x) == float(INFINITY)) {
 			y = DBL_MAX / D;
 		}
 		return y;
@@ -163,20 +161,21 @@ public:
 		double exp_div;
 
 		double Cmax = x[0];
-		for (int i = 0; i < (int)size; i++) {
+		int i;
+		for (i = 0; i < (int)size; ++i) {
 			if (Cmax < x[i]) {
 				Cmax = x[i];
 			}
 		}
 
-		for (int i = 0; i < (int)size; i++) {
+		for (i = 0; i < (int)size; ++i) {
 			exp_a[i] = exps[i].forward(x[i] - Cmax);
 			exp_sum = adds[i].forward(exp_sum, exp_a[i]);
 		}
 
 		exp_div = div.forward(exp_sum);
 
-		for (int i = 0; i < (int)size; i++) {
+		for (i = 0; i < (int)size; ++i) {
 			y[i] = muls[i].forward(exp_a[i], exp_div);
 		}
 		delete[] exp_a;
@@ -186,8 +185,8 @@ public:
 	double* backward(double* dout) {
 		double* dexp_a = new double[size];
 		double dexp_sum = 0.0;
-
-		for (int i = 0; i < (int)size; i++) {
+		int i;
+		for (i = 0; i < (int)size; ++i) {
 			dexp_a[i] = *(muls[i].backward(dout[i]) + 0);
 			dexp_sum += *(muls[i].backward(dout[i]) + 1);
 		}
@@ -196,7 +195,7 @@ public:
 
 		double tmp;
 		dr = new double[size];
-		for (int i = 0; i < (int)size; i++) {
+		for (i = 0; i < (int)size; ++i) {
 			tmp = *(adds[i].backward(dexp_div) + 1) + dexp_a[i];
 			tmp = exps[i].backward(tmp);
 			dr[i] = tmp;
@@ -230,7 +229,7 @@ public:
 		CrossEntropyError::size = size;
 		double log_x;
 		double E = 0.0;
-		for (int i = 0; i < (int)size; i++) {
+		for (int i = 0; i < (int)size; ++i) {
 			log_x = logs[i].forward(x[i]);
 			E = adds[i].forward(
 				E,
@@ -245,7 +244,7 @@ public:
 		dx = new double[size];
 		double de = *(mul.backward(dout) + 1);
 		double tmp;
-		for (int i = 0; i < (int)size; i++) {
+		for (int i = 0; i < (int)size; ++i) {
 			tmp = *(adds[i].backward(de) + 1);
 			tmp = *(muls[i].backward(tmp) + 0);
 			dx[i] = logs[i].backward(tmp);
@@ -334,7 +333,7 @@ public:
 		uniform_real_distribution<double> dist(-1, 1);
 
 		int i, j;
-		for (i = 0; i < (int)hidden_size; i++) {
+		for (i = 0; i < (int)hidden_size; ++i) {
 			fc1.weight[i] = new double[input_size];
 			fc1.muls_two[i] = new Mul[input_size];
 			fc1.adds_two[i] = new Add[input_size];
@@ -343,23 +342,24 @@ public:
 			dfc1.dbias[i] = 0.0;
 			// 逆伝搬中間層のノードを初期化
 			dfc2.dnode_out[i] = 0.0;
-			for (j = 0; j < (int)input_size; j++) {
+			for (j = 0; j < (int)input_size; ++j) {
 				fc1.weight[i][j] = dist(gen);
 				dfc1.dweight[i][j] = 0.0;
 			}
 		}
-		for (i = 0; i < (int)output_size; i++) {
+		for (i = 0; i < (int)output_size; ++i) {
 			fc2.weight[i] = new double[hidden_size];
 			fc2.muls_two[i] = new Mul[hidden_size];
 			fc2.adds_two[i] = new Add[hidden_size];
 			dfc2.dweight[i] = new double[hidden_size];
 			fc2.bias[i] = 0.0;
 			dfc2.dbias[i] = 0.0;
-			for (j = 0; j < (int)hidden_size; j++) {
+			for (j = 0; j < (int)hidden_size; ++j) {
 				fc2.weight[i][j] = dist(gen);
 				dfc2.dweight[i][j] = 0.0;
 			}
 		}
+		cout << "初期化完了" << endl;
 	}
 
 	double* predict(double* x) {
@@ -388,24 +388,24 @@ public:
 			cin.get();
 		}
 
-		for (int i = 0; i < hidden_size; i++) {
-			for (int j = 0; j < input_size; j++) {
+		for (int i = 0; i < hidden_size; ++i) {
+			for (int j = 0; j < input_size; ++j) {
 
 				ofs << "W1_" << i << j << fc1.weight[i][j] << "_";
 			}
 		}
 
-		for (int i = 0; i < output_size; i++) {
-			for (int j = 0; j < hidden_size; j++) {
+		for (int i = 0; i < output_size; ++i) {
+			for (int j = 0; j < hidden_size; ++j) {
 				ofs << "W2_" << i << j << fc2.weight[i][j] << "_";
 			}
 		}
 
-		for (int i = 0; i < hidden_size; i++) {
+		for (int i = 0; i < hidden_size; ++i) {
 			ofs << "b1_" << i << fc1.bias[i] << "_";
 		}
 
-		for (int i = 0; i < output_size; i++) {
+		for (int i = 0; i < output_size; ++i) {
 			ofs << "b2_" << i << fc2.bias[i] << "_";
 		}
 	}
@@ -486,13 +486,13 @@ public:
 
 	void del() {
 		int i;
-		for (i = 0; i < (int)hidden_size; i++) {
+		for (i = 0; i < (int)hidden_size; ++i) {
 			delete[] fc1.weight[i];
 			delete[] fc1.muls_two[i];
 			delete[] fc1.adds_two[i];
 			delete[] dfc1.dweight[i];
 		}
-		for (i = 0; i < (int)output_size; i++) {
+		for (i = 0; i < (int)output_size; ++i) {
 			delete[] fc2.weight[i];
 			delete[] fc2.muls_two[i];
 			delete[] fc2.adds_two[i];
@@ -533,9 +533,10 @@ private:
 
 	void _fc1(double* x) {
 		double tmp, a, s;
-		for (int i = 0; i < hidden_size; i++) {
+		int i, j;
+		for (i = 0; i < hidden_size; ++i) {
 			tmp = 0.0;
-			for (int j = 0; j < input_size; j++) {
+			for (j = 0; j < input_size; ++j) {
 				a = fc1.muls_two[i][j].forward(x[j], fc1.weight[i][j]);
 				tmp = fc1.adds_two[i][j].forward(tmp, a);
 			}
@@ -546,9 +547,10 @@ private:
 
 	void _fc2(void) {
 		double tmp, a;
-		for (int i = 0; i < output_size; i++) {
+		int i, j;
+		for (i = 0; i < output_size; ++i) {
 			tmp = 0.0;
-			for (int j = 0; j < hidden_size; j++) {
+			for (j = 0; j < hidden_size; ++j) {
 				a = fc2.muls_two[i][j].forward(
 					fc1.node_out[j],
 					fc2.weight[i][j]
@@ -563,10 +565,11 @@ private:
 		double* dtmp_bias2;
 		double* dtmp_da;
 		double* dhidden_out_dweight2;
-		for (int i = 0; i < output_size; i++) {
+		int i, j;
+		for (i = 0; i < output_size; ++i) {
 			dtmp_bias2 = fc2.adds_one[i].backward(dout[i]);
 			dfc2.dbias[i] = dtmp_bias2[1];
-			for (int j = 0; j < hidden_size; j++) {
+			for (j = 0; j < hidden_size; ++j) {
 				dtmp_da = fc2.adds_two[i][j].backward(dtmp_bias2[0]);
 				dhidden_out_dweight2 = fc2.muls_two[i][j].backward(dtmp_da[1]);
 				dfc2.dweight[i][j] = dhidden_out_dweight2[1];
@@ -580,17 +583,151 @@ private:
 		double* dtmp_bias1;
 		double* dtmp_da;
 		double* dx_dweight1;
-		for (int i = 0; i < hidden_size; i++) {
+		int i, j;
+		for (i = 0; i < hidden_size; ++i) {
 			tmp = activations[i].backward(dfc2.dnode_out[i]);
 			dtmp_bias1 = fc1.adds_one[i].backward(tmp);
 			dfc1.dbias[i] = dtmp_bias1[1];
-			for (int j = 0; j < input_size; j++) {
+			for (j = 0; j < input_size; ++j) {
 				dtmp_da = fc1.adds_two[i][j].backward(dtmp_bias1[0]);
 				dx_dweight1 = fc1.muls_two[i][j].backward(dtmp_da[1]);
 				dfc1.dweight[i][j] = dx_dweight1[1];
 			}
 		}
 	}
+};
+
+// _____FAST CLASS_____
+class FastMul {
+public:
+	double* tmp[2];
+	void forward(double* a, double* b, double* y) {
+		tmp[0] = a;
+		tmp[1] = b;
+		if (((*y) = (*tmp[0]) * (*tmp[1])) == float(INFINITY)) {
+			*y = DBL_MAX / C;
+		}
+	}
+	void backward(double* dout, double* dy) {
+		dy[0] = (*dout) * (*tmp[1]);
+		dy[1] = (*dout) * (*tmp[0]);
+	}
+};
+class FastSigmoid {
+public:
+	double forward(double* x) {
+		y = 1.0 / (1.0 + std::exp(-(*x)));
+		return y;
+	}
+	double backward(double* dout) {
+		return (*dout) * (1.0 - y) * y;
+	}
+private:
+	double y;
+};
+
+
+class FastSoftmaxWithLoss {
+public:
+	FastSoftmaxWithLoss(size_t&& output_size) {
+		size = output_size;
+		v = new double[size];
+		dx = new double[size];
+	}
+	void SoftmaxForward(double* x, double* p) {
+		A = x[0];
+		for (i = 0; i < (int)size; ++i) {
+			if (A < x[i]) {
+				A = x[i];
+			}
+		}
+		for (i = 0; i < (int)size; ++i) {
+			v[i] = exp(x[i] - A);
+			tmp += v[i];
+		}
+		for (i = 0; i < (int)size; ++i) {
+			p[i] = v[i] / tmp;
+		}
+		v = p;
+	}
+
+	void CrossEntropyErrorForward(double* x, double* t,double* E) {
+		(*E) = 0.0;
+		for (i = 0; i < (int)size; ++i) {
+			A = log(x[i]);
+			(*E) += A * t[i];
+			dx[i] = v[i] - t[i];
+		}
+		(*E) *= -1;
+	}
+
+	double* backward() {
+		return dx;
+	}
+
+	void del() {
+		delete[] v;
+		delete[] dx;
+	}
+private:
+	size_t size;
+	double* v;
+	double A;
+	double tmp;
+	int i;
+	double* dx;
+};
+
+template<class A1>
+class FastSimpleNet {
+public:
+	class Forward {
+	public:
+		double** weight;
+		double* bias;
+		double* node_out;
+		FastMul** muls_two;
+	};
+	class Backward {
+	public:
+		double** dweight;
+		double* dbias;
+		double* dnode_out;
+	};
+	Forward fc1, fc2;
+	Backward dfc1, dfc2;
+
+	FastSimpleNet(
+		size_t _input_size,
+		size_t _hidden_size,
+		size_t _output_size) {
+		//	引数を右辺値にキャスト
+		input_size = move(_input_size);
+		hidden_size = move(_hidden_size);
+		output_size = move(_output_size);
+
+		//	動的にメモリを割り当てる
+		fc1.weight = new double* [hidden_size];
+		fc2.weight = new double* [output_size];
+		dfc1.dweight = new double* [hidden_size];
+		dfc2.dweight = new double* [output_size];
+
+		fc1.bias = new double[hidden_size];
+		fc2.bias = new double[output_size];
+		dfc1.dbias = new double[hidden_size];
+		dfc2.dbias = new double[output_size];
+
+		fc1.node_out = new double[hidden_size];
+		fc2.node_out = new double[output_size];
+		dfc2.dnode_out = new double[hidden_size];
+
+		fc1.muls_two = new Mul * [hidden_size];
+		fc2.muls_two = new Mul * [output_size];
+	}
+private:
+	size_t input_size;
+	size_t hidden_size;
+	size_t output_size;
 };
 
 template<class Net>
@@ -601,18 +738,19 @@ public:
 	}
 
 	void step(Net model) {
-		for (int i = 0; i < model.hidden_size; i++) {
+		int i, j;
+		for (i = 0; i < model.hidden_size; ++i) {
 			// バイアス1の更新
 			model.fc1.bias[i] -= lr * model.dfc1.dbias[i];
-			for (int j = 0; j < model.input_size; j++) {
+			for (j = 0; j < model.input_size; ++j) {
 				// 重み1の更新
 				model.fc1.weight[i][j] -= lr * model.dfc1.dweight[i][j];
 			}
 		}
-		for (int i = 0; i < model.output_size; i++) {
+		for (i = 0; i < model.output_size; ++i) {
 			// バイアス2の更新
 			model.fc2.bias[i] -= lr * model.dfc2.dbias[i];
-			for (int j = 0; j < model.hidden_size; j++) {
+			for (j = 0; j < model.hidden_size; ++j) {
 				// 重み2の更新
 				model.fc2.weight[i][j] -= lr * model.dfc2.dweight[i][j];
 			}
@@ -640,35 +778,35 @@ public:
 			v_w2 = new double* [output_size];
 			v_b1 = new double[hidden_size];
 			v_b2 = new double[output_size];
-			for (i = 0; i < hidden_size; i++) {
+			for (i = 0; i < hidden_size; ++i) {
 				v_w1[i] = new double[input_size];
 				v_b1[i] = 0.0;
-				for (j = 0; j < input_size; j++) {
+				for (j = 0; j < input_size; ++j) {
 					v_w1[i][j] = 0.0;
 				}
 			}
-			for (i = 0; i < output_size; i++) {
+			for (i = 0; i < output_size; ++i) {
 				v_w2[i] = new double[hidden_size];
 				v_b2[i] = 0.0;
-				for (j = 0; j < hidden_size; j++) {
+				for (j = 0; j < hidden_size; ++j) {
 					v_w2[i][j] = 0.0;
 				}
 			}
 		}
-		for (i = 0; i < hidden_size; i++) {
+		for (i = 0; i < hidden_size; ++i) {
 			v_b1[i] = momentum * v_b1[i] - lr * model.dfc1.dbias[i];
 			model.fc1.bias[i] += v_b1[i];
-			for (j = 0; j < input_size; j++) {
+			for (j = 0; j < input_size; ++j) {
 				v_w1[i][j] =
 					momentum * v_w1[i][j]
 					- lr * model.dfc1.dweight[i][j];
 				model.fc1.weight[i][j] += v_w1[i][j];
 			}
 		}
-		for (i = 0; i < output_size; i++) {
+		for (i = 0; i < output_size; ++i) {
 			v_b2[i] = momentum * v_b2[i] - lr * model.dfc2.dbias[i];
 			model.fc1.bias[i] += v_b2[i];
-			for (j = 0; j < hidden_size; j++) {
+			for (j = 0; j < hidden_size; ++j) {
 				v_w2[i][j] =
 					momentum * v_w2[i][j]
 					- lr * model.dfc2.dweight[i][j];
@@ -679,10 +817,10 @@ public:
 
 	~Momentum() {
 		int i;
-		for (i = 0; i < hidden_size; i++) {
+		for (i = 0; i < hidden_size; ++i) {
 			delete[] v_w1[i];
 		}
-		for (i = 0; i < output_size; i++) {
+		for (i = 0; i < output_size; ++i) {
 			delete[] v_w2[i];
 		}
 		delete[] v_b1;
@@ -720,40 +858,40 @@ public:
 			h_w2 = new double* [output_size];
 			h_b1 = new double[hidden_size];
 			h_b2 = new double[output_size];
-			for (i = 0; i < hidden_size; i++) {
+			for (i = 0; i < hidden_size; ++i) {
 				h_w1[i] = new double[input_size];
 				h_b1[i] = 0.0;
-				for (j = 0; j < input_size; j++) {
+				for (j = 0; j < input_size; ++j) {
 					h_w1[i][j] = 0.0;
 				}
 			}
-			for (i = 0; i < output_size; i++) {
+			for (i = 0; i < output_size; ++i) {
 				h_w2[i] = new double[hidden_size];
 				h_b2[i] = 0.0;
-				for (j = 0; j < hidden_size; j++) {
+				for (j = 0; j < hidden_size; ++j) {
 					h_w2[i][j] = 0.0;
 				}
 			}
 		}
-		for (i = 0; i < hidden_size; i++) {
+		for (i = 0; i < hidden_size; ++i) {
 			h_b1[i] += model.dfc1.dbias[i] * model.dfc1.dbias[i];
 			// 0で除算することを防ぐためにDeltaを足している
 			model.fc1.bias[i] -=
 				lr / (sqrt(h_b1[i]) + Delta)
 				* model.dfc1.dbias[i];
-			for (j = 0; j < input_size; j++) {
+			for (j = 0; j < input_size; ++j) {
 				h_w1[i][j] += model.dfc1.dweight[i][j] * model.dfc1.dweight[i][j];
 				model.fc1.weight[i][j] -=
 					lr / (sqrt(h_w1[i][j]) + Delta)
 					* model.dfc1.dweight[i][j];
 			}
 		}
-		for (i = 0; i < output_size; i++) {
+		for (i = 0; i < output_size; ++i) {
 			h_b2[i] += model.dfc2.dbias[i] * model.dfc2.dbias[i];
 			model.fc2.bias[i] -=
 				lr / (sqrt(h_b2[i]) + Delta)
 				* model.dfc2.dbias[i];
-			for (j = 0; j < hidden_size; j++) {
+			for (j = 0; j < hidden_size; ++j) {
 				h_w2[i][j] += model.dfc2.dweight[i][j] * model.dfc2.dweight[i][j];
 				model.fc2.weight[i][j] -=
 					lr / (sqrt(h_w2[i][j]) + Delta)
@@ -763,10 +901,10 @@ public:
 	}
 	~AdaGrad() {
 		int i;
-		for (i = 0; i < hidden_size; i++) {
+		for (i = 0; i < hidden_size; ++i) {
 			delete[] h_w1[i];
 		}
-		for (i = 0; i < output_size; i++) {
+		for (i = 0; i < output_size; ++i) {
 			delete[] h_w2[i];
 		}
 		delete[] h_b1;
@@ -803,28 +941,28 @@ public:
 			h_w2 = new double* [output_size];
 			h_b1 = new double[hidden_size];
 			h_b2 = new double[output_size];
-			for (i = 0; i < hidden_size; i++) {
+			for (i = 0; i < hidden_size; ++i) {
 				h_w1[i] = new double[input_size];
 				h_b1[i] = 0.0;
-				for (j = 0; j < input_size; j++) {
+				for (j = 0; j < input_size; ++j) {
 					h_w1[i][j] = 0.0;
 				}
 			}
-			for (i = 0; i < output_size; i++) {
+			for (i = 0; i < output_size; ++i) {
 				h_w2[i] = new double[hidden_size];
 				h_b2[i] = 0.0;
-				for (j = 0; j < hidden_size; j++) {
+				for (j = 0; j < hidden_size; ++j) {
 					h_w2[i][j] = 0.0;
 				}
 			}
 		}
-		for (i = 0; i < hidden_size; i++) {
+		for (i = 0; i < hidden_size; ++i) {
 			h_b1[i] *= decay_rate;
 			h_b1[i] += (1 - decay_rate)
 				* model.dfc1.dbias[i] * model.dfc1.dbias[i];
 			model.fc1.bias[i] -= lr * model.dfc1.dbias[i]
 				/ (sqrt(h_b1[i]) + Delta);
-			for (j = 0; j < input_size; j++) {
+			for (j = 0; j < input_size; ++j) {
 				h_w1[i][j] *= decay_rate;
 				h_w1[i][j] += (1 - decay_rate)
 					* model.dfc1.dweight[i][j] * model.dfc1.dweight[i][j];
@@ -832,13 +970,13 @@ public:
 					/ (sqrt(h_w1[i][j]) + Delta);
 			}
 		}
-		for (i = 0; i < output_size; i++) {
+		for (i = 0; i < output_size; ++i) {
 			h_b2[i] *= decay_rate;
 			h_b2[i] += (1 - decay_rate)
 				* model.dfc2.dbias[i] * model.dfc2.dbias[i];
 			model.fc2.bias[i] -= lr * model.dfc2.dbias[i]
 				/ (sqrt(h_b2[i]) + Delta);
-			for (j = 0; j < hidden_size; j++) {
+			for (j = 0; j < hidden_size; ++j) {
 				h_w2[i][j] *= decay_rate;
 				h_w2[i][j] += (1 - decay_rate)
 					* model.dfc2.dweight[i][j] * model.dfc2.dweight[i][j];
@@ -849,10 +987,10 @@ public:
 	}
 	~RMSProp() {
 		int i;
-		for (i = 0; i < hidden_size; i++) {
+		for (i = 0; i < hidden_size; ++i) {
 			delete[] h_w1[i];
 		}
-		for (i = 0; i < output_size; i++) {
+		for (i = 0; i < output_size; ++i) {
 			delete[] h_w2[i];
 		}
 		delete[] h_w1;
@@ -896,22 +1034,22 @@ public:
 			v_w2 = new double* [output_size];
 			v_b1 = new double[hidden_size];
 			v_b2 = new double[output_size];
-			for (i = 0; i < hidden_size; i++) {
+			for (i = 0; i < hidden_size; ++i) {
 				m_w1[i] = new double[input_size];
 				m_b1[i] = 0.0;
 				v_w1[i] = new double[input_size];
 				v_b1[i] = 0.0;
-				for (j = 0; j < input_size; j++) {
+				for (j = 0; j < input_size; ++j) {
 					m_w1[i][j] = 0.0;
 					v_w1[i][j] = 0.0;
 				}
 			}
-			for (i = 0; i < output_size; i++) {
+			for (i = 0; i < output_size; ++i) {
 				m_w2[i] = new double[hidden_size];
 				m_b2[i] = 0.0;
 				v_w2[i] = new double[hidden_size];
 				v_b2[i] = 0.0;
-				for (j = 0; j < hidden_size; j++) {
+				for (j = 0; j < hidden_size; ++j) {
 					m_w2[i][j] = 0.0;
 					v_w2[i][j] = 0.0;
 				}
@@ -919,21 +1057,21 @@ public:
 		}
 		iter += 1.0;
 		double lr_t = lr * sqrt(1.0 - pow(beta2, iter)) / (1.0 - pow(beta1, iter));
-		for (i = 0; i < hidden_size; i++) {
+		for (i = 0; i < hidden_size; ++i) {
 			m_b1[i] += (1 - beta1) * (model.dfc1.dbias[i] - m_b1[i]);
 			v_b1[i] += (1 - beta2) * (model.dfc1.dbias[i] * model.dfc1.dbias[i] - v_b1[i]);
 			model.fc1.bias[i] -= lr_t * m_b1[i] / (sqrt(v_b1[i]) + Delta);
-			for (j = 0; j < input_size; j++) {
+			for (j = 0; j < input_size; ++j) {
 				m_w1[i][j] += (1 - beta1) * (model.dfc1.dweight[i][j] - m_w1[i][j]);
 				v_w1[i][j] += (1 - beta2) * (model.dfc1.dweight[i][j] * model.dfc1.dweight[i][j] - v_w1[i][j]);
 				model.fc1.weight[i][j] -= lr_t * m_w1[i][j] / (sqrt(v_w1[i][j]) + Delta);
 			}
 		}
-		for (i = 0; i < output_size; i++) {
+		for (i = 0; i < output_size; ++i) {
 			m_b2[i] += (1 - beta1) * (model.dfc2.dbias[i] - m_b2[i]);
 			v_b2[i] += (1 - beta2) * (model.dfc2.dbias[i] * model.dfc2.dbias[i] - v_b2[i]);
 			model.fc2.bias[i] -= lr_t * m_b2[i] / (sqrt(v_b2[i]) + Delta);
-			for (j = 0; j < hidden_size; j++) {
+			for (j = 0; j < hidden_size; ++j) {
 				m_w2[i][j] += (1 - beta1) * (model.dfc2.dweight[i][j] - m_w2[i][j]);
 				v_w2[i][j] += (1 - beta2) * (model.dfc2.dweight[i][j] * model.dfc2.dweight[i][j] - v_w2[i][j]);
 				model.fc2.weight[i][j] -= lr_t * m_w2[i][j] / (sqrt(v_w2[i][j]) + Delta);
@@ -943,11 +1081,11 @@ public:
 
 	~Adam() {
 		int i;
-		for (i = 0; i < hidden_size; i++) {
+		for (i = 0; i < hidden_size; ++i) {
 			delete[] m_w1[i];
 			delete[] v_w1[i];
 		}
-		for (i = 0; i < output_size; i++) {
+		for (i = 0; i < output_size; ++i) {
 			delete[] m_w2[i];
 			delete[] v_w2[i];
 		}
