@@ -836,6 +836,248 @@ private:
 	double* tmp[2];
 };
 
+class FastDiv {
+public:
+	void forward(double* x, double* y) {
+		if (((*y) = 1 / (*x)) == float(INFINITY)) {
+			(*y) = DBL_MAX / D;
+		}
+		FastDiv::y = y;
+	}
+	void backward(double* dout, double* dx) {
+		(*dx) = (*dout) * (-1 * (*y) * (*y));
+	}
+private:
+	double* y;
+};
+
+class FastSigmoid {
+public:
+	void forward(double* x, double* y) {
+		*y = 1 / (1.0 + exp(-(*x)));
+		FastSigmoid::y = y;
+	}
+	void backward(double* dout, double* dx) {
+		*dx = (*dout) * (1.0 - (*y)) * (*y);
+	}
+private:
+	double* y;
+};
+
+class FastReLU {
+public:
+	void forward(double* _x, double* y) {
+		FastReLU::x = _x;
+		if (*x > 0.0) { *y = *x; }
+		else { *y = 0.0; }
+	}
+	void backward(double* dout, double* dx) {
+		if (*x > 0.0) { *dx = *dout; }
+		else { *dx = 0.0; }
+	}
+private:
+	double* x;
+};
+
+class FastSoftmaxWithLoss {
+public:
+	FastSoftmaxWithLoss(size_t* _size) {
+		size = _size;
+		tmp = new double[(*size)];
+		a = b = 0.0;
+		i = 0;
+	}
+	void SoftmaxForward(double* x, double* y) {
+		a = x[0];
+		for (i = 0; i < (int)(*size); ++i) {
+			if (a < x[i]) {
+				a = x[i];
+			}
+		}
+		for (i = 0; i < (int)(*size); ++i) {
+			tmp[i] = exp(x[i] - a);
+			b += tmp[i];
+		}
+		a = 1 / b;
+		for (i = 0; i < (int)(*size); ++i) {
+			y[i] = tmp[i] * a;
+		}
+		FastSoftmaxWithLoss::y = y;
+	}
+
+	void CrossEntropyErrorForward(double* t, double* loss) {
+		tmp = t;
+		for (i = 0; i < (int)(*size); ++i) {
+			a = log(y[i]);
+			b += a * t[i];
+		}
+		*loss = b * (-1);
+	}
+
+	void backward(double* dout, double* dx) {
+		for (i = 0; i < (int)(*size); ++i) {
+			dx[i] = y[i] - tmp[i];
+		}
+	}
+private:
+	size_t* size;
+	double* tmp;
+	double a, b;
+	int i;
+	double* y;
+};
+
+template<class ActFunc,class SoftmaxWithLoss>
+class FastSimpleNet {
+public:
+	class Forward {
+	public:
+		double** weight;
+		double* bias;
+		double* node_out;
+		FastMul** muls_two;
+	};
+	class Backward {
+	public:
+		double** dweight;
+		double* dbias;
+		double* dnode_out;
+	};
+
+	size_t m_size[3];
+	Forward fc1, fc2;
+	Backward dfc1, dfc2;
+
+	FastSimpleNet(
+		size_t&& _inputSize,
+		size_t&& _hiddenSize, 
+		size_t&& _outputSize) {
+
+		i = j = 0;
+		a = b = 0.0;
+
+		m_size[0] = _inputSize;
+		m_size[1] = _hiddenSize;
+		m_size[2] = _outputSize;
+
+		fc1.weight = new double* [m_size[1]];
+		fc1.bias = new double[m_size[1]];
+		fc1.node_out = new double[m_size[1]];
+		fc1.muls_two = new FastMul * [m_size[1]];
+		
+		fc2.weight = new double* [m_size[2]];
+		fc2.bias = new double[m_size[2]];
+		fc2.node_out = new double[m_size[2]];
+		fc2.muls_two = new FastMul * [m_size[2]];
+
+		aFunc = new ActFunc[m_size[1]];
+
+		dfc2.dweight = new double*[m_size[2]];
+		dfc2.dbias = new double[m_size[2]];
+		//// dfc2.dnode_out = new double[m_size[2]];
+
+		dfc1.dweight = new double* [m_size[1]];
+		dfc1.dbias = new double[m_size[1]];
+		dfc1.dnode_out = new double[m_size[1]];
+
+		random_device rd;
+		mt19937 gen(rd());
+		uniform_real_distribution<double> dist(-1, 1);
+	
+		for (i = 0; i < (int)m_size[1]; ++i) {
+			fc1.muls_two[i] = new FastMul[m_size[0]];
+			fc1.weight[i] = new double[m_size[0]];
+			fc1.bias[i] = 0.0;
+			fc1.node_out[i] = 0.0;
+			dfc1.dweight[i] = new double[m_size[0]];
+			dfc1.dbias[i] = 0.0;
+			dfc1.dnode_out[i] = 0.0;
+			for (j = 0; j < (int)m_size[0]; ++j) {
+				fc1.weight[i][j] = dist(gen);
+				dfc1.dweight[i][j] = 0.0;
+			}
+		}
+			
+		for (i = 0; i < (int)m_size[2]; ++i) {
+			fc2.muls_two[i] = new FastMul[m_size[1]];
+			fc2.weight[i] = new double[m_size[1]];
+			fc2.bias[i] = 0.0;
+			fc2.node_out[i] = 0.0;
+			dfc2.dweight[i] = new double[m_size[1]];
+			dfc2.dbias[i] = 0.0;
+			for (j = 0; j < (int)m_size[1]; ++j) {
+				fc2.weight[i][j] = dist(gen);
+				dfc2.dweight[i][j] = 0.0;
+			}
+		}
+	}
+
+	void predict(double* x) {
+		_fc1(x);
+		_fc2();
+	}
+
+	void del() {
+		for (i = 0; i < (int)m_size[1]; ++i) {
+			delete[] fc1.weight[i];
+			delete[] fc1.muls_two[i];
+			delete[] dfc1.dweight[i];
+		}
+		for (i = 0; i < (int)m_size[2]; ++i) {
+			delete[] fc2.weight[i];
+			delete[] fc2.muls_two[i];
+			delete[] dfc2.dweight[i];
+		}
+		delete[] fc1.weight;
+		delete[] fc1.muls_two;
+		delete[] fc1.node_out;
+		delete[] fc1.bias;
+
+		delete[] fc2.weight;
+		delete[] fc2.muls_two;
+		delete[] fc2.bias;
+		delete[] fc2.node_out;
+
+		delete[] dfc2.dweight;
+		delete[] dfc2.dbias;
+		
+		delete[] dfc1.dweight;
+		delete[] dfc1.dbias;
+		delete[] dfc1.dnode_out;
+
+		cout << "³í‚É‰ð•ú‚µ‚Ü‚µ‚½iFastSimpleNetj" << endl;
+	}
+private:
+	ActFunc* aFunc;
+	int i, j;
+	double a, b;
+
+	void _fc1(double* x) {
+		for (i = 0; i < m_size[1]; ++i) {
+			b = 0.0;
+			for (j = 0; j < m_size[0]; ++j) {
+				fc1.muls_two[i][j].forward(&(x[j]), &(fc1.weight[i][j]), &a);
+				cout << a << endl;
+				b += a;
+			}
+			a = b + fc1.bias[i];
+			aFunc[i].forward(&a, &fc1.node_out[i]);
+		}
+	}
+
+	void _fc2(void) {
+		for (i = 0; i < m_size[2]; ++i) {
+			b = 0.0;
+			for (j = 0; j < m_size[1]; ++j) {
+				fc2.muls_two[i][j].forward(
+					&fc1.node_out[j], &fc2.weight[i][j], &a);
+				b += a;
+			}
+			fc2.node_out[i] = b + fc2.bias[i];
+		}
+	}
+};
+
 template<class Net>
 class SGD {
 public:
@@ -1223,6 +1465,4 @@ private:
 	double iter = 0.0;
 };
 
-class LogSoftmax {};
-class Nll_Loss {};
 #endif // !_SimpleNeuralNetwork_H_
