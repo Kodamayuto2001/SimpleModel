@@ -1,6 +1,7 @@
 # SimpleModel
 
 # DataLoader.hppがおかしいので直しています。
+# SimpleNeuralNetwork.hpp処理速度を改善しています。
 
 ### SimpleNeuralNetwork.hpp
 ##### Activation Func
