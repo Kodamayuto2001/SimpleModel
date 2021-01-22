@@ -597,137 +597,243 @@ private:
 	}
 };
 
-// _____FAST CLASS_____
+//class FastMul {
+//public:
+//	void forward(double&& a, double&& b, double* y) {
+//		tmp[0] = a;
+//		tmp[1] = b;
+//		if (((*y) = tmp[0] * tmp[1]) == float(INFINITY)) {
+//			(*y) = DBL_MAX / C;
+//		}
+//	}
+//	void backward(double&& dout, double dx[2]) {
+//		dx[0] = dout * tmp[1];
+//		dx[1] = dout * tmp[0];
+//	}
+//private:
+//	double tmp[2];
+//};
+//
+//class FastDiv {
+//public:
+//	void forward(double* x, double* y) {
+//		if (((*y) = 1 / (*x)) == float(INFINITY)) {
+//			*y = DBL_MAX / D;
+//		}
+//		FastDiv::y = y;
+//	}
+//	void backward(double&& dout, double* dx) {
+//		*dx = dout * (-1 * (*y) * (*y));
+//	}
+//private:
+//	double* y;
+//};
+//
+//class FastSigmoid {
+//public:
+//	void forward(double&& x, double* y) {
+//		*y = 1 / (1.0 + exp(-x));
+//		FastSigmoid::y = y;
+//	}
+//	void backward(double&& dout, double* dx) {
+//		*dx = dout * (1.0 - (*y)) * (*y);
+//	}
+//private:
+//	double* y;
+//};
+//
+//class FastReLU {
+//public:
+//	void forward(double&& _x, double* y) {
+//		FastReLU::x = _x;
+//		if (x > 0.0) { (*y) = x; }
+//		else { (*y) = 0.0; }
+//	}
+//	void backward(double&& dout,double* dx) {
+//		if (x > 0.0) { *dx = dout; }
+//		else { *dx = 0; }
+//	}
+//private:
+//	double x;
+//};
+//
+//class FastSoftmaxWithLoss {
+//public:
+//	FastSoftmaxWithLoss(size_t* _size) {
+//		size = _size;
+//		i = 0;
+//		tmp = new double[(*size)];
+//		muls = new FastMul[(*size)];
+//		b = 0.0;
+//		c = 0.0;
+//	}
+//	void SoftmaxForward(double* x,double* y) {
+//		b = x[0];
+//		for (i = 0; i < (int)(*size); ++i) {
+//			if (b < x[i]) {
+//				b = x[i];
+//			}
+//		}
+//		for (i = 0; i < (int)(*size); ++i) {
+//			tmp[i] = exp(x[i] - b);
+//			c += tmp[i];
+//		}
+//		div.forward(&c,&b);
+//		for (i = 0; i < (int)(*size); ++i) {
+//			
+//		}
+//	}
+//private:
+//	size_t* size;
+//	int i;
+//	double* tmp;
+//	double b;
+//	double c;
+//	FastDiv div;
+//	FastMul* muls;
+//};
+//
+//template<class FastActivation1>
+//class FastSimpleNet {
+//public:
+//	
+//	class Forward {
+//	public:
+//		double** weight;
+//		double* bias;
+//		double* node_out;
+//		FastMul** muls_two;
+//	};
+//
+//	Forward fc1, fc2;
+//	size_t m_size[3];
+//	FastSimpleNet(
+//		size_t&& _inputSize,
+//		size_t&& _hiddenSize,
+//		size_t&& _outputSize
+//	) {
+//		i = j = 0;
+//		tmp = a = 0.0;
+//
+//		m_size[0] = _inputSize;
+//		m_size[1] = _hiddenSize;
+//		m_size[2] = _outputSize;
+//
+//		fc1.weight = new double* [m_size[1]];
+//		fc1.bias = new double[m_size[1]];
+//		fc1.node_out = new double[m_size[1]];
+//		fc1.muls_two = new FastMul * [m_size[1]];
+//
+//		fc2.weight = new double* [m_size[2]];
+//		fc2.bias = new double[m_size[2]];
+//		fc2.node_out = new double[m_size[2]];
+//		fc2.muls_two = new FastMul * [m_size[2]];
+//
+//		//	中間層の活性化関数
+//		AcFuncs = new FastActivation1[m_size[1]];
+//
+//		random_device rd;
+//		mt19937 gen(rd());
+//		uniform_real_distribution<double> dist(-1, 1);
+//
+//		for (i = 0; i < (int)m_size[1]; ++i) {
+//			fc1.muls_two[i] = new FastMul[m_size[0]];
+//			fc1.weight[i] = new double[m_size[0]];
+//			fc1.bias[i] = 0.0;
+//			fc1.node_out[i] = 0.0;
+//			for (j = 0; j < (int)m_size[0]; ++j) {
+//				fc1.weight[i][j] = dist(gen);
+//			}
+//		}
+//
+//		for (i = 0; i < (int)m_size[2]; ++i) {
+//			fc2.muls_two[i] = new FastMul[m_size[1]];
+//			fc2.weight[i] = new double[m_size[1]];
+//			fc2.bias[i] = 0.0;
+//			fc2.node_out[i] = 0.0;
+//			for (j = 0; j < (int)m_size[1]; ++j) {
+//				fc2.weight[i][j] = dist(gen);
+//			}
+//		}
+//	}
+//
+//	void predict(double* x) {
+//		_fc1(x);
+//		_fc2();
+//	}
+//
+//	void del() {
+//		for (i = 0; i < (int)m_size[1]; ++i) {
+//			delete[] fc1.muls_two[i];
+//			delete[] fc1.weight[i];
+//		}
+//		for (i = 0; i < (int)m_size[2]; ++i) {
+//			delete[] fc2.muls_two[i];
+//			delete[] fc2.weight[i];
+//		}
+//		delete[] fc1.muls_two;
+//		delete[] fc1.weight;
+//		delete[] fc1.bias;
+//		delete[] fc1.node_out;
+//		delete[] fc2.muls_two;
+//		delete[] fc2.weight;
+//		delete[] fc2.bias;
+//		delete[] fc2.node_out;
+//		cout << "正常に開放されました（FastSimpleNet）" << endl;
+//	}
+//
+//private:
+//	FastActivation1* AcFuncs;
+//	int i, j;
+//	double tmp;
+//	double a;
+//
+//	
+//
+//	void _fc1(double* x) {
+//		for (i = 0; i < m_size[1]; ++i) {
+//			tmp = 0.0;
+//			for (j = 0; j < m_size[0]; ++j) {
+//				fc1.muls_two[i][j].forward(
+//					move(x[j]), move(fc1.weight[i][j]), &a);
+//				tmp += a;
+//			}
+//			a = tmp + fc1.bias[i];
+//			AcFuncs[i].forward(move(a), &(fc1.node_out[i]));
+//		}
+//	}
+//
+//	void _fc2(void) {
+//		for (i = 0; i < m_size[2]; ++i) {
+//			tmp = 0.0;
+//			for (j = 0; j < m_size[1]; ++j) {
+//				fc2.muls_two[i][j].forward(
+//					move(fc1.node_out[j]),
+//					move(fc2.weight[i][j]),
+//					&a
+//				);
+//				tmp += a;
+//			}
+//			fc2.node_out[i] = tmp + fc2.bias[i];
+//		}
+//	}
+//};
+
 class FastMul {
 public:
-	double* tmp[2];
 	void forward(double* a, double* b, double* y) {
 		tmp[0] = a;
 		tmp[1] = b;
-		if (((*y) = (*tmp[0]) * (*tmp[1])) == float(INFINITY)) {
-			*y = DBL_MAX / C;
+		if (((*y) = (*a) * (*b)) == float(INFINITY)) {
+			(*y) = DBL_MAX / C;
 		}
 	}
-	void backward(double* dout, double* dy) {
-		dy[0] = (*dout) * (*tmp[1]);
-		dy[1] = (*dout) * (*tmp[0]);
-	}
-};
-class FastSigmoid {
-public:
-	double forward(double* x) {
-		y = 1.0 / (1.0 + std::exp(-(*x)));
-		return y;
-	}
-	double backward(double* dout) {
-		return (*dout) * (1.0 - y) * y;
+	void backward(double* dout, double dx[2]) {
+		dx[0] = (*dout) * (*tmp[1]);
+		dx[1] = (*dout) * (*tmp[0]);
 	}
 private:
-	double y;
-};
-
-
-class FastSoftmaxWithLoss {
-public:
-	FastSoftmaxWithLoss(size_t&& output_size) {
-		size = output_size;
-		v = new double[size];
-		dx = new double[size];
-	}
-	void SoftmaxForward(double* x, double* p) {
-		A = x[0];
-		for (i = 0; i < (int)size; ++i) {
-			if (A < x[i]) {
-				A = x[i];
-			}
-		}
-		for (i = 0; i < (int)size; ++i) {
-			v[i] = exp(x[i] - A);
-			tmp += v[i];
-		}
-		for (i = 0; i < (int)size; ++i) {
-			p[i] = v[i] / tmp;
-		}
-		v = p;
-	}
-
-	void CrossEntropyErrorForward(double* x, double* t,double* E) {
-		(*E) = 0.0;
-		for (i = 0; i < (int)size; ++i) {
-			A = log(x[i]);
-			(*E) += A * t[i];
-			dx[i] = v[i] - t[i];
-		}
-		(*E) *= -1;
-	}
-
-	double* backward() {
-		return dx;
-	}
-
-	void del() {
-		delete[] v;
-		delete[] dx;
-	}
-private:
-	size_t size;
-	double* v;
-	double A;
-	double tmp;
-	int i;
-	double* dx;
-};
-
-template<class A1>
-class FastSimpleNet {
-public:
-	class Forward {
-	public:
-		double** weight;
-		double* bias;
-		double* node_out;
-		FastMul** muls_two;
-	};
-	class Backward {
-	public:
-		double** dweight;
-		double* dbias;
-		double* dnode_out;
-	};
-	Forward fc1, fc2;
-	Backward dfc1, dfc2;
-
-	FastSimpleNet(
-		size_t _input_size,
-		size_t _hidden_size,
-		size_t _output_size) {
-		//	引数を右辺値にキャスト
-		input_size = move(_input_size);
-		hidden_size = move(_hidden_size);
-		output_size = move(_output_size);
-
-		//	動的にメモリを割り当てる
-		fc1.weight = new double* [hidden_size];
-		fc2.weight = new double* [output_size];
-		dfc1.dweight = new double* [hidden_size];
-		dfc2.dweight = new double* [output_size];
-
-		fc1.bias = new double[hidden_size];
-		fc2.bias = new double[output_size];
-		dfc1.dbias = new double[hidden_size];
-		dfc2.dbias = new double[output_size];
-
-		fc1.node_out = new double[hidden_size];
-		fc2.node_out = new double[output_size];
-		dfc2.dnode_out = new double[hidden_size];
-
-		fc1.muls_two = new Mul * [hidden_size];
-		fc2.muls_two = new Mul * [output_size];
-	}
-private:
-	size_t input_size;
-	size_t hidden_size;
-	size_t output_size;
+	double* tmp[2];
 };
 
 template<class Net>
