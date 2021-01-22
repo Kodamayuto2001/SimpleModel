@@ -1,5 +1,7 @@
 # SimpleModel
 
+# DataLoader.hppがおかしいので直しています。
+
 ### SimpleNeuralNetwork.hpp
 ##### Activation Func
   - ReLU              class
