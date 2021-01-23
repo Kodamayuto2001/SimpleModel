@@ -19,13 +19,6 @@
   - RNSProp           class
   - Adam              class
 
-##### Func
-  - Add               class
-  - Mul               class
-  - Div               class
-  - Exp               class
-  - Log               class
-
 ### dataset.hpp
   - DataSet           class
 
