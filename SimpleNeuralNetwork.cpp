@@ -138,6 +138,7 @@ void trainFromDataSet() {
 	int epoch = 40;
 	double loss;
 	Adam<Net> optimizer;
+	double* y;
 	for (int e = 0; e < epoch; e++) {
 		for (int i = 0; i < 100; i++) {
 			loss = model.forward(x[i], t);
@@ -145,12 +146,42 @@ void trainFromDataSet() {
 			optimizer.step(model);
 			printf("loss = %lf\n", loss);
 		}
+		y = model.predict(x[0]);
+		cout << y[0] << "  " << y[1] << endl;
 	}
 	model.save("model.txt");
 	model.del();
+	dl.del();
 }
 
+void Fast() {
+	DataLoader dl("DataSet/", 100, 3, 160, 160);
+	dl.load();
+	double** x = dl.vecImg();
+	double t[2] = { 1,0 };
+
+	typedef FastSimpleNet<FastSigmoid, FastSoftmaxWithLoss> Net;
+	Net model(3 * 160 * 160, 320, 2);
+	FastAdam<Net> optimizer;
+
+	int epoch = 1;
+	int e = 0;
+	int i = 0;
+	for (e = 0; e < epoch; ++e) {
+		for (i = 0; i < 100; ++i) {
+			model.forward(x[i],t);
+			model.backward();
+			optimizer.step(&model);
+			cout << model.loss << endl;
+		}
+	}
+
+	model.del();
+	dl.del();
+}
+
+
 int main() {
-	trainFromDataSet();
+	Fast();
 	return 0;
 }

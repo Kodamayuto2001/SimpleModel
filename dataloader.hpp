@@ -95,6 +95,7 @@ public:
 		}
 		delete[] imgList;
 		delete[] Vimages;
+		cout << "³í‚É‰ð•ú‚µ‚Ü‚µ‚½iDataLoaderj" << endl;
 	}
 
 private:
