@@ -78,14 +78,10 @@ public:
 	}
 
 	double** vecImg() {
-		if (Vimages == NULL) {
-			load();
-			del(false);
-		}
 		return Vimages;
 	}
 
-	void del(bool delVimages = true) {
+	void del() {
 		int i, j, k;
 		for (i = 0; i < dataSize; i++) {
 			for (j = 0; j < height; j++) {
@@ -95,10 +91,10 @@ public:
 				delete[] imgList[i][j];
 			}
 			delete[] imgList[i];
-			if(delVimages != false){ delete[] Vimages[i]; }
+			delete[] Vimages[i];
 		}
 		delete[] imgList;
-		if(delVimages != false){ delete[] Vimages; }
+		delete[] Vimages;
 	}
 
 private:

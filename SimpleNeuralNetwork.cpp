@@ -121,12 +121,14 @@ void LoadDataSet() {
 	DataLoader dl("DataSet/", 100, 3, 160, 160);
 	double**** tmp = dl.load();
 	double** vectorImg = dl.vecImg();
+	cout << vectorImg[0][0] << endl;
 	cout << "‰æ‘œ‚ð“Ç‚Ýž‚ß‚Ü‚µ‚½" << endl;
 	dl.del();
 }
 
 void trainFromDataSet() {
 	DataLoader dl("DataSet/", 100, 3, 160, 160);
+	dl.load();
 	double** x = dl.vecImg();
 	double t[2] = { 1,0 };
 

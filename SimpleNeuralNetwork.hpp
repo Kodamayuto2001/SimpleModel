@@ -927,7 +927,7 @@ private:
 	double* y;
 };
 
-template<class ActFunc,class SoftmaxWithLoss>
+template<class ActFunc, class SoftmaxWithLoss>
 class FastSimpleNet {
 public:
 	class Forward {
@@ -950,7 +950,7 @@ public:
 
 	FastSimpleNet(
 		size_t&& _inputSize,
-		size_t&& _hiddenSize, 
+		size_t&& _hiddenSize,
 		size_t&& _outputSize) {
 
 		i = j = 0;
@@ -964,7 +964,7 @@ public:
 		fc1.bias = new double[m_size[1]];
 		fc1.node_out = new double[m_size[1]];
 		fc1.muls_two = new FastMul * [m_size[1]];
-		
+
 		fc2.weight = new double* [m_size[2]];
 		fc2.bias = new double[m_size[2]];
 		fc2.node_out = new double[m_size[2]];
@@ -972,7 +972,7 @@ public:
 
 		aFunc = new ActFunc[m_size[1]];
 
-		dfc2.dweight = new double*[m_size[2]];
+		dfc2.dweight = new double* [m_size[2]];
 		dfc2.dbias = new double[m_size[2]];
 		//// dfc2.dnode_out = new double[m_size[2]];
 
@@ -983,7 +983,7 @@ public:
 		random_device rd;
 		mt19937 gen(rd());
 		uniform_real_distribution<double> dist(-1, 1);
-	
+
 		for (i = 0; i < (int)m_size[1]; ++i) {
 			fc1.muls_two[i] = new FastMul[m_size[0]];
 			fc1.weight[i] = new double[m_size[0]];
@@ -997,7 +997,7 @@ public:
 				dfc1.dweight[i][j] = 0.0;
 			}
 		}
-			
+
 		for (i = 0; i < (int)m_size[2]; ++i) {
 			fc2.muls_two[i] = new FastMul[m_size[1]];
 			fc2.weight[i] = new double[m_size[1]];
@@ -1040,7 +1040,7 @@ public:
 
 		delete[] dfc2.dweight;
 		delete[] dfc2.dbias;
-		
+
 		delete[] dfc1.dweight;
 		delete[] dfc1.dbias;
 		delete[] dfc1.dnode_out;
