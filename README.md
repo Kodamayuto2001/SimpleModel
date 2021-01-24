@@ -36,3 +36,4 @@
 ### 開発環境
 - VisualStudio2019
 - C++17
+- OpenCV
