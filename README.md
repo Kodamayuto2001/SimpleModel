@@ -20,7 +20,7 @@
   - SGD               class
   - Momentum          class
   - AdaGrad           class
-  - RNSProp           class
+  - RMSProp           class
   - Adam              class
   - FastAdam          class
 
