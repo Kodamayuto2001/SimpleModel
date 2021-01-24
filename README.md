@@ -8,9 +8,13 @@
   - Sigmoid           class
   - Softmax           class
   - CrossEntropyError class
+  - FastReLU          class
+  - FastSigmoid       class
+  - FastSoftmaxWithLoss class
 
 ##### Model
   - SimpleNet         class
+  - FastSimpleNet     class
 
 ##### Optimizer
   - SGD               class
@@ -18,6 +22,7 @@
   - AdaGrad           class
   - RNSProp           class
   - Adam              class
+  - FastAdam          class
 
 ### dataset.hpp
   - DataSet           class
