@@ -175,13 +175,29 @@ void Fast() {
 			cout << model.loss << endl;
 		}
 	}
-
+	model.save("model.kodamayuto");
 	model.del();
 	dl.del();
 }
 
+void FastTest() {
+	typedef FastSimpleNet<FastSigmoid, FastSoftmaxWithLoss> Net;
+	Net model(3 * 160 * 160, 320, 2);
+
+	DataLoader dl("DataSet/", 100, 3, 160, 160);
+	dl.load();
+	double** x = dl.vecImg();
+
+	model.load("model.kodamayuto");
+
+	model.predict(x[54]);
+
+	cout << model.y[0]*100 << "%" << endl;
+
+	model.del();
+}
 
 int main() {
-	Fast();
+	FastTest();
 	return 0;
 }

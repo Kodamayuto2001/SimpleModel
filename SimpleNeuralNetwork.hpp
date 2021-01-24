@@ -1043,6 +1043,47 @@ public:
 		_dfc1();
 	}
 
+	void save(const char* fileName = "model.kodamayuto") {
+		ofstream ofs;
+		ofs.open(fileName, ios::out | ios::binary | ios::trunc);
+		if (!ofs) {
+			cout << "ファイルが開けませんでした。" << endl;
+		}
+		for (i = 0; i < hidden_size; ++i) {
+			ofs.write((char*)&fc1.bias[i], sizeof(double));
+			for (j = 0; j < input_size; ++j) {
+				ofs.write((char*)&fc1.weight[i][j], sizeof(double));
+			}
+		}
+		for (i = 0; i < output_size; ++i) {
+			ofs.write((char*)&fc2.bias[i], sizeof(double));
+			for (j = 0; j < hidden_size; ++j) {
+				ofs.write((char*)&fc2.weight[i][j], sizeof(double));
+			}
+		}
+		ofs.close();
+	}
+
+	void load(const char* fileName = "model.kodamayuto") {
+		ifstream ifs(fileName, ios::in | ios::binary);
+		if (!ifs) {
+			cout << "ファイルが開けませんでした。" << endl;
+		}
+		for (i = 0; i < hidden_size; ++i) {
+			ifs.read((char*)&fc1.bias[i], sizeof(double));
+			for (j = 0; j < input_size; ++j) {
+				ifs.read((char*)&fc1.weight[i][j], sizeof(double));
+			}
+		}
+		for (i = 0; i < output_size; ++i) {
+			ifs.read((char*)&fc2.bias[i], sizeof(double));
+			for (j = 0; j < hidden_size; ++j) {
+				ifs.read((char*)&fc2.weight[i][j], sizeof(double));
+			}
+		}
+		ifs.close();
+	}
+
 	void del() {
 		for (i = 0; i < (int)hidden_size; ++i) {
 			delete[] fc1.weight[i];
