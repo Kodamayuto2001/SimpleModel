@@ -658,20 +658,6 @@ private:
 	double* x;
 };
 
-/*
- *	FastSoftmaxWithLoss
- *	tmpのメモリ確保、解放について
- *	
- *	まず、__init__関数で変数tmpが動的にメモリを割り当てられる。
- *	つぎにSoftmaxForwardで、動的に割り当てたtmpの配列のそれぞれの要素に代入される。
- *	delete[] tmp;	・・・①
- *	CrossEntropyErrorForwardでtmpにtをシャローコピーする。
- *	このときシャローコピーされたtmpのアドレスはtなので、
- *	最初に動的にメモリ割り当てたのが解放されていない
- *	メモリリークが発生することになる。
- *
- *	そのため、①でメモリを解放する。
- */
 class FastSoftmaxWithLoss {
 public:
 	void __init__(size_t* _size) {
@@ -697,28 +683,32 @@ public:
 			y[i] = tmp[i] * a;
 		}
 		FastSoftmaxWithLoss::y = y;
-		delete[] tmp;
 	}
 
-	void CrossEntropyErrorForward(double* t, double* loss) {
-		tmp = t;
-		t = nullptr;
+	void CrossEntropyErrorForward(double* _t, double* loss) {
+		t = _t;
+		_t = nullptr;
 		b = 0.0;
 		for (i = 0; i < (int)(*size); ++i) {
 			a = log(y[i]);
-			b += a * tmp[i];
+			b += a * t[i];
 		}
 		*loss = b * (-1);
 	}
 
 	void backward(double* dx) {
 		for (i = 0; i < (int)(*size); ++i) {
-			dx[i] = y[i] - tmp[i];
+			dx[i] = y[i] - t[i];
 		}
+	}
+
+	void del() {
+		delete[] tmp;
 	}
 private:
 	size_t* size;
 	double* tmp;
+	double* t;
 	double a, b;
 	int i;
 	double* y;
@@ -907,6 +897,7 @@ public:
 		delete[] dfc1.dnode_out;
 
 		delete[] y;
+		swl.del();
 
 		cout << "正常に解放しました（FastSimpleNet）" << endl;
 	}
