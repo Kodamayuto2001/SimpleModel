@@ -612,7 +612,7 @@ public:
 		dx[1] = (*dout) * (*tmp[0]);
 	}
 private:
-	double* tmp[2];
+	double* tmp[2];	//	アドレスを格納する配列
 };
 
 class FastDiv {

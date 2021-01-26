@@ -165,11 +165,11 @@ void Fast() {
 	FastAdam<Net> optimizer;
 
 	int epoch = 1;
-	int e = 0;
+	int e = 1;
 	int i = 0;
 	for (e = 0; e < epoch; ++e) {
-		for (i = 0; i < 100; ++i) {
-			model.forward(x[i],t);
+		for (i = 0; i < 1; ++i) {
+			model.forward(x[i], t);
 			model.backward();
 			optimizer.step(&model);
 			cout << model.loss << endl;
@@ -192,12 +192,12 @@ void FastTest() {
 
 	model.predict(x[54]);
 
-	cout << model.y[0]*100 << "%" << endl;
+	cout << model.y[0] * 100 << "%" << endl;
 
 	model.del();
 }
 
 int main() {
-	FastTest();
+	Fast();
 	return 0;
 }
