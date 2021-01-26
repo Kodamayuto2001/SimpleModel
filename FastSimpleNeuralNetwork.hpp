@@ -49,14 +49,21 @@ public:
 		int i, j, k;
 		for (i = 0; i < 2; ++i) {
 			fc[i].weight = new double* [size[i + 1]];
+			fc[i].bias = new double[size[i + 1]];
+			fc[i].node = new double[size[i + 1]];
+
 			dfc[i].weight = new double* [size[i + 1]];
+			dfc[i].bias = new double[size[i + 1]];
 			for (j = 0; j < size[i + 1]; ++j) {
 				fc[i].weight[j] = new double[size[i]];
 				dfc[i].weight[j] = new double[size[i]];
+
+				fc[i].bias[j] = 0.0;
+				fc[i].node[j] = 0.0;
+				dfc[i].bias[j] = 0.0;
 				for (k = 0; k < size[i]; ++k) {
 					fc[i].weight[j][k] = dist(gen);
 					dfc[i].weight[j][k] = 0.0;
-					cout << fc[i].weight[j][k] << endl;
 				}
 			}
 		}
@@ -71,7 +78,10 @@ public:
 				delete[] dfc[i].weight[j];
 			}
 			delete[] fc[i].weight;
+			delete[] fc[i].bias;
+			delete[] fc[i].node;
 			delete[] dfc[i].weight;
+			delete[] dfc[i].bias;
 		}
 	}
 private:
