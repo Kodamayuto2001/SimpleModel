@@ -1107,7 +1107,8 @@ public:
 
 		delete[] dfc2.dweight;
 		delete[] dfc2.dbias;
-		delete[] dfc2.dnode_out;
+		//	dfc2.dbiasにdfc2.dnode_outのアドレスを格納したので、dfc2.dnode_outをdelete[]できない
+		//	delete[] dfc2.dnode_out;
 
 		delete[] dfc1.dweight;
 		delete[] dfc1.dbias;
