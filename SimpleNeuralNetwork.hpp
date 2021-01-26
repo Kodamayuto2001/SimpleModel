@@ -921,9 +921,9 @@ public:
 		for (i = 0; i < (int)(*size); ++i) {
 			dx[i] = y[i] - tmp[i];
 		}
-		delete[] tmp;
+		// delete[] tmp;
 	}
-	
+
 private:
 	size_t* size;
 	double* tmp;
@@ -1108,7 +1108,7 @@ public:
 		delete[] dfc2.dweight;
 		delete[] dfc2.dbias;
 		delete[] dfc2.dnode_out;
-		
+
 		delete[] dfc1.dweight;
 		delete[] dfc1.dbias;
 		delete[] dfc1.dnode_out;
@@ -1166,7 +1166,7 @@ private:
 			aFunc[i].backward(&dfc1.dnode_out[i], &a);
 			dfc1.dbias[i] = a;
 			for (j = 0; j < input_size; ++j) {
-				fc1.muls_two[i][j].backward(&a,dx_dweight);
+				fc1.muls_two[i][j].backward(&a, dx_dweight);
 				dfc1.dweight[i][j] = dx_dweight[1];
 			}
 		}
