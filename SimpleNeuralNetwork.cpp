@@ -1,6 +1,7 @@
 #include "SimpleNeuralNetwork.hpp"
 #include "dataset.hpp"
 #include "dataloader.hpp"
+#include "FastSimpleNeuralNetwork.hpp"
 
 void trainSGD() {
 	typedef SimpleNet<ReLU, Softmax, CrossEntropyError> Net;
@@ -197,7 +198,13 @@ void FastTest() {
 	model.del();
 }
 
+void Fast2__test() {
+	FastModel<FastSigmoid, FastSoftmaxWithLoss> model(2,3,2);
+
+	model.del();
+}
+
 int main() {
-	Fast();
+	Fast2__test();
 	return 0;
 }
