@@ -1,8 +1,8 @@
 # SimpleModel
 
-## SimpleNeuralNetwork.hpp処理速度を改善しています。
+## 処理速度を改善しています。
 
-### SimpleNeuralNetwork.hpp
+### SimpleNeuralNetwork.hpp FastSimpleNeuralNetwork.hpp
 ##### Activation Func
   - ReLU              class
   - Sigmoid           class
@@ -21,7 +21,6 @@
   - Momentum          class
   - AdaGrad           class
   - RMSProp           class
-  - Adam              class
   - FastAdam          class
 
 ### dataset.hpp
