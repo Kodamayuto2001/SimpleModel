@@ -21,6 +21,7 @@
   - Momentum          class
   - AdaGrad           class
   - RMSProp           class
+  - Adam              class
   - FastAdam          class
 
 ### dataset.hpp
