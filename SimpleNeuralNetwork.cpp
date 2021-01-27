@@ -31,7 +31,7 @@ void train_0() {
 
 void train_1() {
 	int dataMax = 100;
-	int channel = 3;
+	int channel = 1;
 	int imgHeight = 160;
 	int imgWidth = 160;
 	double lr = 0.00001;
@@ -53,7 +53,7 @@ void train_1() {
 	);
 	FastAdam<Net> optimizer(lr,beta1,beta2);
 
-	for (int e = 0; e < 100; ++e) {
+	for (int e = 0; e < 1; ++e) {
 		for (int i = 0; i < 80; ++i) {
 			model.forward(x[i], t);
 			model.backward();
