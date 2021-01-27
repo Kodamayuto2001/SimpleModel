@@ -149,6 +149,7 @@ public:
 			delete[] dbias[i];
 		}
 		delete[] actf;
+		swl.del();
 		cout << "³í‚É‰ð•ú‚µ‚Ü‚µ‚½iFastModelj" << endl;
 	}
 
