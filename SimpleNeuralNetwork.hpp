@@ -630,332 +630,250 @@ private:
 	double* y;
 };
 
-class FastSigmoid {
-public:
-	void forward(double* x, double* y) {
-		*y = 1 / (1.0 + exp(-(*x)));
-		FastSigmoid::y = y;
-	}
-	void backward(double* dout, double* dx) {
-		*dx = (*dout) * (1.0 - (*y)) * (*y);
-	}
-private:
-	double* y;
-};
 
-class FastReLU {
-public:
-	void forward(double* _x, double* y) {
-		FastReLU::x = _x;
-		if (*x > 0.0) { *y = *x; }
-		else { *y = 0.0; }
-	}
-	void backward(double* dout, double* dx) {
-		if (*x > 0.0) { *dx = *dout; }
-		else { *dx = 0.0; }
-	}
-private:
-	double* x;
-};
 
-class FastSoftmaxWithLoss {
-public:
-	void __init__(size_t* _size) {
-		size = _size;
-		tmp = new double[(*size)];
-		a = b = 0.0;
-		i = 0;
-	}
-	void SoftmaxForward(double* x, double* y) {
-		a = x[0];
-		for (i = 0; i < (int)(*size); ++i) {
-			if (a < x[i]) {
-				a = x[i];
-			}
-		}
-		b = 0.0;
-		for (i = 0; i < (int)(*size); ++i) {
-			tmp[i] = exp(x[i] - a);
-			b += tmp[i];
-		}
-		a = 1 / b;
-		for (i = 0; i < (int)(*size); ++i) {
-			y[i] = tmp[i] * a;
-		}
-		FastSoftmaxWithLoss::y = y;
-	}
-
-	void CrossEntropyErrorForward(double* _t, double* loss) {
-		t = _t;
-		_t = nullptr;
-		b = 0.0;
-		for (i = 0; i < (int)(*size); ++i) {
-			a = log(y[i]);
-			b += a * t[i];
-		}
-		*loss = b * (-1);
-	}
-
-	void backward(double* dx) {
-		for (i = 0; i < (int)(*size); ++i) {
-			dx[i] = y[i] - t[i];
-		}
-	}
-
-	void del() {
-		delete[] tmp;
-	}
-private:
-	size_t* size;
-	double* tmp;
-	double* t;
-	double a, b;
-	int i;
-	double* y;
-};
-
-template<class ActFunc, class SoftmaxWithLoss>
-class FastSimpleNet {
-public:
-	class Forward {
-	public:
-		double** weight;
-		double* bias;
-		double* node_out;
-		FastMul** muls_two;
-	};
-	class Backward {
-	public:
-		double** dweight;
-		double* dbias;
-		double* dnode_out;
-	};
-
-	size_t input_size;
-	size_t hidden_size;
-	size_t output_size;
-	Forward fc1, fc2;
-	Backward dfc1, dfc2;
-	double* y;
-	double loss;
-
-	FastSimpleNet(
-		size_t&& _inputSize,
-		size_t&& _hiddenSize,
-		size_t&& _outputSize) {
-
-		i = j = 0;
-		a = b = 0.0;
-
-		input_size = _inputSize;
-		hidden_size = _hiddenSize;
-		output_size = _outputSize;
-
-		fc1.weight = new double* [hidden_size];
-		fc1.bias = new double[hidden_size];
-		fc1.node_out = new double[hidden_size];
-		fc1.muls_two = new FastMul * [hidden_size];
-
-		fc2.weight = new double* [output_size];
-		fc2.bias = new double[output_size];
-		fc2.node_out = new double[output_size];
-		fc2.muls_two = new FastMul * [output_size];
-
-		aFunc = new ActFunc[hidden_size];
-
-		dfc2.dweight = new double* [output_size];
-		dfc2.dbias = new double[output_size];
-		dfc2.dnode_out = new double[output_size];
-
-		dfc1.dweight = new double* [hidden_size];
-		dfc1.dbias = new double[hidden_size];
-		dfc1.dnode_out = new double[hidden_size];
-
-		swl.__init__(&output_size);
-		y = new double[output_size];
-
-		random_device rd;
-		mt19937 gen(rd());
-		uniform_real_distribution<double> dist(-1, 1);
-
-		for (i = 0; i < (int)hidden_size; ++i) {
-			fc1.muls_two[i] = new FastMul[input_size];
-			fc1.weight[i] = new double[input_size];
-			fc1.bias[i] = 0.0;
-			fc1.node_out[i] = 0.0;
-			dfc1.dweight[i] = new double[input_size];
-			dfc1.dbias[i] = 0.0;
-			dfc1.dnode_out[i] = 0.0;
-			for (j = 0; j < (int)input_size; ++j) {
-				fc1.weight[i][j] = dist(gen);
-				dfc1.dweight[i][j] = 0.0;
-			}
-		}
-
-		for (i = 0; i < (int)output_size; ++i) {
-			fc2.muls_two[i] = new FastMul[hidden_size];
-			fc2.weight[i] = new double[hidden_size];
-			fc2.bias[i] = 0.0;
-			fc2.node_out[i] = 0.0;
-			dfc2.dweight[i] = new double[hidden_size];
-			dfc2.dbias[i] = 0.0;
-			dfc2.dnode_out[i] = 0.0;
-			y[i] = 0.0;
-			for (j = 0; j < (int)hidden_size; ++j) {
-				fc2.weight[i][j] = dist(gen);
-				dfc2.dweight[i][j] = 0.0;
-			}
-		}
-	}
-
-	void predict(double* x) {
-		_fc1(x);
-		_fc2();
-		swl.SoftmaxForward(fc2.node_out, y);
-	}
-
-	void forward(double* x, double* t) {
-		predict(x);
-		swl.CrossEntropyErrorForward(t, &loss);
-	}
-
-	void backward() {
-		swl.backward(dfc2.dnode_out);
-		_dfc2(dfc2.dnode_out);
-		_dfc1();
-	}
-
-	void save(const char* fileName = "model.kodamayuto") {
-		ofstream ofs;
-		ofs.open(fileName, ios::out | ios::binary | ios::trunc);
-		if (!ofs) {
-			cout << "ファイルが開けませんでした。" << endl;
-		}
-		for (i = 0; i < hidden_size; ++i) {
-			ofs.write((char*)&fc1.bias[i], sizeof(double));
-			for (j = 0; j < input_size; ++j) {
-				ofs.write((char*)&fc1.weight[i][j], sizeof(double));
-			}
-		}
-		for (i = 0; i < output_size; ++i) {
-			ofs.write((char*)&fc2.bias[i], sizeof(double));
-			for (j = 0; j < hidden_size; ++j) {
-				ofs.write((char*)&fc2.weight[i][j], sizeof(double));
-			}
-		}
-		ofs.close();
-	}
-
-	void load(const char* fileName = "model.kodamayuto") {
-		ifstream ifs(fileName, ios::in | ios::binary);
-		if (!ifs) {
-			cout << "ファイルが開けませんでした。" << endl;
-		}
-		for (i = 0; i < hidden_size; ++i) {
-			ifs.read((char*)&fc1.bias[i], sizeof(double));
-			for (j = 0; j < input_size; ++j) {
-				ifs.read((char*)&fc1.weight[i][j], sizeof(double));
-			}
-		}
-		for (i = 0; i < output_size; ++i) {
-			ifs.read((char*)&fc2.bias[i], sizeof(double));
-			for (j = 0; j < hidden_size; ++j) {
-				ifs.read((char*)&fc2.weight[i][j], sizeof(double));
-			}
-		}
-		ifs.close();
-	}
-
-	void del() {
-		for (i = 0; i < (int)hidden_size; ++i) {
-			delete[] fc1.weight[i];
-			delete[] fc1.muls_two[i];
-			delete[] dfc1.dweight[i];
-		}
-		for (i = 0; i < (int)output_size; ++i) {
-			delete[] fc2.weight[i];
-			delete[] fc2.muls_two[i];
-			delete[] dfc2.dweight[i];
-		}
-		delete[] fc1.weight;
-		delete[] fc1.muls_two;
-		delete[] fc1.node_out;
-		delete[] fc1.bias;
-
-		delete[] fc2.weight;
-		delete[] fc2.muls_two;
-		delete[] fc2.bias;
-		delete[] fc2.node_out;
-
-		delete[] dfc2.dweight;
-		delete[] dfc2.dbias;
-		//	dfc2.dbiasにdfc2.dnode_outのアドレスを格納したので、dfc2.dnode_outをdelete[]できない
-		//	delete[] dfc2.dnode_out;
-
-		delete[] dfc1.dweight;
-		delete[] dfc1.dbias;
-		delete[] dfc1.dnode_out;
-
-		delete[] y;
-		swl.del();
-
-		cout << "正常に解放しました（FastSimpleNet）" << endl;
-	}
-private:
-	ActFunc* aFunc;
-	SoftmaxWithLoss swl;
-	int i, j;
-	double a, b;
-	double dx_dweight[2];
-
-	void _fc1(double* x) {
-		for (i = 0; i < hidden_size; ++i) {
-			b = 0.0;
-			for (j = 0; j < input_size; ++j) {
-				fc1.muls_two[i][j].forward(&(x[j]), &(fc1.weight[i][j]), &a);
-				b += a;
-			}
-			a = b + fc1.bias[i];
-			aFunc[i].forward(&a, &fc1.node_out[i]);
-			dfc1.dnode_out[i] = 0.0;
-		}
-	}
-
-	void _fc2(void) {
-		for (i = 0; i < output_size; ++i) {
-			b = 0.0;
-			for (j = 0; j < hidden_size; ++j) {
-				fc2.muls_two[i][j].forward(
-					&fc1.node_out[j], &fc2.weight[i][j], &a);
-				b += a;
-			}
-			fc2.node_out[i] = b + fc2.bias[i];
-			dfc2.dnode_out[i] = 0.0;
-		}
-	}
-
-	void _dfc2(double* dout) {
-		dfc2.dbias = dout;
-		for (i = 0; i < output_size; ++i) {
-			for (j = 0; j < hidden_size; ++j) {
-				fc2.muls_two[i][j].backward(&dfc2.dbias[i], dx_dweight);
-				dfc1.dnode_out[j] += dx_dweight[0];
-				dfc2.dweight[i][j] = dx_dweight[1];
-			}
-		}
-	}
-
-	void _dfc1(void) {
-		for (i = 0; i < hidden_size; ++i) {
-			aFunc[i].backward(&dfc1.dnode_out[i], &a);
-			dfc1.dbias[i] = a;
-			for (j = 0; j < input_size; ++j) {
-				fc1.muls_two[i][j].backward(&a, dx_dweight);
-				dfc1.dweight[i][j] = dx_dweight[1];
-			}
-		}
-	}
-};
+//template<class ActFunc, class SoftmaxWithLoss>
+//class FastSimpleNet {
+//public:
+//	class Forward {
+//	public:
+//		double** weight;
+//		double* bias;
+//		double* node_out;
+//		FastMul** muls_two;
+//	};
+//	class Backward {
+//	public:
+//		double** dweight;
+//		double* dbias;
+//		double* dnode_out;
+//	};
+//
+//	size_t input_size;
+//	size_t hidden_size;
+//	size_t output_size;
+//	Forward fc1, fc2;
+//	Backward dfc1, dfc2;
+//	double* y;
+//	double loss;
+//
+//	FastSimpleNet(
+//		size_t&& _inputSize,
+//		size_t&& _hiddenSize,
+//		size_t&& _outputSize) {
+//
+//		i = j = 0;
+//		a = b = 0.0;
+//
+//		input_size = _inputSize;
+//		hidden_size = _hiddenSize;
+//		output_size = _outputSize;
+//
+//		fc1.weight = new double* [hidden_size];
+//		fc1.bias = new double[hidden_size];
+//		fc1.node_out = new double[hidden_size];
+//		fc1.muls_two = new FastMul * [hidden_size];
+//
+//		fc2.weight = new double* [output_size];
+//		fc2.bias = new double[output_size];
+//		fc2.node_out = new double[output_size];
+//		fc2.muls_two = new FastMul * [output_size];
+//
+//		aFunc = new ActFunc[hidden_size];
+//
+//		dfc2.dweight = new double* [output_size];
+//		dfc2.dbias = new double[output_size];
+//		dfc2.dnode_out = new double[output_size];
+//
+//		dfc1.dweight = new double* [hidden_size];
+//		dfc1.dbias = new double[hidden_size];
+//		dfc1.dnode_out = new double[hidden_size];
+//
+//		swl.__init__(&output_size);
+//		y = new double[output_size];
+//
+//		random_device rd;
+//		mt19937 gen(rd());
+//		uniform_real_distribution<double> dist(-1, 1);
+//
+//		for (i = 0; i < (int)hidden_size; ++i) {
+//			fc1.muls_two[i] = new FastMul[input_size];
+//			fc1.weight[i] = new double[input_size];
+//			fc1.bias[i] = 0.0;
+//			fc1.node_out[i] = 0.0;
+//			dfc1.dweight[i] = new double[input_size];
+//			dfc1.dbias[i] = 0.0;
+//			dfc1.dnode_out[i] = 0.0;
+//			for (j = 0; j < (int)input_size; ++j) {
+//				fc1.weight[i][j] = dist(gen);
+//				dfc1.dweight[i][j] = 0.0;
+//			}
+//		}
+//
+//		for (i = 0; i < (int)output_size; ++i) {
+//			fc2.muls_two[i] = new FastMul[hidden_size];
+//			fc2.weight[i] = new double[hidden_size];
+//			fc2.bias[i] = 0.0;
+//			fc2.node_out[i] = 0.0;
+//			dfc2.dweight[i] = new double[hidden_size];
+//			dfc2.dbias[i] = 0.0;
+//			dfc2.dnode_out[i] = 0.0;
+//			y[i] = 0.0;
+//			for (j = 0; j < (int)hidden_size; ++j) {
+//				fc2.weight[i][j] = dist(gen);
+//				dfc2.dweight[i][j] = 0.0;
+//			}
+//		}
+//	}
+//
+//	void predict(double* x) {
+//		_fc1(x);
+//		_fc2();
+//		swl.SoftmaxForward(fc2.node_out, y);
+//	}
+//
+//	void forward(double* x, double* t) {
+//		predict(x);
+//		swl.CrossEntropyErrorForward(t, &loss);
+//	}
+//
+//	void backward() {
+//		swl.backward(dfc2.dnode_out);
+//		_dfc2(dfc2.dnode_out);
+//		_dfc1();
+//	}
+//
+//	void save(const char* fileName = "model.kodamayuto") {
+//		ofstream ofs;
+//		ofs.open(fileName, ios::out | ios::binary | ios::trunc);
+//		if (!ofs) {
+//			cout << "ファイルが開けませんでした。" << endl;
+//		}
+//		for (i = 0; i < hidden_size; ++i) {
+//			ofs.write((char*)&fc1.bias[i], sizeof(double));
+//			for (j = 0; j < input_size; ++j) {
+//				ofs.write((char*)&fc1.weight[i][j], sizeof(double));
+//			}
+//		}
+//		for (i = 0; i < output_size; ++i) {
+//			ofs.write((char*)&fc2.bias[i], sizeof(double));
+//			for (j = 0; j < hidden_size; ++j) {
+//				ofs.write((char*)&fc2.weight[i][j], sizeof(double));
+//			}
+//		}
+//		ofs.close();
+//	}
+//
+//	void load(const char* fileName = "model.kodamayuto") {
+//		ifstream ifs(fileName, ios::in | ios::binary);
+//		if (!ifs) {
+//			cout << "ファイルが開けませんでした。" << endl;
+//		}
+//		for (i = 0; i < hidden_size; ++i) {
+//			ifs.read((char*)&fc1.bias[i], sizeof(double));
+//			for (j = 0; j < input_size; ++j) {
+//				ifs.read((char*)&fc1.weight[i][j], sizeof(double));
+//			}
+//		}
+//		for (i = 0; i < output_size; ++i) {
+//			ifs.read((char*)&fc2.bias[i], sizeof(double));
+//			for (j = 0; j < hidden_size; ++j) {
+//				ifs.read((char*)&fc2.weight[i][j], sizeof(double));
+//			}
+//		}
+//		ifs.close();
+//	}
+//
+//	void del() {
+//		for (i = 0; i < (int)hidden_size; ++i) {
+//			delete[] fc1.weight[i];
+//			delete[] fc1.muls_two[i];
+//			delete[] dfc1.dweight[i];
+//		}
+//		for (i = 0; i < (int)output_size; ++i) {
+//			delete[] fc2.weight[i];
+//			delete[] fc2.muls_two[i];
+//			delete[] dfc2.dweight[i];
+//		}
+//		delete[] fc1.weight;
+//		delete[] fc1.muls_two;
+//		delete[] fc1.node_out;
+//		delete[] fc1.bias;
+//
+//		delete[] fc2.weight;
+//		delete[] fc2.muls_two;
+//		delete[] fc2.bias;
+//		delete[] fc2.node_out;
+//
+//		delete[] dfc2.dweight;
+//		delete[] dfc2.dbias;
+//		//	dfc2.dbiasにdfc2.dnode_outのアドレスを格納したので、dfc2.dnode_outをdelete[]できない
+//		//	delete[] dfc2.dnode_out;
+//
+//		delete[] dfc1.dweight;
+//		delete[] dfc1.dbias;
+//		delete[] dfc1.dnode_out;
+//
+//		delete[] y;
+//		swl.del();
+//
+//		cout << "正常に解放しました（FastSimpleNet）" << endl;
+//	}
+//private:
+//	ActFunc* aFunc;
+//	SoftmaxWithLoss swl;
+//	int i, j;
+//	double a, b;
+//	double dx_dweight[2];
+//
+//	void _fc1(double* x) {
+//		for (i = 0; i < hidden_size; ++i) {
+//			b = 0.0;
+//			for (j = 0; j < input_size; ++j) {
+//				fc1.muls_two[i][j].forward(&(x[j]), &(fc1.weight[i][j]), &a);
+//				b += a;
+//			}
+//			a = b + fc1.bias[i];
+//			aFunc[i].forward(&a, &fc1.node_out[i]);
+//			dfc1.dnode_out[i] = 0.0;
+//		}
+//	}
+//
+//	void _fc2(void) {
+//		for (i = 0; i < output_size; ++i) {
+//			b = 0.0;
+//			for (j = 0; j < hidden_size; ++j) {
+//				fc2.muls_two[i][j].forward(
+//					&fc1.node_out[j], &fc2.weight[i][j], &a);
+//				b += a;
+//			}
+//			fc2.node_out[i] = b + fc2.bias[i];
+//			dfc2.dnode_out[i] = 0.0;
+//		}
+//	}
+//
+//	void _dfc2(double* dout) {
+//		dfc2.dbias = dout;
+//		for (i = 0; i < output_size; ++i) {
+//			for (j = 0; j < hidden_size; ++j) {
+//				fc2.muls_two[i][j].backward(&dfc2.dbias[i], dx_dweight);
+//				dfc1.dnode_out[j] += dx_dweight[0];
+//				dfc2.dweight[i][j] = dx_dweight[1];
+//			}
+//		}
+//	}
+//
+//	void _dfc1(void) {
+//		for (i = 0; i < hidden_size; ++i) {
+//			aFunc[i].backward(&dfc1.dnode_out[i], &a);
+//			dfc1.dbias[i] = a;
+//			for (j = 0; j < input_size; ++j) {
+//				fc1.muls_two[i][j].backward(&a, dx_dweight);
+//				dfc1.dweight[i][j] = dx_dweight[1];
+//			}
+//		}
+//	}
+//};
 
 template<class Net>
 class SGD {
@@ -1350,113 +1268,113 @@ private:
 	double lr_t;
 };
 
-template<class Net>
-class FastAdam {
-public:
-	FastAdam(double lr = 0.001, double beta1 = 0.9, double beta2 = 0.999) {
-		FastAdam::lr = lr;
-		FastAdam::beta1 = beta1;
-		FastAdam::beta2 = beta2;
-		lr_t = 0.0;
-		i = j = 0;
-		isFirst = 0;
-	}
-
-	void step(Net* model) {
-		if (isFirst == 0) {
-			isFirst = 1;
-			input_size = model->input_size;
-			hidden_size = model->hidden_size;
-			output_size = model->output_size;
-			m_w1 = new double* [hidden_size];
-			m_w2 = new double* [output_size];
-			m_b1 = new double[hidden_size];
-			m_b2 = new double[output_size];
-			v_w1 = new double* [hidden_size];
-			v_w2 = new double* [output_size];
-			v_b1 = new double[hidden_size];
-			v_b2 = new double[output_size];
-			for (i = 0; i < hidden_size; ++i) {
-				m_w1[i] = new double[input_size];
-				m_b1[i] = 0.0;
-				v_w1[i] = new double[input_size];
-				v_b1[i] = 0.0;
-				for (j = 0; j < input_size; ++j) {
-					m_w1[i][j] = 0.0;
-					v_w1[i][j] = 0.0;
-				}
-			}
-			for (i = 0; i < output_size; ++i) {
-				m_w2[i] = new double[hidden_size];
-				m_b2[i] = 0.0;
-				v_w2[i] = new double[hidden_size];
-				v_b2[i] = 0.0;
-				for (j = 0; j < hidden_size; ++j) {
-					m_w2[i][j] = 0.0;
-					v_w2[i][j] = 0.0;
-				}
-			}
-		}
-		iter += 1.0;
-		lr_t = lr * sqrt(1.0 - pow(beta2, iter)) / (1.0 - pow(beta1, iter));
-		for (i = 0; i < hidden_size; ++i) {
-			m_b1[i] += (1 - beta1) * (model->dfc1.dbias[i] - m_b1[i]);
-			v_b1[i] += (1 - beta2) * (model->dfc1.dbias[i] * model->dfc1.dbias[i] - v_b1[i]);
-			model->fc1.bias[i] -= lr_t * m_b1[i] / (sqrt(v_b1[i]) + Delta);
-			for (j = 0; j < input_size; ++j) {
-				m_w1[i][j] += (1 - beta1) * (model->dfc1.dweight[i][j] - m_w1[i][j]);
-				v_w1[i][j] += (1 - beta2) * (model->dfc1.dweight[i][j] * model->dfc1.dweight[i][j] - v_w1[i][j]);
-				model->fc1.weight[i][j] -= lr_t * m_w1[i][j] / (sqrt(v_w1[i][j]) + Delta);
-			}
-		}
-		for (i = 0; i < output_size; ++i) {
-			m_b2[i] += (1 - beta1) * (model->dfc2.dbias[i] - m_b2[i]);
-			v_b2[i] += (1 - beta2) * (model->dfc2.dbias[i] * model->dfc2.dbias[i] - v_b2[i]);
-			model->fc2.bias[i] -= lr_t * m_b2[i] / (sqrt(v_b2[i]) + Delta);
-			for (j = 0; j < hidden_size; ++j) {
-				m_w2[i][j] += (1 - beta1) * (model->dfc2.dweight[i][j] - m_w2[i][j]);
-				v_w2[i][j] += (1 - beta2) * (model->dfc2.dweight[i][j] * model->dfc2.dweight[i][j] - v_w2[i][j]);
-				model->fc2.weight[i][j] -= lr_t * m_w2[i][j] / (sqrt(v_w2[i][j]) + Delta);
-			}
-		}
-	}
-	~FastAdam() {
-		for (i = 0; i < hidden_size; ++i) {
-			delete[] m_w1[i];
-			delete[] v_w1[i];
-		}
-		for (i = 0; i < output_size; ++i) {
-			delete[] m_w2[i];
-			delete[] v_w2[i];
-		}
-		delete[] m_w1;
-		delete[] v_w1;
-		delete[] m_w2;
-		delete[] v_w2;
-		delete[] m_b1;
-		delete[] m_b2;
-		delete[] v_b1;
-		delete[] v_b2;
-		cout << "正常に解放しました（Adam）" << endl;
-	}
-private:
-	int i, j, isFirst;
-	double lr;
-	double beta1;
-	double beta2;
-	double** m_w1;
-	double** m_w2;
-	double* m_b1;
-	double* m_b2;
-	double** v_w1;
-	double** v_w2;
-	double* v_b1;
-	double* v_b2;
-	size_t input_size;
-	size_t hidden_size;
-	size_t output_size;
-	double iter = 0.0;
-	double lr_t;
-};
+//template<class Net>
+//class FastAdam {
+//public:
+//	FastAdam(double lr = 0.001, double beta1 = 0.9, double beta2 = 0.999) {
+//		FastAdam::lr = lr;
+//		FastAdam::beta1 = beta1;
+//		FastAdam::beta2 = beta2;
+//		lr_t = 0.0;
+//		i = j = 0;
+//		isFirst = 0;
+//	}
+//
+//	void step(Net* model) {
+//		if (isFirst == 0) {
+//			isFirst = 1;
+//			input_size = model->input_size;
+//			hidden_size = model->hidden_size;
+//			output_size = model->output_size;
+//			m_w1 = new double* [hidden_size];
+//			m_w2 = new double* [output_size];
+//			m_b1 = new double[hidden_size];
+//			m_b2 = new double[output_size];
+//			v_w1 = new double* [hidden_size];
+//			v_w2 = new double* [output_size];
+//			v_b1 = new double[hidden_size];
+//			v_b2 = new double[output_size];
+//			for (i = 0; i < hidden_size; ++i) {
+//				m_w1[i] = new double[input_size];
+//				m_b1[i] = 0.0;
+//				v_w1[i] = new double[input_size];
+//				v_b1[i] = 0.0;
+//				for (j = 0; j < input_size; ++j) {
+//					m_w1[i][j] = 0.0;
+//					v_w1[i][j] = 0.0;
+//				}
+//			}
+//			for (i = 0; i < output_size; ++i) {
+//				m_w2[i] = new double[hidden_size];
+//				m_b2[i] = 0.0;
+//				v_w2[i] = new double[hidden_size];
+//				v_b2[i] = 0.0;
+//				for (j = 0; j < hidden_size; ++j) {
+//					m_w2[i][j] = 0.0;
+//					v_w2[i][j] = 0.0;
+//				}
+//			}
+//		}
+//		iter += 1.0;
+//		lr_t = lr * sqrt(1.0 - pow(beta2, iter)) / (1.0 - pow(beta1, iter));
+//		for (i = 0; i < hidden_size; ++i) {
+//			m_b1[i] += (1 - beta1) * (model->dfc1.dbias[i] - m_b1[i]);
+//			v_b1[i] += (1 - beta2) * (model->dfc1.dbias[i] * model->dfc1.dbias[i] - v_b1[i]);
+//			model->fc1.bias[i] -= lr_t * m_b1[i] / (sqrt(v_b1[i]) + Delta);
+//			for (j = 0; j < input_size; ++j) {
+//				m_w1[i][j] += (1 - beta1) * (model->dfc1.dweight[i][j] - m_w1[i][j]);
+//				v_w1[i][j] += (1 - beta2) * (model->dfc1.dweight[i][j] * model->dfc1.dweight[i][j] - v_w1[i][j]);
+//				model->fc1.weight[i][j] -= lr_t * m_w1[i][j] / (sqrt(v_w1[i][j]) + Delta);
+//			}
+//		}
+//		for (i = 0; i < output_size; ++i) {
+//			m_b2[i] += (1 - beta1) * (model->dfc2.dbias[i] - m_b2[i]);
+//			v_b2[i] += (1 - beta2) * (model->dfc2.dbias[i] * model->dfc2.dbias[i] - v_b2[i]);
+//			model->fc2.bias[i] -= lr_t * m_b2[i] / (sqrt(v_b2[i]) + Delta);
+//			for (j = 0; j < hidden_size; ++j) {
+//				m_w2[i][j] += (1 - beta1) * (model->dfc2.dweight[i][j] - m_w2[i][j]);
+//				v_w2[i][j] += (1 - beta2) * (model->dfc2.dweight[i][j] * model->dfc2.dweight[i][j] - v_w2[i][j]);
+//				model->fc2.weight[i][j] -= lr_t * m_w2[i][j] / (sqrt(v_w2[i][j]) + Delta);
+//			}
+//		}
+//	}
+//	~FastAdam() {
+//		for (i = 0; i < hidden_size; ++i) {
+//			delete[] m_w1[i];
+//			delete[] v_w1[i];
+//		}
+//		for (i = 0; i < output_size; ++i) {
+//			delete[] m_w2[i];
+//			delete[] v_w2[i];
+//		}
+//		delete[] m_w1;
+//		delete[] v_w1;
+//		delete[] m_w2;
+//		delete[] v_w2;
+//		delete[] m_b1;
+//		delete[] m_b2;
+//		delete[] v_b1;
+//		delete[] v_b2;
+//		cout << "正常に解放しました（Adam）" << endl;
+//	}
+//private:
+//	int i, j, isFirst;
+//	double lr;
+//	double beta1;
+//	double beta2;
+//	double** m_w1;
+//	double** m_w2;
+//	double* m_b1;
+//	double* m_b2;
+//	double** v_w1;
+//	double** v_w2;
+//	double* v_b1;
+//	double* v_b2;
+//	size_t input_size;
+//	size_t hidden_size;
+//	size_t output_size;
+//	double iter = 0.0;
+//	double lr_t;
+//};
 
 #endif // !_SimpleNeuralNetwork_H_
