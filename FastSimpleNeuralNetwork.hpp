@@ -365,10 +365,55 @@ public:
 	FastMomentum(double _lr = 0.01, double _momentum = 0.9) {
 		lr = _lr;
 		momentum = _momentum;
+		i = j = k = isSecond = 0;
+	}
+	void step(Net* model) {
+		if (isSecond == 0) {
+			isSecond = 1;
+			size[0] = model->size[0];
+			size[1] = model->size[1];
+			size[2] = model->size[2];
+			for (i = 0; i < 2; ++i) {
+				vW[i] = new double* [size[i + 1]];
+				vb[i] = new double[size[i + 1]];
+				for (j = 0; j < model->size[i + 1]; ++j) {
+					vW[i][j] = new double[size[i]];
+					vb[i][j] = 0.0;
+					for (k = 0; k < model->size[i]; ++k) {
+						vW[i][j][k] = 0.0;
+					}
+				}
+			}
+		}
+		for (i = 0; i < 2; ++i) {
+			for (j = 0; j < size[i + 1]; ++j) {
+				vb[i][j] = momentum * vb[i][j] - lr * model->dbias[i][j];
+				model->bias[i][j] += vb[i][j];
+				for (k = 0; k < size[i]; ++k) {
+					vW[i][j][k] = momentum * vW[i][j][k] - lr * model->dweight[i][j][k];
+					model->weight[i][j][k] += vW[i][j][k];
+				}
+			}
+		}
+	}
+	~FastMomentum() {
+		for (i = 0; i < 2; ++i) {
+			for (j = 0; j < size[i + 1]; ++j) {
+				delete[] vW[i][j];
+			}
+			delete[] vW[i];
+			delete[] vb[i];
+		}
+		cout << "³í‚É‰ð•ú‚µ‚Ü‚µ‚½iFastMomentumj" << endl;
 	}
 private:
 	double lr;
 	double momentum;
+	double** vW[2];
+	double* vb[2];
+	int i, j, k;
+	int isSecond;
+	int size[3];
 };
 
 /****************************************************************************************

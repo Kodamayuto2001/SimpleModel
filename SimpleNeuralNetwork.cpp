@@ -64,6 +64,42 @@ void trainSGD() {
 	dl.del();
 }
 
+void trainMomentum() {
+	int dataMax = 100;
+	int channel = 1;
+	int imgHeight = 160;
+	int imgWidth = 160;
+	int hiddenNeuron = 320;
+	int outSize = 10;
+	double lr = 0.05;
+	double momentum = 0.9;
+
+	typedef FastModel<FastSigmoid, FastSoftmaxWithLoss> Net;
+	DataLoader dl("DataSet/", dataMax, channel, imgHeight, imgWidth);
+	Net model(
+		move(imgHeight * imgWidth * channel),
+		move(hiddenNeuron),
+		move(outSize)
+	);
+	FastMomentum<Net> optimizer(lr, momentum);
+
+	dl.load();
+	double** x = dl.vecImg();
+	double t[10] = { 0,0,0,0,0,0,0,1,0,0 };
+
+	for (int e = 0; e < 10; ++e) {
+		for (int i = 0; i < 80; ++i) {
+			model.forward(x[i], t);
+			model.backward();
+			optimizer.step(&model);
+			cout << model.loss << endl;
+		}
+	}
+	model.save();
+	model.del();
+	dl.del();
+}
+
 void trainAdam() {
 	int dataMax = 100;
 	int channel = 1;
@@ -105,7 +141,7 @@ void trainAdam() {
 	dl.del();
 }
 
-void testSGD() {
+void testSigmoid() {
 	int dataMax = 100;
 	int channel = 1;
 	int imgHeight = 160;
@@ -130,7 +166,7 @@ void testSGD() {
 	dl.del();
 }
 
-void testAdam() {
+void testReLU() {
 	int dataMax = 100;
 	int channel = 1;
 	int imgHeight = 160;
@@ -158,6 +194,6 @@ void testAdam() {
 }
 
 int main() {
-	testSGD();
+	testSigmoid();
 	return 0;
 }
