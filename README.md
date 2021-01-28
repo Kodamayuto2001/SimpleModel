@@ -22,6 +22,7 @@
   - AdaGrad           class
   - RMSProp           class
   - Adam              class
+  - FastSGD           class
   - FastAdam          class
 
 ### dataset.hpp
