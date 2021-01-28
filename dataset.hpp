@@ -18,7 +18,14 @@
 using namespace std;
 using namespace cv;
 
+/****************************************************************************************
+	DataSet	class	ƒf[ƒ^ƒZƒbƒg‚ğì¬‚µ‚Ü‚·B
 
+	ƒRƒ“ƒXƒgƒ‰ƒNƒ^‚Ìˆø”
+	int dataMax			ƒf[ƒ^ƒZƒbƒg‚Ì–‡”
+	string cascadePath	ƒJƒXƒP[ƒh“Á’¥•ª—ŞŠí‚ÌƒpƒX
+	char*  saveDir		ƒf[ƒ^ƒZƒbƒg‚ğ•Û‘¶‚·‚éƒfƒBƒŒƒNƒgƒŠ
+****************************************************************************************/
 class DataSet {
 public:
 	void MakeDataSet(
@@ -30,14 +37,14 @@ public:
 		namespace fs = std::filesystem;
 		bool isExist = fs::create_directory(saveDir);
 		if (isExist == 0) {
-			cout << "ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã¯ä½œæˆã—ã¦ã„ã¾ã›ã‚“ã€‚" << endl;
+			cout << "ƒfƒBƒŒƒNƒgƒŠ‚Íì¬‚µ‚Ä‚¢‚Ü‚¹‚ñB" << endl;
 		}
 		else {
-			cout << "ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ä½œæˆã—ã¾ã—ãŸã€‚" << endl;
+			cout << "ƒfƒBƒŒƒNƒgƒŠ‚ğì¬‚µ‚Ü‚µ‚½B" << endl;
 		}
 		CascadeClassifier cascade;
 		if (!cascade.load(cascadePath)) {
-			cout << "ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰åˆ†é¡å™¨ã‚’èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ" << endl;
+			cout << "ƒJƒXƒP[ƒh•ª—ŞŠí‚ğ“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½" << endl;
 		}
 
 		vector<Rect> faces;
@@ -56,14 +63,13 @@ public:
 #endif // !CV_AA
 		cap.set(CV_CAP_PROP_FRAME_WIDTH, 1920);
 		cap.set(CV_CAP_PROP_FRAME_HEIGHT, 1080);
-		Mat img, imgGray,resultImg;
+		Mat img, imgGray;
 		string strCnt;
 		int i, cnt = 0;
-		
+
 		while (1)
 		{
 			cap >> img;
-			cap >> resultImg;
 			cvtColor(img, imgGray, CV_RGB2GRAY);
 			cascade.detectMultiScale(imgGray, faces, 1.1, 3, 0, Size(100, 100));
 			for (i = 0; i < faces.size(); i++) {
@@ -74,15 +80,14 @@ public:
 					3,
 					CV_AA
 				);
-				if (cnt <= dataMax) { cnt++; }
-				Mat tri(resultImg, Rect(faces[i].x, faces[i].y, faces[i].width, faces[i].height));
-				resultImg = tri;
+				cnt++;
+				Mat tri(imgGray, Rect(faces[i].x, faces[i].y, faces[i].width, faces[i].height));
+				imgGray = tri;
 			}
 			if (cnt > dataMax) { break; }
-
-			strCnt = cntFunc(dataMax,cnt);
+			strCnt = cntFunc(dataMax, cnt);
 			imshow("img", img);
-			imwrite(saveDir + (string)"\\" + strCnt + ".jpg", resultImg);
+			imwrite(saveDir + (string)"\\" + strCnt + ".jpg", imgGray);
 
 			const int key = waitKey(1);
 			if (key == 'q') { break; }
