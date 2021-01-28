@@ -360,6 +360,20 @@ private:
 	int i, j, k;
 };
 
+/****************************************************************************************
+	FastMomentum
+	最適化アルゴリズムMomentum
+	#	Net					モデルのタイプを設定
+
+	FastMomentumコンストラクタ
+		#	double lr		学習率
+		#	momentum		運動量係数
+
+	step関数
+		勾配を更新する
+		#	Net* model		モデルのインスタンスのポインタ
+
+****************************************************************************************/
 template <class Net> class FastMomentum {
 public:
 	FastMomentum(double _lr = 0.01, double _momentum = 0.9) {
