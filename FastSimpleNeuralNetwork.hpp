@@ -9,6 +9,18 @@
 using namespace std;
 constexpr double Delta = 1.0e-100;
 
+/****************************************************************************************
+	FastSigmoid
+
+	forward関数	
+		#	double* x		純伝搬入力ポインタ
+		#	double* y		純伝搬出力ポインタ
+
+	backward関数
+		#	double* dout	逆伝搬入力ポインタ
+		#	double* dx		逆伝搬出力ポインタ
+
+****************************************************************************************/
 class FastSigmoid {
 public:
 	void forward(double* x, double* y) {
@@ -22,6 +34,18 @@ private:
 	double* y;
 };
 
+/****************************************************************************************
+	FastReLU
+
+	forward関数
+		#	double* _x		純伝搬入力ポインタ
+		#	double* y		純伝搬出力ポインタ
+
+	backward関数
+		#	double* dout	逆伝搬入力ポインタ
+		#	double* dx		逆伝搬出力ポインタ
+
+****************************************************************************************/
 class FastReLU {
 public:
 	void forward(double* _x, double* y) {
@@ -37,6 +61,23 @@ private:
 	double* x;
 };
 
+/****************************************************************************************
+	FastSoftmaxWithLoss
+
+	__init__関数
+		#	int* _size		ニューラルネットワーク最終出力層数
+
+	SoftmaxForward関数
+		#	double* x		ソフトマックス関数純伝搬入力
+		#	double* y		ソフトマックス関数純伝搬出力
+
+	CrossEntropyErrorForward関数
+		#	double* _t		交差エントロピー誤差関数純伝搬入力（正解ラベル）
+		#	double*	loss	交差エントロピー誤差関数純伝搬出力（損失値）
+
+	backward関数
+		#	double* dx		ソフトマックス関数と交差エントロピー誤差関数の逆伝搬出力
+****************************************************************************************/
 class FastSoftmaxWithLoss {
 public:
 	void __init__(int* _size) {
@@ -93,8 +134,42 @@ private:
 	double* y;
 };
 
-template<class ActFunc,class SoftmaxWithLoss>
-class FastModel {
+/****************************************************************************************
+	FastModel
+	人工知能のモデル。計算を速くするためポインタなどを使う。
+	#	ActFunc			活性化関数（中間層）
+	#	SoftmaxWithLoss	出力の関数（活性化関数＋損失関数）
+
+	FastModelコンストラクタ
+		演算に必要な変数を動的にメモリを割り当て、初期化する。
+		#	int&& inputSize		モデルの入力層（ムーブセマンティクス）
+		#	int&& hiddenSize	モデルの中間層（ムーブセマンティクス）
+		#	int&& outputSize	モデルの出力層（ムーブセマンティクス）
+
+	del関数
+		演算が終了したときに呼び出す。動的にメモリ割り当てた変数を解放する
+
+	predict関数
+		モデルを純伝搬したときの予測値を計算する。予測値は、node[1][n]に格納される(nはモデルの最終層数)
+		#	double* x	教師データ
+
+	forward関数
+		モデルを純伝搬し、損失値を計算する。損失値は、lossに格納される。
+		#	double* x	教師データ
+		#	double* t	正解ラベル
+
+	backward関数
+		パラメータを更新し、学習する。
+
+	save関数
+		モデルのパラメータを保存する。
+		#	const char* fileName	保存するファイル名（拡張子は適当）
+
+	load関数
+		モデルのパラメータを読み込む。
+		#	const char* fileName	読み込むモデルのファイル名
+****************************************************************************************/
+template<class ActFunc, class SoftmaxWithLoss> class FastModel {
 public:
 	double** weight[2];
 	double* bias[2];
@@ -252,8 +327,55 @@ private:
 	}
 };
 
-template<class Net>
-class FastAdam {
+/****************************************************************************************
+	FastSGD
+	確率的勾配降下法
+	#	Net					モデルのタイプを設定
+
+	FastSGDコンストラクタ
+		#	double lr		学習率を設定する
+
+	step関数
+		勾配を更新する
+		#	Net* model		モデルのインスタンスのポインタ
+****************************************************************************************/
+template<class Net> class FastSGD {
+public:
+	FastSGD(double _lr = 0.01) {
+		FastSGD::lr = _lr;
+	}
+
+	void step(Net* model) {
+		for (i = 0; i < 2; ++i) {
+			for (j = 0; j < model->size[i + 1]; ++j) {
+				model->bias[i][j] -= lr * model->dbias[i][j];
+				for (k = 0; k < model->size[i]; ++k) {
+					model->weight[i][j][k] -= lr * model->dweight[i][j][k];
+				}
+			}
+		}
+	}
+private:
+	double lr;
+	int i, j, k;
+};
+
+/****************************************************************************************
+	FastAdam
+	最適化アルゴリズムAdam
+	#	Net					モデルのタイプを設定
+
+	FastAdamコンストラクタ
+		#	double _lr		学習率
+		#	double _beta1	ハイパーパラメータ１
+		#	double _beta2	ハイパーパラメータ２
+
+	step関数
+		勾配を更新する
+		#	Net* model		モデルのインスタンスのポインタ
+
+****************************************************************************************/
+template<class Net> class FastAdam {
 public:
 	FastAdam(double _lr = 0.001, double _beta1 = 0.9, double _beta2 = 0.999) {
 		lr = _lr;
