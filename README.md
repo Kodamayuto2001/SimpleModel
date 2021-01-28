@@ -2,7 +2,7 @@
 
 ## 処理速度を改善しています。
 
-### SimpleNeuralNetwork.hpp FastSimpleNeuralNetwork.hpp
+### SimpleNeuralNetwork.hpp (FastSimpleNeuralNetwork.hpp)
 ##### Activation Func
   - ReLU              class
   - Sigmoid           class
