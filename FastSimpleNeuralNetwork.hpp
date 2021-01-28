@@ -342,7 +342,7 @@ private:
 template<class Net> class FastSGD {
 public:
 	FastSGD(double _lr = 0.01) {
-		FastSGD::lr = _lr;
+		lr = _lr;
 	}
 
 	void step(Net* model) {
@@ -358,6 +358,17 @@ public:
 private:
 	double lr;
 	int i, j, k;
+};
+
+template <class Net> class FastMomentum {
+public:
+	FastMomentum(double _lr = 0.01, double _momentum = 0.9) {
+		lr = _lr;
+		momentum = _momentum;
+	}
+private:
+	double lr;
+	double momentum;
 };
 
 /****************************************************************************************
