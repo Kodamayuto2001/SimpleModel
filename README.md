@@ -23,6 +23,7 @@
   - RMSProp           class
   - Adam              class
   - FastSGD           class
+  - FastMomentum      class
   - FastAdam          class
 
 ### dataset.hpp
