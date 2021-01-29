@@ -100,12 +100,47 @@ void trainMomentum() {
 	dl.del();
 }
 
+void trainAdaGrad() {
+	int dataMax = 100;
+	int channel = 1;
+	int imgHeight = 160;
+	int imgWidth = 160;
+	int hiddenNeuron = 320;
+	int outSize = 10;
+	double lr = 0.05;
+
+	typedef FastModel<FastSigmoid, FastSoftmaxWithLoss> Net;
+	DataLoader dl("DataSet/", dataMax, channel, imgHeight, imgWidth);
+	Net model(
+		move(imgHeight * imgWidth * channel),
+		move(hiddenNeuron),
+		move(outSize)
+	);
+	FastAdaGrad<Net> optimizer(lr);
+
+	dl.load();
+	double** x = dl.vecImg();
+	double t[10] = { 0,0,0,0,0,0,0,1,0,0 };
+
+	for (int e = 0; e < 10; ++e) {
+		for (int i = 0; i < 80; ++i) {
+			model.forward(x[i], t);
+			model.backward();
+			optimizer.step(&model);
+			cout << model.loss << endl;
+		}
+	}
+	model.save();
+	model.del();
+	dl.del();
+}
+
 void trainAdam() {
 	int dataMax = 100;
 	int channel = 1;
 	int imgHeight = 160;
 	int imgWidth = 160;
-	double lr = 0.00005;
+	double lr = 0.0001;
 	double beta1 = 0.9;
 	double beta2 = 0.999;
 	int hiddenNeuron = 320;
@@ -194,6 +229,6 @@ void testReLU() {
 }
 
 int main() {
-	trainSGD();
+	testSigmoid();
 	return 0;
 }

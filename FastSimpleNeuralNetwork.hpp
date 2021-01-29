@@ -431,8 +431,78 @@ private:
 };
 
 /****************************************************************************************
+	FastAdaGrad
+	最適化アルゴリズムAdaGrad
+	#	Net					モデルのタイプを設定
+
+	FastAdaGradコンストラクタ
+		#	double lr		学習率
+	
+	step関数
+		勾配を更新する
+		#	Net* model		モデルのインスタンスのポインタ
+
+****************************************************************************************/
+template<class Net> class FastAdaGrad {
+public:
+	FastAdaGrad(double _lr = 0.01) {
+		lr = _lr;
+		i = j = k = isSecond = 0;
+	}
+
+	void step(Net* model) {
+		if (isSecond == 0) {
+			isSecond = 1;
+			size[0] = model->size[0];
+			size[1] = model->size[1];
+			size[2] = model->size[2];
+
+			for (i = 0; i < 2; ++i) {
+				hW[i] = new double* [size[i + 1]];
+				hb[i] = new double[size[i + 1]];
+				for (j = 0; j < size[i + 1]; ++j) {
+					hW[i][j] = new double[size[i]];
+					hb[i][j] = 0.0;
+					for (k = 0; k < size[i]; ++k) {
+						hW[i][j][k] = 0.0;
+					}
+				}
+			}
+		}
+		for (i = 0; i < 2; ++i) {
+			for (j = 0; j < size[i + 1]; ++j) {
+				hb[i][j] += model->dbias[i][j] * model->dbias[i][j];
+				model->bias[i][j] -= lr / (sqrt(hb[i][j]) + Delta) * model->dbias[i][j];
+				for (k = 0; k < size[i]; ++k) {
+					hW[i][j][k] += model->dweight[i][j][k] * model->dweight[i][j][k];
+					model->weight[i][j][k] -= lr / (sqrt(hW[i][j][k]) + Delta) * model->dweight[i][j][k];
+				}
+			}
+		}
+	}
+	~FastAdaGrad() {
+		for (i = 0; i < 2; ++i) {
+			for (j = 0; j < size[i + 1]; ++j) {
+				delete[] hW[i][j];
+			}
+			delete[] hW[i];
+			delete[] hb[i];
+		}
+		cout << "正常に解放しました（FastAdaGrad）" << endl;
+	}
+private:
+	double lr;
+	double** hW[2];
+	double* hb[2];
+	int i, j, k;
+	int isSecond;
+	int size[3];
+};
+
+/****************************************************************************************
 	FastAdam
 	最適化アルゴリズムAdam
+	二乗するプログラムがあるので、オーバフローする可能性がある。
 	#	Net					モデルのタイプを設定
 
 	FastAdamコンストラクタ
