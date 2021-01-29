@@ -194,6 +194,6 @@ void testReLU() {
 }
 
 int main() {
-	testSigmoid();
+	trainSGD();
 	return 0;
 }

@@ -57,22 +57,25 @@ public:
 
 		int i = 0, j, k, l, v;
 		for (const auto& f : fs::directory_iterator(dirPath)) {
-			img = imread(f.path().string(), 1);
+			img = imread(f.path().string(), 0);
 
 			resize(img, img, Size(), (double)width / img.cols, (double)height / img.rows);
 
 			v = 0;
 			for (j = 0; j < height; j++) {
 				for (k = 0; k < width; k++) {
-					for (l = 0; l < channelSize; l++) {
+					for (l = 0; l < img.channels(); l++) {
 						imgList[i][j][k][l] = (double)img.ptr<Vec3b>(j)[k][l];
 						imgList[i][j][k][l] /= 255;
 						Vimages[i][v] = imgList[i][j][k][l];
+						// printf("%d %d %lf\n", i, v, (double)img.ptr<Vec3b>(j)[k][l]);
 						v++;
 					}
 				}
 			}
 			i++;
+			//	ƒGƒ‰[‚ª”­¶‚·‚é‚½‚ß‚¢‚Ü‚Í‚±‚¤‚µ‚Ä‚¢‚é
+			if (i == 100) { break; }
 		}
 		return imgList;
 	}
