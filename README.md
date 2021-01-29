@@ -24,6 +24,7 @@
   - Adam              class
   - FastSGD           class
   - FastMomentum      class
+  - FastAdaGrad       class
   - FastAdam          class
 
 ### dataset.hpp
