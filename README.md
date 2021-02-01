@@ -26,6 +26,9 @@
   - FastMomentum      class
   - FastAdaGrad       class
   - FastAdam          class
+ 
+##### Other
+  - Flatten           class
 
 ### dataset.hpp
   - DataSet           class
