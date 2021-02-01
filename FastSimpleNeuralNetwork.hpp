@@ -10,6 +10,32 @@ using namespace std;
 constexpr double Delta = 1.0e-100;
 
 /****************************************************************************************
+	Flatten
+	ラベルをone-hot表現にする
+
+	vec関数
+		#	int label	ラベル
+		#	int size	ラベルの最大値
+
+****************************************************************************************/
+class Flatten {
+public:
+	int* x;
+	int* vec(int label, int size) {
+		x = new int[size];
+		for (int i = 0; i < size; ++i) {
+			x[i] = 0;
+		}
+		x[label] = 1;
+		return x;
+	}
+	~Flatten() {
+		delete[] x;
+		cout << "正常に解放しました（Flatten）" << endl;
+	}
+};
+
+/****************************************************************************************
 	FastSigmoid
 
 	forward関数	
@@ -500,9 +526,27 @@ private:
 };
 
 /****************************************************************************************
+	FastRMSProp
+	最適化アルゴリズムRMSProp
+
+****************************************************************************************/
+template<class Net> class FastRMSProp {
+public:
+	FastRMSProp(double _lr = 0.01, double _decay_rate = 0.99) {
+		lr = _lr;
+		decay_rate = _decay_rate;
+	}
+	void step(Net* model) {
+
+	}
+private:
+	double lr;
+	double decay_rate;
+};
+
+/****************************************************************************************
 	FastAdam
-	最適化アルゴリズムAdam
-	二乗するプログラムがあるので、オーバフローする可能性がある。
+	最適化アルゴリズムAdam	不安定
 	#	Net					モデルのタイプを設定
 
 	FastAdamコンストラクタ
