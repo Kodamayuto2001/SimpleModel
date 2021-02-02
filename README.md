@@ -2,7 +2,7 @@
 
 ## 処理速度を改善しています。
 
-### SimpleNeuralNetwork.hpp (FastSimpleNeuralNetwork.hpp)
+### FastSimpleNeuralNetwork.hpp
 ##### Activation Func
   - FastReLU          class
   - FastSigmoid       class
