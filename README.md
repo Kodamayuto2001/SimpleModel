@@ -15,6 +15,7 @@
   - FastSGD           class
   - FastMomentum      class
   - FastAdaGrad       class
+  - FastRMSProp       class
   - FastAdam          class
  
 ##### Other
