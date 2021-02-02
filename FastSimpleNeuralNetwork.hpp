@@ -11,11 +11,11 @@ constexpr double Delta = 1.0e-100;
 
 /****************************************************************************************
 	Flatten
-	ãƒ©ãƒ™ãƒ«ã‚’one-hotè¡¨ç¾ã«ã™ã‚‹
+	ƒ‰ƒxƒ‹‚ğone-hot•\Œ»‚É‚·‚é
 
-	vecé–¢æ•°
-		#	int label	ãƒ©ãƒ™ãƒ«
-		#	int size	ãƒ©ãƒ™ãƒ«ã®æœ€å¤§å€¤
+	vecŠÖ”
+		#	int label	ƒ‰ƒxƒ‹
+		#	int size	ƒ‰ƒxƒ‹‚ÌÅ‘å’l
 
 ****************************************************************************************/
 class Flatten {
@@ -31,20 +31,20 @@ public:
 	}
 	~Flatten() {
 		delete[] x;
-		cout << "æ­£å¸¸ã«è§£æ”¾ã—ã¾ã—ãŸï¼ˆFlattenï¼‰" << endl;
+		cout << "³í‚É‰ğ•ú‚µ‚Ü‚µ‚½iFlattenj" << endl;
 	}
 };
 
 /****************************************************************************************
 	FastSigmoid
 
-	forwardé–¢æ•°	
-		#	double* x		ç´”ä¼æ¬å…¥åŠ›ãƒã‚¤ãƒ³ã‚¿
-		#	double* y		ç´”ä¼æ¬å‡ºåŠ›ãƒã‚¤ãƒ³ã‚¿
+	forwardŠÖ”	
+		#	double* x		ƒ“`”À“ü—Íƒ|ƒCƒ“ƒ^
+		#	double* y		ƒ“`”Ào—Íƒ|ƒCƒ“ƒ^
 
-	backwardé–¢æ•°
-		#	double* dout	é€†ä¼æ¬å…¥åŠ›ãƒã‚¤ãƒ³ã‚¿
-		#	double* dx		é€†ä¼æ¬å‡ºåŠ›ãƒã‚¤ãƒ³ã‚¿
+	backwardŠÖ”
+		#	double* dout	‹t“`”À“ü—Íƒ|ƒCƒ“ƒ^
+		#	double* dx		‹t“`”Ào—Íƒ|ƒCƒ“ƒ^
 
 ****************************************************************************************/
 class FastSigmoid {
@@ -63,13 +63,13 @@ private:
 /****************************************************************************************
 	FastReLU
 
-	forwardé–¢æ•°
-		#	double* _x		ç´”ä¼æ¬å…¥åŠ›ãƒã‚¤ãƒ³ã‚¿
-		#	double* y		ç´”ä¼æ¬å‡ºåŠ›ãƒã‚¤ãƒ³ã‚¿
+	forwardŠÖ”
+		#	double* _x		ƒ“`”À“ü—Íƒ|ƒCƒ“ƒ^
+		#	double* y		ƒ“`”Ào—Íƒ|ƒCƒ“ƒ^
 
-	backwardé–¢æ•°
-		#	double* dout	é€†ä¼æ¬å…¥åŠ›ãƒã‚¤ãƒ³ã‚¿
-		#	double* dx		é€†ä¼æ¬å‡ºåŠ›ãƒã‚¤ãƒ³ã‚¿
+	backwardŠÖ”
+		#	double* dout	‹t“`”À“ü—Íƒ|ƒCƒ“ƒ^
+		#	double* dx		‹t“`”Ào—Íƒ|ƒCƒ“ƒ^
 
 ****************************************************************************************/
 class FastReLU {
@@ -90,19 +90,19 @@ private:
 /****************************************************************************************
 	FastSoftmaxWithLoss
 
-	__init__é–¢æ•°
-		#	int* _size		ãƒ‹ãƒ¥ãƒ¼ãƒ©ãƒ«ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯æœ€çµ‚å‡ºåŠ›å±¤æ•°
+	__init__ŠÖ”
+		#	int* _size		ƒjƒ…[ƒ‰ƒ‹ƒlƒbƒgƒ[ƒNÅIo—Í‘w”
 
-	SoftmaxForwardé–¢æ•°
-		#	double* x		ã‚½ãƒ•ãƒˆãƒãƒƒã‚¯ã‚¹é–¢æ•°ç´”ä¼æ¬å…¥åŠ›
-		#	double* y		ã‚½ãƒ•ãƒˆãƒãƒƒã‚¯ã‚¹é–¢æ•°ç´”ä¼æ¬å‡ºåŠ›
+	SoftmaxForwardŠÖ”
+		#	double* x		ƒ\ƒtƒgƒ}ƒbƒNƒXŠÖ”ƒ“`”À“ü—Í
+		#	double* y		ƒ\ƒtƒgƒ}ƒbƒNƒXŠÖ”ƒ“`”Ào—Í
 
-	CrossEntropyErrorForwardé–¢æ•°
-		#	double* _t		äº¤å·®ã‚¨ãƒ³ãƒˆãƒ­ãƒ”ãƒ¼èª¤å·®é–¢æ•°ç´”ä¼æ¬å…¥åŠ›ï¼ˆæ­£è§£ãƒ©ãƒ™ãƒ«ï¼‰
-		#	double*	loss	äº¤å·®ã‚¨ãƒ³ãƒˆãƒ­ãƒ”ãƒ¼èª¤å·®é–¢æ•°ç´”ä¼æ¬å‡ºåŠ›ï¼ˆæå¤±å€¤ï¼‰
+	CrossEntropyErrorForwardŠÖ”
+		#	double* _t		Œğ·ƒGƒ“ƒgƒƒs[Œë·ŠÖ”ƒ“`”À“ü—Íi³‰ğƒ‰ƒxƒ‹j
+		#	double*	loss	Œğ·ƒGƒ“ƒgƒƒs[Œë·ŠÖ”ƒ“`”Ào—Íi‘¹¸’lj
 
-	backwardé–¢æ•°
-		#	double* dx		ã‚½ãƒ•ãƒˆãƒãƒƒã‚¯ã‚¹é–¢æ•°ã¨äº¤å·®ã‚¨ãƒ³ãƒˆãƒ­ãƒ”ãƒ¼èª¤å·®é–¢æ•°ã®é€†ä¼æ¬å‡ºåŠ›
+	backwardŠÖ”
+		#	double* dx		ƒ\ƒtƒgƒ}ƒbƒNƒXŠÖ”‚ÆŒğ·ƒGƒ“ƒgƒƒs[Œë·ŠÖ”‚Ì‹t“`”Ào—Í
 ****************************************************************************************/
 class FastSoftmaxWithLoss {
 public:
@@ -161,41 +161,41 @@ private:
 };
 
 /****************************************************************************************
-	FastModel
-	äººå·¥çŸ¥èƒ½ã®ãƒ¢ãƒ‡ãƒ«ã€‚è¨ˆç®—ã‚’é€Ÿãã™ã‚‹ãŸã‚ãƒã‚¤ãƒ³ã‚¿ãªã©ã‚’ä½¿ã†ã€‚
-	#	ActFunc			æ´»æ€§åŒ–é–¢æ•°ï¼ˆä¸­é–“å±¤ï¼‰
-	#	SoftmaxWithLoss	å‡ºåŠ›ã®é–¢æ•°ï¼ˆæ´»æ€§åŒ–é–¢æ•°ï¼‹æå¤±é–¢æ•°ï¼‰
+	SimpleNeuralNetwork
+	lH’m”\‚Ìƒ‚ƒfƒ‹BŒvZ‚ğ‘¬‚­‚·‚é‚½‚ßƒ|ƒCƒ“ƒ^‚È‚Ç‚ğg‚¤B
+	#	ActFunc			Šˆ«‰»ŠÖ”i’†ŠÔ‘wj
+	#	SoftmaxWithLoss	o—Í‚ÌŠÖ”iŠˆ«‰»ŠÖ”{‘¹¸ŠÖ”j
 
-	FastModelã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
-		æ¼”ç®—ã«å¿…è¦ãªå¤‰æ•°ã‚’å‹•çš„ã«ãƒ¡ãƒ¢ãƒªã‚’å‰²ã‚Šå½“ã¦ã€åˆæœŸåŒ–ã™ã‚‹ã€‚
-		#	int&& inputSize		ãƒ¢ãƒ‡ãƒ«ã®å…¥åŠ›å±¤ï¼ˆãƒ ãƒ¼ãƒ–ã‚»ãƒãƒ³ãƒ†ã‚£ã‚¯ã‚¹ï¼‰
-		#	int&& hiddenSize	ãƒ¢ãƒ‡ãƒ«ã®ä¸­é–“å±¤ï¼ˆãƒ ãƒ¼ãƒ–ã‚»ãƒãƒ³ãƒ†ã‚£ã‚¯ã‚¹ï¼‰
-		#	int&& outputSize	ãƒ¢ãƒ‡ãƒ«ã®å‡ºåŠ›å±¤ï¼ˆãƒ ãƒ¼ãƒ–ã‚»ãƒãƒ³ãƒ†ã‚£ã‚¯ã‚¹ï¼‰
+	SimpleNeuralNetworkƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		‰‰Z‚É•K—v‚È•Ï”‚ğ“®“I‚Éƒƒ‚ƒŠ‚ğŠ„‚è“–‚ÄA‰Šú‰»‚·‚éB
+		#	int&& inputSize		ƒ‚ƒfƒ‹‚Ì“ü—Í‘wiƒ€[ƒuƒZƒ}ƒ“ƒeƒBƒNƒXj
+		#	int&& hiddenSize	ƒ‚ƒfƒ‹‚Ì’†ŠÔ‘wiƒ€[ƒuƒZƒ}ƒ“ƒeƒBƒNƒXj
+		#	int&& outputSize	ƒ‚ƒfƒ‹‚Ìo—Í‘wiƒ€[ƒuƒZƒ}ƒ“ƒeƒBƒNƒXj
 
-	delé–¢æ•°
-		æ¼”ç®—ãŒçµ‚äº†ã—ãŸã¨ãã«å‘¼ã³å‡ºã™ã€‚å‹•çš„ã«ãƒ¡ãƒ¢ãƒªå‰²ã‚Šå½“ã¦ãŸå¤‰æ•°ã‚’è§£æ”¾ã™ã‚‹
+	delŠÖ”
+		‰‰Z‚ªI—¹‚µ‚½‚Æ‚«‚ÉŒÄ‚Ño‚·B“®“I‚Éƒƒ‚ƒŠŠ„‚è“–‚Ä‚½•Ï”‚ğ‰ğ•ú‚·‚é
 
-	predicté–¢æ•°
-		ãƒ¢ãƒ‡ãƒ«ã‚’ç´”ä¼æ¬ã—ãŸã¨ãã®äºˆæ¸¬å€¤ã‚’è¨ˆç®—ã™ã‚‹ã€‚äºˆæ¸¬å€¤ã¯ã€node[1][n]ã«æ ¼ç´ã•ã‚Œã‚‹(nã¯ãƒ¢ãƒ‡ãƒ«ã®æœ€çµ‚å±¤æ•°)
-		#	double* x	æ•™å¸«ãƒ‡ãƒ¼ã‚¿
+	predictŠÖ”
+		ƒ‚ƒfƒ‹‚ğƒ“`”À‚µ‚½‚Æ‚«‚Ì—\‘ª’l‚ğŒvZ‚·‚éB—\‘ª’l‚ÍAnode[1][n]‚ÉŠi”[‚³‚ê‚é(n‚Íƒ‚ƒfƒ‹‚ÌÅI‘w”)
+		#	double* x	‹³tƒf[ƒ^
 
-	forwardé–¢æ•°
-		ãƒ¢ãƒ‡ãƒ«ã‚’ç´”ä¼æ¬ã—ã€æå¤±å€¤ã‚’è¨ˆç®—ã™ã‚‹ã€‚æå¤±å€¤ã¯ã€lossã«æ ¼ç´ã•ã‚Œã‚‹ã€‚
-		#	double* x	æ•™å¸«ãƒ‡ãƒ¼ã‚¿
-		#	double* t	æ­£è§£ãƒ©ãƒ™ãƒ«
+	forwardŠÖ”
+		ƒ‚ƒfƒ‹‚ğƒ“`”À‚µA‘¹¸’l‚ğŒvZ‚·‚éB‘¹¸’l‚ÍAloss‚ÉŠi”[‚³‚ê‚éB
+		#	double* x	‹³tƒf[ƒ^
+		#	double* t	³‰ğƒ‰ƒxƒ‹
 
-	backwardé–¢æ•°
-		ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’æ›´æ–°ã—ã€å­¦ç¿’ã™ã‚‹ã€‚
+	backwardŠÖ”
+		ƒpƒ‰ƒ[ƒ^‚ğXV‚µAŠwK‚·‚éB
 
-	saveé–¢æ•°
-		ãƒ¢ãƒ‡ãƒ«ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’ä¿å­˜ã™ã‚‹ã€‚
-		#	const char* fileName	ä¿å­˜ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«åï¼ˆæ‹¡å¼µå­ã¯é©å½“ï¼‰
+	saveŠÖ”
+		ƒ‚ƒfƒ‹‚Ìƒpƒ‰ƒ[ƒ^‚ğ•Û‘¶‚·‚éB
+		#	const char* fileName	•Û‘¶‚·‚éƒtƒ@ƒCƒ‹–¼iŠg’£q‚Í“K“–j
 
-	loadé–¢æ•°
-		ãƒ¢ãƒ‡ãƒ«ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã‚€ã€‚
-		#	const char* fileName	èª­ã¿è¾¼ã‚€ãƒ¢ãƒ‡ãƒ«ã®ãƒ•ã‚¡ã‚¤ãƒ«å
+	loadŠÖ”
+		ƒ‚ƒfƒ‹‚Ìƒpƒ‰ƒ[ƒ^‚ğ“Ç‚İ‚ŞB
+		#	const char* fileName	“Ç‚İ‚Şƒ‚ƒfƒ‹‚Ìƒtƒ@ƒCƒ‹–¼
 ****************************************************************************************/
-template<class ActFunc, class SoftmaxWithLoss> class FastModel {
+template<class ActFunc, class SoftmaxWithLoss> class SimpleNeuralNetwork {
 public:
 	double** weight[2];
 	double* bias[2];
@@ -205,7 +205,7 @@ public:
 	double loss;
 	int size[3];
 
-	FastModel(int&& inputSize, int&& hiddenSize, int&& outputSize) {
+	SimpleNeuralNetwork(int&& inputSize, int&& hiddenSize, int&& outputSize) {
 		size[0] = inputSize;
 		size[1] = hiddenSize;
 		size[2] = outputSize;
@@ -215,13 +215,13 @@ public:
 		mt19937 gen(rd());
 		uniform_real_distribution<double> dist(-1, 1);
 
-		for (i = 0; i < 2; ++i) {
+		for (int i = 0; i < 2; ++i) {
 			weight[i] = new double* [size[i + 1]];
 			bias[i] = new double[size[i + 1]];
 			node[i] = new double[size[i + 1]];
 			dweight[i] = new double* [size[i + 1]];
 			dbias[i] = new double[size[i + 1]];
-			for (j = 0; j < size[i + 1]; ++j) {
+			for (int j = 0; j < size[i + 1]; ++j) {
 				weight[i][j] = new double[size[i]];
 				dweight[i][j] = new double[size[i]];
 				bias[i][j] = 0.0;
@@ -238,8 +238,8 @@ public:
 	}
 
 	void del() {
-		for (i = 0; i < 2; ++i) {
-			for (j = 0; j < size[i + 1]; ++j) {
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < size[i + 1]; ++j) {
 				delete[] weight[i][j];
 				delete[] dweight[i][j];
 			}
@@ -251,7 +251,7 @@ public:
 		}
 		delete[] actf;
 		swl.del();
-		cout << "æ­£å¸¸ã«è§£æ”¾ã—ã¾ã—ãŸï¼ˆFastModelï¼‰" << endl;
+		cout << "³í‚É‰ğ•ú‚µ‚Ü‚µ‚½iSimpleNeuralNetworkj" << endl;
 	}
 
 	void predict(double* x) {
@@ -275,7 +275,7 @@ public:
 		ofstream ofs;
 		ofs.open(fileName, ios::out | ios::binary | ios::trunc);
 		if (!ofs) {
-			cout << "ãƒ•ã‚¡ã‚¤ãƒ«ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚" << endl;
+			cout << "ƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B" << endl;
 		}
 		for (int i = 0; i < 2; ++i) {
 			for (int j = 0; j < size[i + 1]; ++j) {
@@ -290,7 +290,7 @@ public:
 	void load(const char* fileName = "model.kodamayuto") {
 		ifstream ifs(fileName, ios::in | ios::binary);
 		if (!ifs) {
-			cout << "ãƒ•ã‚¡ã‚¤ãƒ«ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚" << endl;
+			cout << "ƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B" << endl;
 		}
 		for (int i = 0; i < 2; ++i) {
 			for (int j = 0; j < size[i + 1]; ++j) {
@@ -305,13 +305,12 @@ public:
 private:
 	ActFunc* actf;
 	SoftmaxWithLoss swl;
-	int i, j;
 	double a;
 
 	void _fc1(double* x) {
-		for (i = 0; i < size[1]; ++i) {
+		for (int i = 0; i < size[1]; ++i) {
 			a = 0.0;
-			for (j = 0; j < size[0]; ++j) {
+			for (int j = 0; j < size[0]; ++j) {
 				a += x[j] * weight[0][i][j];
 				dweight[0][i][j] = x[j];
 			}
@@ -321,9 +320,9 @@ private:
 	}
 	void _fc2(void) {
 		double b;
-		for (i = 0; i < size[2]; ++i) {
+		for (int i = 0; i < size[2]; ++i) {
 			b = 0.0;
-			for (j = 0; j < size[1]; ++j) {
+			for (int j = 0; j < size[1]; ++j) {
 				b += node[0][j] * weight[1][i][j];
 				node[0][j] = 0.0;
 			}
@@ -332,8 +331,8 @@ private:
 	}
 
 	void _dfc2(double* dout) {
-		for (i = 0; i < size[2]; ++i) {
-			for (j = 0; j < size[1]; ++j) {
+		for (int i = 0; i < size[2]; ++i) {
+			for (int j = 0; j < size[1]; ++j) {
 				dweight[1][i][j] = (*dout) * node[0][j];
 				node[0][j] += (*dout) * weight[1][i][j];
 			}
@@ -342,10 +341,10 @@ private:
 	}
 
 	void _dfc1(void) {
-		for (i = 0; i < size[1]; ++i) {
+		for (int i = 0; i < size[1]; ++i) {
 			actf[i].backward(&node[0][i], &dbias[0][i]);
 			node[0][i] = 0.0;
-			for (j = 0; j < size[0]; ++j) {
+			for (int j = 0; j < size[0]; ++j) {
 				dweight[0][i][j] *= dbias[0][i];
 			}
 		}
@@ -355,15 +354,15 @@ private:
 
 /****************************************************************************************
 	FastSGD
-	ç¢ºç‡çš„å‹¾é…é™ä¸‹æ³•
-	#	Net					ãƒ¢ãƒ‡ãƒ«ã®ã‚¿ã‚¤ãƒ—ã‚’è¨­å®š
+	Šm—¦“IŒù”z~‰º–@
+	#	Net					ƒ‚ƒfƒ‹‚Ìƒ^ƒCƒv‚ğİ’è
 
-	FastSGDã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
-		#	double lr		å­¦ç¿’ç‡ã‚’è¨­å®šã™ã‚‹
+	FastSGDƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		#	double lr		ŠwK—¦‚ğİ’è‚·‚é
 
-	stepé–¢æ•°
-		å‹¾é…ã‚’æ›´æ–°ã™ã‚‹
-		#	Net* model		ãƒ¢ãƒ‡ãƒ«ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ãƒã‚¤ãƒ³ã‚¿
+	stepŠÖ”
+		Œù”z‚ğXV‚·‚é
+		#	Net* model		ƒ‚ƒfƒ‹‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚Ìƒ|ƒCƒ“ƒ^
 ****************************************************************************************/
 template<class Net> class FastSGD {
 public:
@@ -372,10 +371,10 @@ public:
 	}
 
 	void step(Net* model) {
-		for (i = 0; i < 2; ++i) {
-			for (j = 0; j < model->size[i + 1]; ++j) {
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < model->size[i + 1]; ++j) {
 				model->bias[i][j] -= lr * model->dbias[i][j];
-				for (k = 0; k < model->size[i]; ++k) {
+				for (int k = 0; k < model->size[i]; ++k) {
 					model->weight[i][j][k] -= lr * model->dweight[i][j][k];
 				}
 			}
@@ -383,21 +382,20 @@ public:
 	}
 private:
 	double lr;
-	int i, j, k;
 };
 
 /****************************************************************************************
 	FastMomentum
-	æœ€é©åŒ–ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ Momentum
-	#	Net					ãƒ¢ãƒ‡ãƒ«ã®ã‚¿ã‚¤ãƒ—ã‚’è¨­å®š
+	Å“K‰»ƒAƒ‹ƒSƒŠƒYƒ€Momentum
+	#	Net					ƒ‚ƒfƒ‹‚Ìƒ^ƒCƒv‚ğİ’è
 
-	FastMomentumã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
-		#	double lr		å­¦ç¿’ç‡
-		#	momentum		é‹å‹•é‡ä¿‚æ•°
+	FastMomentumƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		#	double lr		ŠwK—¦
+		#	momentum		‰^“®—ÊŒW”
 
-	stepé–¢æ•°
-		å‹¾é…ã‚’æ›´æ–°ã™ã‚‹
-		#	Net* model		ãƒ¢ãƒ‡ãƒ«ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ãƒã‚¤ãƒ³ã‚¿
+	stepŠÖ”
+		Œù”z‚ğXV‚·‚é
+		#	Net* model		ƒ‚ƒfƒ‹‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚Ìƒ|ƒCƒ“ƒ^
 
 ****************************************************************************************/
 template <class Net> class FastMomentum {
@@ -405,7 +403,7 @@ public:
 	FastMomentum(double _lr = 0.01, double _momentum = 0.9) {
 		lr = _lr;
 		momentum = _momentum;
-		i = j = k = isSecond = 0;
+		isSecond = 0;
 	}
 	void step(Net* model) {
 		if (isSecond == 0) {
@@ -413,23 +411,23 @@ public:
 			size[0] = model->size[0];
 			size[1] = model->size[1];
 			size[2] = model->size[2];
-			for (i = 0; i < 2; ++i) {
+			for (int i = 0; i < 2; ++i) {
 				vW[i] = new double* [size[i + 1]];
 				vb[i] = new double[size[i + 1]];
-				for (j = 0; j < model->size[i + 1]; ++j) {
+				for (int j = 0; j < model->size[i + 1]; ++j) {
 					vW[i][j] = new double[size[i]];
 					vb[i][j] = 0.0;
-					for (k = 0; k < model->size[i]; ++k) {
+					for (int k = 0; k < model->size[i]; ++k) {
 						vW[i][j][k] = 0.0;
 					}
 				}
 			}
 		}
-		for (i = 0; i < 2; ++i) {
-			for (j = 0; j < size[i + 1]; ++j) {
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < size[i + 1]; ++j) {
 				vb[i][j] = momentum * vb[i][j] - lr * model->dbias[i][j];
 				model->bias[i][j] += vb[i][j];
-				for (k = 0; k < size[i]; ++k) {
+				for (int k = 0; k < size[i]; ++k) {
 					vW[i][j][k] = momentum * vW[i][j][k] - lr * model->dweight[i][j][k];
 					model->weight[i][j][k] += vW[i][j][k];
 				}
@@ -437,43 +435,42 @@ public:
 		}
 	}
 	~FastMomentum() {
-		for (i = 0; i < 2; ++i) {
-			for (j = 0; j < size[i + 1]; ++j) {
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < size[i + 1]; ++j) {
 				delete[] vW[i][j];
 			}
 			delete[] vW[i];
 			delete[] vb[i];
 		}
-		cout << "æ­£å¸¸ã«è§£æ”¾ã—ã¾ã—ãŸï¼ˆFastMomentumï¼‰" << endl;
+		cout << "³í‚É‰ğ•ú‚µ‚Ü‚µ‚½iFastMomentumj" << endl;
 	}
 private:
 	double lr;
 	double momentum;
 	double** vW[2];
 	double* vb[2];
-	int i, j, k;
 	int isSecond;
 	int size[3];
 };
 
 /****************************************************************************************
 	FastAdaGrad
-	æœ€é©åŒ–ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ AdaGrad
-	#	Net					ãƒ¢ãƒ‡ãƒ«ã®ã‚¿ã‚¤ãƒ—ã‚’è¨­å®š
+	Å“K‰»ƒAƒ‹ƒSƒŠƒYƒ€AdaGrad
+	#	Net					ƒ‚ƒfƒ‹‚Ìƒ^ƒCƒv‚ğİ’è
 
-	FastAdaGradã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
-		#	double lr		å­¦ç¿’ç‡
+	FastAdaGradƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		#	double lr		ŠwK—¦
 	
-	stepé–¢æ•°
-		å‹¾é…ã‚’æ›´æ–°ã™ã‚‹
-		#	Net* model		ãƒ¢ãƒ‡ãƒ«ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ãƒã‚¤ãƒ³ã‚¿
+	stepŠÖ”
+		Œù”z‚ğXV‚·‚é
+		#	Net* model		ƒ‚ƒfƒ‹‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚Ìƒ|ƒCƒ“ƒ^
 
 ****************************************************************************************/
 template<class Net> class FastAdaGrad {
 public:
 	FastAdaGrad(double _lr = 0.01) {
 		lr = _lr;
-		i = j = k = isSecond = 0;
+		isSecond = 0;
 	}
 
 	void step(Net* model) {
@@ -483,23 +480,23 @@ public:
 			size[1] = model->size[1];
 			size[2] = model->size[2];
 
-			for (i = 0; i < 2; ++i) {
+			for (int i = 0; i < 2; ++i) {
 				hW[i] = new double* [size[i + 1]];
 				hb[i] = new double[size[i + 1]];
-				for (j = 0; j < size[i + 1]; ++j) {
+				for (int j = 0; j < size[i + 1]; ++j) {
 					hW[i][j] = new double[size[i]];
 					hb[i][j] = 0.0;
-					for (k = 0; k < size[i]; ++k) {
+					for (int k = 0; k < size[i]; ++k) {
 						hW[i][j][k] = 0.0;
 					}
 				}
 			}
 		}
-		for (i = 0; i < 2; ++i) {
-			for (j = 0; j < size[i + 1]; ++j) {
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < size[i + 1]; ++j) {
 				hb[i][j] += model->dbias[i][j] * model->dbias[i][j];
 				model->bias[i][j] -= lr / (sqrt(hb[i][j]) + Delta) * model->dbias[i][j];
-				for (k = 0; k < size[i]; ++k) {
+				for (int k = 0; k < size[i]; ++k) {
 					hW[i][j][k] += model->dweight[i][j][k] * model->dweight[i][j][k];
 					model->weight[i][j][k] -= lr / (sqrt(hW[i][j][k]) + Delta) * model->dweight[i][j][k];
 				}
@@ -507,27 +504,26 @@ public:
 		}
 	}
 	~FastAdaGrad() {
-		for (i = 0; i < 2; ++i) {
-			for (j = 0; j < size[i + 1]; ++j) {
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < size[i + 1]; ++j) {
 				delete[] hW[i][j];
 			}
 			delete[] hW[i];
 			delete[] hb[i];
 		}
-		cout << "æ­£å¸¸ã«è§£æ”¾ã—ã¾ã—ãŸï¼ˆFastAdaGradï¼‰" << endl;
+		cout << "³í‚É‰ğ•ú‚µ‚Ü‚µ‚½iFastAdaGradj" << endl;
 	}
 private:
 	double lr;
 	double** hW[2];
 	double* hb[2];
-	int i, j, k;
 	int isSecond;
 	int size[3];
 };
 
 /****************************************************************************************
 	FastRMSProp
-	æœ€é©åŒ–ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ RMSProp
+	Å“K‰»ƒAƒ‹ƒSƒŠƒYƒ€RMSProp
 
 ****************************************************************************************/
 template<class Net> class FastRMSProp {
@@ -535,28 +531,70 @@ public:
 	FastRMSProp(double _lr = 0.01, double _decay_rate = 0.99) {
 		lr = _lr;
 		decay_rate = _decay_rate;
+		isSecond = 0;
 	}
 	void step(Net* model) {
-
+		if (isSecond == 0) {
+			size[0] = model->size[0];
+			size[1] = model->size[1];
+			size[2] = model->size[2];
+			for (int i = 0; i < 2; ++i) {
+				hW[i] = new double* [size[i + 1]];
+				hb[i] = new double[size[i + 1]];
+				for (int j = 0; j < size[i + 1]; ++j) {
+					hW[i][j] = new double[size[i]];
+					hb[i][j] = 0.0;
+					for (int k = 0; k < size[i]; ++k) {
+						hW[i][j][k] = 0.0;
+					}
+				}
+			}
+		}
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < size[i + 1]; ++j) {
+				hb[i][j] *= decay_rate;
+				hb[i][j] += (1 - decay_rate) * model->dbias[i][j] * model->dbias[i][j];
+				model->bias[i][j] -= lr * model->dbias[i][j] / (sqrt(hb[i][j]) + Delta);
+				for (int k = 0; k < size[i]; ++k) {
+					hW[i][j][k] *= decay_rate;
+					hW[i][j][k] += (1 - decay_rate) * model->dweight[i][j][k] * model->dweight[i][j][k];
+					model->weight[i][j][k] -= lr * model->dweight[i][j][k] / (sqrt(hW[i][j][k]) + Delta);
+				}
+			}
+		}
+	}
+	~FastRMSProp() {
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < size[i + 1]; ++j) {
+				delete[] hW[i][j];
+			}
+			delete[] hW[i];
+			delete[] hb[i];
+		}
+		cout << "³í‚É‰ğ•ú‚µ‚Ü‚µ‚½iFastRMSPropj" << endl;
 	}
 private:
 	double lr;
 	double decay_rate;
+	double** hW[2];
+	double* hb[2];
+	int isSecond;
+	int size[3];
 };
 
 /****************************************************************************************
 	FastAdam
-	æœ€é©åŒ–ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ Adam
-	#	Net					ãƒ¢ãƒ‡ãƒ«ã®ã‚¿ã‚¤ãƒ—ã‚’è¨­å®š
+	Å“K‰»ƒAƒ‹ƒSƒŠƒYƒ€Adam
+	#	Net					ƒ‚ƒfƒ‹‚Ìƒ^ƒCƒv‚ğİ’è
 
-	FastAdamã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
-		#	double _lr		å­¦ç¿’ç‡
-		#	double _beta1	ãƒã‚¤ãƒ‘ãƒ¼ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ï¼‘
-		#	double _beta2	ãƒã‚¤ãƒ‘ãƒ¼ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ï¼’
+	FastAdamƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		#	double _lr		ŠwK—¦
+		#	double _beta1	ƒnƒCƒp[ƒpƒ‰ƒ[ƒ^‚P
+		#	double _beta2	ƒnƒCƒp[ƒpƒ‰ƒ[ƒ^‚Q
 
-	stepé–¢æ•°
-		å‹¾é…ã‚’æ›´æ–°ã™ã‚‹
-		#	Net* model		ãƒ¢ãƒ‡ãƒ«ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ãƒã‚¤ãƒ³ã‚¿
+	stepŠÖ”
+		Œù”z‚ğXV‚·‚é
+		#	Net* model		ƒ‚ƒfƒ‹‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚Ìƒ|ƒCƒ“ƒ^
 
 ****************************************************************************************/
 template<class Net> class FastAdam {
@@ -567,7 +605,6 @@ public:
 		beta2 = _beta2;
 		isSecond = 0;
 		lr_t = 0.0;
-		i = j = k = 0;
 	}
 	void step(Net* model) {
 		if (isSecond == 0) {
@@ -575,17 +612,17 @@ public:
 			size[0] = model->size[0];
 			size[1] = model->size[1];
 			size[2] = model->size[2];
-			for (i = 0; i < 2; ++i) {
+			for (int i = 0; i < 2; ++i) {
 				mW[i] = new double* [model->size[i + 1]];
 				vW[i] = new double* [model->size[i + 1]];
 				mb[i] = new double[model->size[i + 1]];
 				vb[i] = new double[model->size[i + 1]];
-				for (j = 0; j < model->size[i + 1]; ++j) {
+				for (int j = 0; j < model->size[i + 1]; ++j) {
 					mW[i][j] = new double[model->size[i]];
 					vW[i][j] = new double[model->size[i]];
 					mb[i][j] = 0.0;
 					vb[i][j] = 0.0;
-					for (k = 0; k < model->size[i]; ++k) {
+					for (int k = 0; k < model->size[i]; ++k) {
 						mW[i][j][k] = 0.0;
 						vW[i][j][k] = 0.0;
 					}
@@ -594,12 +631,12 @@ public:
 		}
 		iter += 1.0;
 		lr_t = lr * sqrt(1.0 - pow(beta2, iter)) / (1.0 - pow(beta1, iter));
-		for (i = 0; i < 2; ++i) {
-			for (j = 0; j < model->size[i + 1]; ++j) {
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < model->size[i + 1]; ++j) {
 				mb[i][j] += (1 - beta1) * (model->dbias[i][j] - mb[i][j]);
 				vb[i][j] += (1 - beta2) * ((model->dbias[i][j]) * (model->dbias[i][j]) - vb[i][j]);
 				model->bias[i][j] -= lr_t * mb[i][j] / (sqrt(vb[i][j]) + Delta);
-				for (k = 0; k < model->size[i]; ++k) {
+				for (int k = 0; k < model->size[i]; ++k) {
 					mW[i][j][k] += (1 - beta1) * (model->dweight[i][j][k] - mW[i][j][k]);
 					vW[i][j][k] += (1 - beta2) * ((model->dweight[i][j][k]) * (model->dweight[i][j][k]) - vW[i][j][k]);
 					model->weight[i][j][k] -= lr_t * mW[i][j][k] / (sqrt(vW[i][j][k]) + Delta);
@@ -608,8 +645,8 @@ public:
 		}
 	}
 	~FastAdam() {
-		for (i = 0; i < 2; ++i) {
-			for (j = 0; j < size[i + 1]; ++j) {
+		for (int i = 0; i < 2; ++i) {
+			for (int j = 0; j < size[i + 1]; ++j) {
 				delete[] mW[i][j];
 				delete[] vW[i][j];
 			}
@@ -618,10 +655,9 @@ public:
 			delete[] mb[i];
 			delete[] vb[i];
 		}
-		cout << "æ­£å¸¸ã«è§£æ”¾ã—ã¾ã—ãŸï¼ˆFastAdamï¼‰" << endl;
+		cout << "³í‚É‰ğ•ú‚µ‚Ü‚µ‚½iFastAdamj" << endl;
 	}
 private:
-	int i, j, k;
 	double lr;
 	double beta1;
 	double beta2;

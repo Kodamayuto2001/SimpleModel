@@ -15,7 +15,22 @@ using namespace cv;
 using namespace std;
 namespace fs = filesystem;
 
+/****************************************************************************************
+	DataLoader
 
+	DataLoaderコンストラクタ
+		#	string dirPath		データセットのフォルダを指定する
+		#	int dataSize		データの個数を指定する
+		#	int height			画像データの縦の長さをリサイズする
+		#	int width			画像データの横の長さをリサイズする
+
+	load関数
+		戻り値			画像データdataSize枚の4次元配列
+
+	vecImg関数	
+		戻り値			それぞれの画像データを1次元配列に変形した2次元配列
+
+****************************************************************************************/
 class DataLoader {
 public:
 	double**** imgList;
