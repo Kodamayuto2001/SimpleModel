@@ -55,9 +55,13 @@ public:
 	double**** load() {
 		Mat img;
 
+		int x;
+		if (channelSize == 1) { x = 0; }
+		else { x = 1; }
+
 		int i = 0, j, k, l, v;
 		for (const auto& f : fs::directory_iterator(dirPath)) {
-			img = imread(f.path().string(), 0);
+			img = imread(f.path().string(), x);
 
 			resize(img, img, Size(), (double)width / img.cols, (double)height / img.rows);
 
@@ -75,7 +79,7 @@ public:
 			}
 			i++;
 			//	ƒGƒ‰[‚ª”­¶‚·‚é‚½‚ß‚¢‚Ü‚Í‚±‚¤‚µ‚Ä‚¢‚é
-			if (i == 100) { break; }
+			if (i == dataSize) { break; }
 		}
 		return imgList;
 	}
