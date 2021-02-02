@@ -4,24 +4,14 @@
 
 ### SimpleNeuralNetwork.hpp (FastSimpleNeuralNetwork.hpp)
 ##### Activation Func
-  - ReLU              class
-  - Sigmoid           class
-  - Softmax           class
-  - CrossEntropyError class
   - FastReLU          class
   - FastSigmoid       class
   - FastSoftmaxWithLoss class
 
 ##### Model
-  - SimpleNet         class
-  - FastSimpleNet     class
+  - SimpleNeuralNetwork     class
 
 ##### Optimizer
-  - SGD               class
-  - Momentum          class
-  - AdaGrad           class
-  - RMSProp           class
-  - Adam              class
   - FastSGD           class
   - FastMomentum      class
   - FastAdaGrad       class
