@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -22,17 +22,18 @@ void CrossEntropyError_forward(double*, double*, double*);
 void SoftmaxWithLoss_backward(double*, double*, double*);
 void SimpleNeuralNetwork_init();
 void SimpleNeuralNetwork(
-	void(*)(double*,double*),
-	void(*)(double*,double*),
-	void(*)(double*,double*,double*),
-	void(*)(double*,double*,double*),
-	void(*)(double*,double*,double*),
-	double*, 
+	void(*)(double*, double*),
+	void(*)(double*, double*),
+	void(*)(double*, double*, double*),
+	void(*)(double*, double*, double*),
+	void(*)(double*, double*, double*),
+	double*,
+	double*,
 	double*
 );
 
-//	ƒOƒ[ƒoƒ‹•Ï”@ƒXƒ^ƒeƒBƒbƒN—Ìˆæ@
-//  ƒvƒƒOƒ‰ƒ€ŠJn‚©‚çI‚í‚è‚Ü‚Åƒƒ‚ƒŠŠ„‚è“–‚Ä•Ï‰»‚µ‚È‚¢
+//	ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°ã€€ã‚¹ã‚¿ãƒ†ã‚£ãƒƒã‚¯é ˜åŸŸã€€
+//  ãƒ—ãƒ­ã‚°ãƒ©ãƒ é–‹å§‹ã‹ã‚‰çµ‚ã‚ã‚Šã¾ã§ãƒ¡ãƒ¢ãƒªå‰²ã‚Šå½“ã¦å¤‰åŒ–ã—ãªã„
 double weight_1[HIDDEN_SIZE][INPUT_SIZE];
 double weight_2[OUTPUT_SIZE][HIDDEN_SIZE];
 double bias_1[HIDDEN_SIZE];
@@ -43,10 +44,12 @@ double dweight_1[HIDDEN_SIZE][INPUT_SIZE];
 double dweight_2[OUTPUT_SIZE][HIDDEN_SIZE];
 double dbias_1[HIDDEN_SIZE];
 double dbias_2[OUTPUT_SIZE];
+double dnode_1[HIDDEN_SIZE];
 
 int main(void) {
 	double x[INPUT_SIZE] = { 5,1 };
 	double t[INPUT_SIZE] = { 1,0 };
+	double loss;
 
 	SimpleNeuralNetwork_init();
 	SimpleNeuralNetwork(
@@ -55,9 +58,11 @@ int main(void) {
 		CrossEntropyError_forward,
 		SoftmaxWithLoss_backward,
 		ReLU_backward,
-		x, t
+		x, t, &loss
 	);
-	
+	printf("%f\n", loss);
+
+	return 0;
 }
 
 void SimpleNeuralNetwork_init() {
@@ -77,32 +82,47 @@ void SimpleNeuralNetwork_init() {
 }
 
 void SimpleNeuralNetwork(
-	void(*forward_1)(double*,double*),
-	void(*forward_2)(double*,double*),
-	void(*loss)(double*,double*,double*),
-	void(*backward_2)(double*,double*,double*),
-	void(*backward_1)(double*,double*,double*),
+	void(*forward_1)(double*, double*),
+	void(*forward_2)(double*, double*),
+	void(*lossFunc)(double*, double*, double*),
+	void(*backward_2)(double*, double*, double*),
+	void(*backward_1)(double*, double*, double*),
 	double* x,
-	double* t
+	double* t,
+	double* loss
 ) {
-	double a;
-	for (int i = 0; i < HIDDEN_SIZE; ++i) {
-		a = 0.0;
-		for (int j = 0; j < INPUT_SIZE; ++j) {
-			a += x[j] * weight_1[i][j];
-			dweight_1[i][j] = x[j];
+	int i, j;
+	for (i = 0; i < HIDDEN_SIZE; ++i) {
+		dnode_1[i] = 0.0;
+		for (j = 0; j < INPUT_SIZE; ++j) {
+			node_1[i] += x[j] * weight_1[i][j];
 		}
-		a += bias_1[i];
-		forward_1(&a, &node_1[i]);
+		node_1[i] += bias_1[i];
+		forward_1(&node_1[i], &node_1[i]);
 	}
-
-	for (int i = 0; i < OUTPUT_SIZE; ++i) {
-		a = 0.0;
-		for (int j = 0; j < HIDDEN_SIZE; ++j) {
-			a += node_1[j] * weight_2[i][j];
+	for (i = 0; i < OUTPUT_SIZE; ++i) {
+		for (j = 0; j < HIDDEN_SIZE; ++j) {
+			node_2[i] += node_1[j] * weight_2[i][j];
+		}
+		node_2[i] += bias_2[i];
+	}
+	forward_2(node_2, node_2);
+	lossFunc(t,node_2,loss);
+	backward_2(t, node_2, dbias_2);
+	for (i = 0; i < OUTPUT_SIZE; ++i) {
+		node_2[i] = 0.0;
+		for (j = 0; j < HIDDEN_SIZE; ++j) {
+			dnode_1[j] += dbias_2[i] * weight_2[i][j];
+			dweight_2[i][j] = node_1[j] * dbias_2[i];
 		}
 	}
-	return ;
+	for (i = 0; i < HIDDEN_SIZE; ++i) {
+		backward_1(&node_1[i], &dnode_1[i],&dbias_1[i]);
+		node_1[i] = 0.0;
+		for (j = 0; j < INPUT_SIZE; ++j) {
+			dweight_1[i][j] = x[j] * dbias_1[i];
+		}
+	}
 }
 
 
@@ -116,15 +136,15 @@ int* Flatten(int label, int x[OUTPUT_SIZE]) {
 void Sigmoid_forward(double* x, double* y) {
 	*y = 1 / (1.0 + exp(-(*x)));
 }
-void Sigmoid_backward(double* dout, double* dx, double* y) {
+void Sigmoid_backward(double* y, double* dout, double* dx) {
 	*dx = (*dout) * (1.0 - (*y)) * (*y);
 }
 void ReLU_forward(double* x, double* y) {
 	if (*x > 0.0) { *y = *x; }
 	else { *y = 0.0; }
 }
-void ReLU_backward(double* dout, double* dx, double* x) {
-	if (*x > 0.0) { *dx = *dout; }
+void ReLU_backward(double* y, double* dout, double* dx) {
+	if (*y > 0.0) { *dx = *dout; }
 	else { *dx = 0.0; }
 }
 void Softmax_forward(double* x, double* y) {
@@ -146,14 +166,14 @@ void Softmax_forward(double* x, double* y) {
 		y[i] = tmp[i] * a;
 	}
 }
-void CrossEntropyError_forward(double* t, double* loss, double* y) {
+void CrossEntropyError_forward(double* t, double* y, double* loss) {
 	double a = 0.0;
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		a += log(y[i]) * t[i];
 	}
 	*loss = a * (-1);
 }
-void SoftmaxWithLoss_backward(double* dx, double* y, double* t) {
+void SoftmaxWithLoss_backward(double* t, double* y, double* dx) {
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		dx[i] = y[i] - t[i];
 	}
