@@ -12,11 +12,9 @@ constexpr double Delta = 1.0e-100;
 /****************************************************************************************
 	Flatten
 	ラベルをone-hot表現にする
-
 	vec関数
 		#	int label	ラベル
 		#	int size	ラベルの最大値
-
 ****************************************************************************************/
 class Flatten {
 public:
@@ -37,15 +35,12 @@ public:
 
 /****************************************************************************************
 	FastSigmoid
-
-	forward関数	
+	forward関数
 		#	double* x		純伝搬入力ポインタ
 		#	double* y		純伝搬出力ポインタ
-
 	backward関数
 		#	double* dout	逆伝搬入力ポインタ
 		#	double* dx		逆伝搬出力ポインタ
-
 ****************************************************************************************/
 class FastSigmoid {
 public:
@@ -62,15 +57,12 @@ private:
 
 /****************************************************************************************
 	FastReLU
-
 	forward関数
 		#	double* _x		純伝搬入力ポインタ
 		#	double* y		純伝搬出力ポインタ
-
 	backward関数
 		#	double* dout	逆伝搬入力ポインタ
 		#	double* dx		逆伝搬出力ポインタ
-
 ****************************************************************************************/
 class FastReLU {
 public:
@@ -89,18 +81,14 @@ private:
 
 /****************************************************************************************
 	FastSoftmaxWithLoss
-
 	__init__関数
 		#	int* _size		ニューラルネットワーク最終出力層数
-
 	SoftmaxForward関数
 		#	double* x		ソフトマックス関数純伝搬入力
 		#	double* y		ソフトマックス関数純伝搬出力
-
 	CrossEntropyErrorForward関数
 		#	double* _t		交差エントロピー誤差関数純伝搬入力（正解ラベル）
 		#	double*	loss	交差エントロピー誤差関数純伝搬出力（損失値）
-
 	backward関数
 		#	double* dx		ソフトマックス関数と交差エントロピー誤差関数の逆伝搬出力
 ****************************************************************************************/
@@ -165,32 +153,25 @@ private:
 	人工知能のモデル。計算を速くするためポインタなどを使う。
 	#	ActFunc			活性化関数（中間層）
 	#	SoftmaxWithLoss	出力の関数（活性化関数＋損失関数）
-
 	SimpleNeuralNetworkコンストラクタ
 		演算に必要な変数を動的にメモリを割り当て、初期化する。
 		#	int&& inputSize		モデルの入力層（ムーブセマンティクス）
 		#	int&& hiddenSize	モデルの中間層（ムーブセマンティクス）
 		#	int&& outputSize	モデルの出力層（ムーブセマンティクス）
-
 	del関数
 		演算が終了したときに呼び出す。動的にメモリ割り当てた変数を解放する
-
 	predict関数
 		モデルを純伝搬したときの予測値を計算する。予測値は、node[1][n]に格納される(nはモデルの最終層数)
 		#	double* x	教師データ
-
 	forward関数
 		モデルを純伝搬し、損失値を計算する。損失値は、lossに格納される。
 		#	double* x	教師データ
 		#	double* t	正解ラベル
-
 	backward関数
 		パラメータを更新し、学習する。
-
 	save関数
 		モデルのパラメータを保存する。
 		#	const char* fileName	保存するファイル名（拡張子は適当）
-
 	load関数
 		モデルのパラメータを読み込む。
 		#	const char* fileName	読み込むモデルのファイル名
@@ -324,6 +305,7 @@ private:
 			b = 0.0;
 			for (int j = 0; j < size[1]; ++j) {
 				b += node[0][j] * weight[1][i][j];
+				dweight[1][i][j] = node[0][j];
 				node[0][j] = 0.0;
 			}
 			node[1][i] += b + bias[1][i];
@@ -333,7 +315,7 @@ private:
 	void _dfc2(double* dout) {
 		for (int i = 0; i < size[2]; ++i) {
 			for (int j = 0; j < size[1]; ++j) {
-				dweight[1][i][j] = (*dout) * node[0][j];
+				dweight[1][i][j] *= (*dout);
 				node[0][j] += (*dout) * weight[1][i][j];
 			}
 			node[1][i] = 0.0;
@@ -356,10 +338,8 @@ private:
 	FastSGD
 	確率的勾配降下法
 	#	Net					モデルのタイプを設定
-
 	FastSGDコンストラクタ
 		#	double lr		学習率を設定する
-
 	step関数
 		勾配を更新する
 		#	Net* model		モデルのインスタンスのポインタ
@@ -388,15 +368,12 @@ private:
 	FastMomentum
 	最適化アルゴリズムMomentum
 	#	Net					モデルのタイプを設定
-
 	FastMomentumコンストラクタ
 		#	double lr		学習率
 		#	momentum		運動量係数
-
 	step関数
 		勾配を更新する
 		#	Net* model		モデルのインスタンスのポインタ
-
 ****************************************************************************************/
 template <class Net> class FastMomentum {
 public:
@@ -457,14 +434,12 @@ private:
 	FastAdaGrad
 	最適化アルゴリズムAdaGrad
 	#	Net					モデルのタイプを設定
-
 	FastAdaGradコンストラクタ
 		#	double lr		学習率
-	
+
 	step関数
 		勾配を更新する
 		#	Net* model		モデルのインスタンスのポインタ
-
 ****************************************************************************************/
 template<class Net> class FastAdaGrad {
 public:
@@ -524,7 +499,6 @@ private:
 /****************************************************************************************
 	FastRMSProp
 	最適化アルゴリズムRMSProp
-
 ****************************************************************************************/
 template<class Net> class FastRMSProp {
 public:
@@ -586,16 +560,13 @@ private:
 	FastAdam
 	最適化アルゴリズムAdam
 	#	Net					モデルのタイプを設定
-
 	FastAdamコンストラクタ
 		#	double _lr		学習率
 		#	double _beta1	ハイパーパラメータ１
 		#	double _beta2	ハイパーパラメータ２
-
 	step関数
 		勾配を更新する
 		#	Net* model		モデルのインスタンスのポインタ
-
 ****************************************************************************************/
 template<class Net> class FastAdam {
 public:

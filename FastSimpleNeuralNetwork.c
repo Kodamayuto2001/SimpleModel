@@ -1,16 +1,16 @@
-ï»¿#include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
 
 #define DATAMAX		100
 #define CHANNEL		1
-#define IMG_HEIGHT	160
-#define IMG_WIDTH	160
+#define IMG_HEIGHT	1
+#define IMG_WIDTH	2
 
 #define INPUT_SIZE  CHANNEL*IMG_HEIGHT*IMG_WIDTH
-#define HIDDEN_SIZE 320
-#define OUTPUT_SIZE 10
+#define HIDDEN_SIZE 3
+#define OUTPUT_SIZE 2
 
 int* Flatten(int, int[OUTPUT_SIZE]);
 void Sigmoid_forward(double*, double*);
@@ -20,16 +20,19 @@ void ReLU_backward(double*, double*, double*);
 void Softmax_forward(double*, double*);
 void CrossEntropyError_forward(double*, double*, double*);
 void SoftmaxWithLoss_backward(double*, double*, double*);
+void SimpleNeuralNetwork_init();
 void SimpleNeuralNetwork(
 	void(*)(double*,double*),
-	void(*)(double*,double*), 
-	void(*)(double*,double*,double*), 
-	void(*)(double*,double*,double*), 
-	void(*)(double*,double*,double*)
+	void(*)(double*,double*),
+	void(*)(double*,double*,double*),
+	void(*)(double*,double*,double*),
+	void(*)(double*,double*,double*),
+	double*, 
+	double*
 );
 
-//	ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°ã€€ã‚¹ã‚¿ãƒ†ã‚£ãƒƒã‚¯é ˜åŸŸã€€
-//  ãƒ—ãƒ­ã‚°ãƒ©ãƒ é–‹å§‹ã‹ã‚‰çµ‚ã‚ã‚Šã¾ã§ãƒ¡ãƒ¢ãƒªå‰²ã‚Šå½“ã¦å¤‰åŒ–ã—ãªã„
+//	ƒOƒ[ƒoƒ‹•Ï”@ƒXƒ^ƒeƒBƒbƒN—Ìˆæ@
+//  ƒvƒƒOƒ‰ƒ€ŠJn‚©‚çI‚í‚è‚Ü‚Åƒƒ‚ƒŠŠ„‚è“–‚Ä•Ï‰»‚µ‚È‚¢
 double weight_1[HIDDEN_SIZE][INPUT_SIZE];
 double weight_2[OUTPUT_SIZE][HIDDEN_SIZE];
 double bias_1[HIDDEN_SIZE];
@@ -42,36 +45,64 @@ double dbias_1[HIDDEN_SIZE];
 double dbias_2[OUTPUT_SIZE];
 
 int main(void) {
+	double x[INPUT_SIZE] = { 5,1 };
+	double t[INPUT_SIZE] = { 1,0 };
+
+	SimpleNeuralNetwork_init();
 	SimpleNeuralNetwork(
 		ReLU_forward,
 		Softmax_forward,
 		CrossEntropyError_forward,
 		SoftmaxWithLoss_backward,
-		ReLU_backward
+		ReLU_backward,
+		x, t
 	);
+	
 }
 
-void SimpleNeuralNetwork(
-	void (*forward_1)(double*, double*),
-	void (*forward_2)(double*, double*),
-	void (*loss)(double*, double*, double*),
-	void (*backward_2)(double*, double*, double*),
-	void (*backward_1)(double*, double*, double*)
-) {
+void SimpleNeuralNetwork_init() {
 	srand(time(NULL));
-	// 0ã‹ã‚‰1ã®ä¹±æ•°ãªã®ã§ã€-1ã‹ã‚‰1ã®ä¹±æ•°ã«ç›´ã™å¿…è¦ãŒã‚ã‚‹
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
 		bias_1[i] = 0.0;
 		for (int j = 0; j < INPUT_SIZE; ++j) {
-			weight_1[i][j] = (double)rand() / RAND_MAX;
+			weight_1[i][j] = 1 - ((double)rand() / (RAND_MAX / 2));
 		}
 	}
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		bias_2[i] = 0.0;
 		for (int j = 0; j < HIDDEN_SIZE; ++j) {
-			weight_2[i][j] = (double)rand() / RAND_MAX;
+			weight_2[i][j] = 1 - ((double)rand() / (RAND_MAX / 2));
 		}
 	}
+}
+
+void SimpleNeuralNetwork(
+	void(*forward_1)(double*,double*),
+	void(*forward_2)(double*,double*),
+	void(*loss)(double*,double*,double*),
+	void(*backward_2)(double*,double*,double*),
+	void(*backward_1)(double*,double*,double*),
+	double* x,
+	double* t
+) {
+	double a;
+	for (int i = 0; i < HIDDEN_SIZE; ++i) {
+		a = 0.0;
+		for (int j = 0; j < INPUT_SIZE; ++j) {
+			a += x[j] * weight_1[i][j];
+			dweight_1[i][j] = x[j];
+		}
+		a += bias_1[i];
+		forward_1(&a, &node_1[i]);
+	}
+
+	for (int i = 0; i < OUTPUT_SIZE; ++i) {
+		a = 0.0;
+		for (int j = 0; j < HIDDEN_SIZE; ++j) {
+			a += node_1[j] * weight_2[i][j];
+		}
+	}
+	return ;
 }
 
 
