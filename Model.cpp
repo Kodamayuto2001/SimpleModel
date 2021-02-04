@@ -31,11 +31,12 @@ int main(void) {
 				t,
 				&loss
 			);
-			AdaGrad();
-			cout << loss << endl;
+			Adam();
+			// cout << loss << endl;
+			cout << i << endl;
 		}
 	}
-
+	
 	dl.del();
 	return 0;
 }

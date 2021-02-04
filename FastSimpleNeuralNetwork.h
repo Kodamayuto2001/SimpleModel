@@ -46,9 +46,12 @@ void SimpleNeuralNetwork(
 	double*,
 	double*
 );
+void SGD(double);
+void Momentum(double, double);
+void AdaGrad(double);
+void RMSProp(double, double);
+void Adam(double, double, double);
 
-//	グローバル変数　スタティック領域　
-//  プログラム開始から終わりまでメモリ割り当て変化しない
 double weight_1[HIDDEN_SIZE][INPUT_SIZE];
 double weight_2[OUTPUT_SIZE][HIDDEN_SIZE];
 double bias_1[HIDDEN_SIZE];
@@ -239,7 +242,6 @@ void AdaGrad(double lr = 0.01) {
 	static double h_weight_2[OUTPUT_SIZE][HIDDEN_SIZE];
 	static double h_bias_1[HIDDEN_SIZE];
 	static double h_bias_2[OUTPUT_SIZE];
-	static constexpr double Delta = 1.0e-300;
 	if (flag == 0) {
 		for (int i = 0; i < HIDDEN_SIZE; ++i) {
 			h_bias_1[i] = 0;
@@ -256,18 +258,114 @@ void AdaGrad(double lr = 0.01) {
 	}
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
 		h_bias_1[i] += dbias_1[i] * dbias_1[i];
-		bias_1[i] -= lr / sqrt(h_bias_1[i] + Delta) * dbias_1[i];
+		bias_1[i] -= lr / sqrt(h_bias_1[i]) * dbias_1[i];
 		for (int j = 0; j < INPUT_SIZE; ++j) {
 			h_weight_1[i][j] += dweight_1[i][j] * dweight_1[i][j];
-			weight_1[i][j] -= lr / sqrt(h_weight_1[i][j] + Delta) * dweight_1[i][j];
+			weight_1[i][j] -= lr / sqrt(h_weight_1[i][j] + 1.0e-300) * dweight_1[i][j];
 		}
 	}
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		h_bias_2[i] += dbias_2[i] * dbias_2[i];
-		bias_2[i] -= lr / sqrt(h_bias_2[i] + Delta) * dbias_2[i];
+		bias_2[i] -= lr / sqrt(h_bias_2[i]) * dbias_2[i];
 		for (int j = 0; j < HIDDEN_SIZE; ++j) {
 			h_weight_2[i][j] += dweight_2[i][j] * dweight_2[i][j];
-			weight_2[i][j] -= lr / sqrt(h_weight_2[i][j] + Delta) * dweight_2[i][j];
+			weight_2[i][j] -= lr / sqrt(h_weight_2[i][j] + 1.0e-300) * dweight_2[i][j];
+		}
+	}
+}
+
+void RMSProp(double lr = 0.01, double decay_rate = 0.99) {
+	static int flag = 0;
+	static double h_weight_1[HIDDEN_SIZE][INPUT_SIZE];
+	static double h_weight_2[OUTPUT_SIZE][HIDDEN_SIZE];
+	static double h_bias_1[HIDDEN_SIZE];
+	static double h_bias_2[OUTPUT_SIZE];
+	if (flag == 0) {
+		for (int i = 0; i < HIDDEN_SIZE; ++i) {
+			h_bias_1[i] = 0;
+			for (int j = 0; j < INPUT_SIZE; ++j) {
+				h_weight_1[i][j] = 0;
+			}
+		}
+		for (int i = 0; i < OUTPUT_SIZE; ++i) {
+			h_bias_2[i] = 0;
+			for (int j = 0; j < HIDDEN_SIZE; ++j) {
+				h_weight_2[i][j] = 0;
+			}
+		}
+	}
+	for (int i = 0; i < HIDDEN_SIZE; ++i) {
+		h_bias_1[i] *= decay_rate;
+		h_bias_1[i] += (1 - decay_rate) * dbias_1[i] * dbias_1[i];
+		bias_1[i] -= lr * dbias_1[i] / sqrt(h_bias_1[i] + 1.0e-300);
+		for (int j = 0; j < INPUT_SIZE; ++j) {
+			h_weight_1[i][j] *= decay_rate;
+			h_weight_1[i][j] += (1 - decay_rate) * dweight_1[i][j] * dweight_1[i][j];
+			weight_1[i][j] -= lr * dweight_1[i][j] / sqrt(h_weight_1[i][j] + 1.0e-300);
+		}
+	}
+	for (int i = 0; i < OUTPUT_SIZE; ++i) {
+		h_bias_2[i] *= decay_rate;
+		h_bias_2[i] += (1 - decay_rate) * dbias_2[i] * dbias_2[i];
+		bias_2[i] -= lr * dbias_2[i] / sqrt(h_bias_2[i] + 1.0e-300);
+		for (int j = 0; j < HIDDEN_SIZE; ++j) {
+			h_weight_2[i][j] *= decay_rate;
+			h_weight_2[i][j] += (1 - decay_rate) * dweight_2[i][j] * dweight_2[i][j];
+			weight_2[i][j] -= lr * dweight_2[i][j] / sqrt(h_weight_2[i][j] + 1.0e-300);
+		}
+	}
+
+	flag = 1;
+}
+
+void Adam(double lr = 0.001, double beta1 = 0.9, double beta2 = 0.999) {
+	static double iter = 0;
+	static double m_weight_1[HIDDEN_SIZE][INPUT_SIZE];
+	static double m_weight_2[OUTPUT_SIZE][HIDDEN_SIZE];
+	static double v_weight_1[HIDDEN_SIZE][INPUT_SIZE];
+	static double v_weight_2[OUTPUT_SIZE][HIDDEN_SIZE];
+	static double m_bias_1[HIDDEN_SIZE];
+	static double m_bias_2[OUTPUT_SIZE];
+	static double v_bias_1[HIDDEN_SIZE];
+	static double v_bias_2[OUTPUT_SIZE];
+	if (iter == 0) {
+		for (int i = 0; i < HIDDEN_SIZE; ++i) {
+			m_bias_1[i] = 0;
+			v_bias_1[i] = 0;
+			for (int j = 0; j < INPUT_SIZE; ++j) {
+				m_weight_1[i][j] = 0;
+				v_weight_1[i][j] = 0;
+			}
+		}
+		for (int i = 0; i < OUTPUT_SIZE; ++i) {
+			m_bias_2[i] = 0;
+			v_bias_2[i] = 0;
+			for (int j = 0; j < HIDDEN_SIZE; ++j) {
+				m_weight_2[i][j] = 0;
+				v_weight_2[i][j] = 0;
+			}
+		}
+	}
+	iter += 1.0;
+	double lr_t = lr * sqrt(1.0 - pow(beta2, iter)) / (1.0 - pow(beta1, iter));
+	for (int i = 0; i < HIDDEN_SIZE; ++i) {
+		m_bias_1[i] += (1 - beta1) * (dbias_1[i] - m_bias_1[i]);
+		v_bias_1[i] += (1 - beta2) * (dbias_1[i] * dbias_1[i] - v_bias_1[i]);
+		bias_1[i] -= lr_t * m_bias_1[i] / sqrt(v_bias_1[i] + 1.0e-300);
+		for (int j = 0; j < INPUT_SIZE; ++j) {
+			m_weight_1[i][j] += (1 - beta1) * (dweight_1[i][j] - m_weight_1[i][j]);
+			v_weight_1[i][j] += (1 - beta2) * (dweight_1[i][j] * dweight_1[i][j] - v_weight_1[i][j]);
+			weight_1[i][j] -= lr_t * m_weight_1[i][j] / sqrt(v_weight_1[i][j] + 1.0e-300);
+		}
+	}
+	for (int i = 0; i < OUTPUT_SIZE; ++i) {
+		m_bias_2[i] += (1 - beta1) * (dbias_2[i] - m_bias_2[i]);
+		v_bias_2[i] += (1 - beta2) * (dbias_2[i] * dbias_2[i] - v_bias_2[i]);
+		bias_2[i] -= lr_t * m_bias_2[i] / sqrt(v_bias_2[i] + 1.0e-300);
+		for (int j = 0; j < HIDDEN_SIZE; ++j) {
+			m_weight_2[i][j] += (1 - beta1) * (dweight_2[i][j] - m_weight_2[i][j]);
+			v_weight_2[i][j] += (1 - beta2) * (dweight_2[i][j] * dweight_2[i][j] - v_weight_2[i][j]);
+			weight_2[i][j] -= lr_t * m_weight_2[i][j] / sqrt(v_weight_2[i][j] + 1.0e-300);
 		}
 	}
 }
