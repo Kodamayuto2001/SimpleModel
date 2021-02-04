@@ -51,6 +51,8 @@ void Momentum(double, double);
 void AdaGrad(double);
 void RMSProp(double, double);
 void Adam(double, double, double);
+void save(const char* fileName);
+void load(const char* fileName);
 
 double weight_1[HIDDEN_SIZE][INPUT_SIZE];
 double weight_2[OUTPUT_SIZE][HIDDEN_SIZE];
@@ -370,4 +372,43 @@ void Adam(double lr = 0.001, double beta1 = 0.9, double beta2 = 0.999) {
 	}
 }
 
+
+void save(const char* fileName = "test.model") {
+	FILE* fp;
+	fp = fopen(fileName, "wb");
+	if (fp == NULL) {
+		printf("ファイルが開けませんでした。\n");
+		exit(1);
+	}
+
+	fwrite((char*)bias_1, sizeof(bias_1[0]), HIDDEN_SIZE, fp);
+	for (int i = 0; i < HIDDEN_SIZE; ++i) {
+		fwrite((char*)weight_1[i], sizeof(weight_1[i][0]), INPUT_SIZE, fp);
+	}
+	fwrite((char*)bias_2, sizeof(bias_2[0]), OUTPUT_SIZE, fp);
+	for (int i = 0; i < OUTPUT_SIZE; ++i) {
+		fwrite((char*)weight_2[i], sizeof(weight_2[i][0]), OUTPUT_SIZE, fp);
+	}
+	fclose(fp);
+	printf("パラメータを保存しました。\n");
+}
+
+void load(const char* fileName = "test.model") {
+	FILE* fp;
+	fp = fopen(fileName, "rb");
+	if (fp == NULL) {
+		printf("ファイルが開けませんでした。\n");
+		exit(1);
+	}
+
+	fread((char*)bias_1, sizeof(bias_1[0]), HIDDEN_SIZE, fp);
+	for (int i = 0; i < HIDDEN_SIZE; ++i) {
+		fread((char*)weight_1[i], sizeof(weight_1[i][0]), INPUT_SIZE, fp);
+	}
+	fread((char*)bias_2, sizeof(bias_2[0]), OUTPUT_SIZE, fp);
+	for (int i = 0; i < OUTPUT_SIZE; ++i) {
+		fread((char*)weight_2[i], sizeof(weight_2[i][0]), OUTPUT_SIZE, fp);
+	}
+	fclose(fp);
+}
 #endif // !_FastSimpleNeuralNetwork_H_

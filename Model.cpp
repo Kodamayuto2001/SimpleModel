@@ -36,7 +36,9 @@ int main(void) {
 			cout << i << endl;
 		}
 	}
-	
+	save("test.model");
 	dl.del();
+
+	load("test.model");
 	return 0;
 }
