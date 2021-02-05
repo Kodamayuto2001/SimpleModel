@@ -261,7 +261,7 @@ void AdaGrad(double lr = 0.01) {
 	}
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
 		h_bias_1[i] += dbias_1[i] * dbias_1[i];
-		bias_1[i] -= lr / sqrt(h_bias_1[i]) * dbias_1[i];
+		bias_1[i] -= lr / sqrt(h_bias_1[i] + 1.0e-300) * dbias_1[i];
 		for (int j = 0; j < INPUT_SIZE; ++j) {
 			h_weight_1[i][j] += dweight_1[i][j] * dweight_1[i][j];
 			weight_1[i][j] -= lr / sqrt(h_weight_1[i][j] + 1.0e-300) * dweight_1[i][j];
@@ -269,7 +269,7 @@ void AdaGrad(double lr = 0.01) {
 	}
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		h_bias_2[i] += dbias_2[i] * dbias_2[i];
-		bias_2[i] -= lr / sqrt(h_bias_2[i]) * dbias_2[i];
+		bias_2[i] -= lr / sqrt(h_bias_2[i] + 1.0e-300) * dbias_2[i];
 		for (int j = 0; j < HIDDEN_SIZE; ++j) {
 			h_weight_2[i][j] += dweight_2[i][j] * dweight_2[i][j];
 			weight_2[i][j] -= lr / sqrt(h_weight_2[i][j] + 1.0e-300) * dweight_2[i][j];

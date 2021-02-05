@@ -19,7 +19,7 @@ int main(void) {
 
 	double loss;
 	SimpleNeuralNetwork_init();
-	for (int e = 0; e < 10; ++e) {
+	for (int e = 0; e < 1; ++e) {
 		for (int i = 0; i < DATAMAX; ++i) {
 			SimpleNeuralNetwork(
 				Sigmoid_forward,
@@ -31,9 +31,8 @@ int main(void) {
 				t,
 				&loss
 			);
-			Adam();
-			// cout << loss << endl;
-			cout << i << endl;
+			AdaGrad();
+			cout << loss << endl;
 		}
 	}
 	save("test.model");
