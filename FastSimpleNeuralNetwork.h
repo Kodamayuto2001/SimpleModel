@@ -27,6 +27,7 @@
 #define OUTPUT_SIZE 100
 #endif // !OUTPUT_SIZE
 
+
 void Flatten(int, double[]);
 void Sigmoid_forward(double*, double*);
 void Sigmoid_backward(double*, double*, double*);
@@ -172,7 +173,7 @@ void Softmax_forward(double* x, double* y) {
 void CrossEntropyError_forward(double* t, double* y, double* loss) {
 	double a = 0.0;
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
-		a += log(y[i]+ 1.0e-300) * t[i];
+		a += log(y[i] + 1.0e-300) * t[i];
 	}
 	*loss = a * (-1);
 }
@@ -375,7 +376,7 @@ void Adam(double lr = 0.001, double beta1 = 0.9, double beta2 = 0.999) {
 
 void save(const char* fileName = "test.model") {
 	FILE* fp;
-	fp = fopen(fileName, "wb");
+	fopen_s(&fp,fileName, "wb");
 	if (fp == NULL) {
 		printf("ファイルが開けませんでした。\n");
 		exit(1);
@@ -395,7 +396,7 @@ void save(const char* fileName = "test.model") {
 
 void load(const char* fileName = "test.model") {
 	FILE* fp;
-	fp = fopen(fileName, "rb");
+	fopen_s(&fp, fileName, "rb");
 	if (fp == NULL) {
 		printf("ファイルが開けませんでした。\n");
 		exit(1);
