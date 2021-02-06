@@ -9,7 +9,6 @@
 #define OUTPUT_SIZE 10
 #include "FastSimpleNeuralNetwork.h"
 
-
 int main(void) {
 	DataLoader dl("DataSet/", DATAMAX, CHANNEL, IMG_HEIGHT, IMG_WIDTH);
 	dl.load();
@@ -31,8 +30,9 @@ int main(void) {
 				t,
 				&loss
 			);
-			Adam();
-			cout << loss << endl;
+			SGD();
+			// cout << loss << endl;
+			cout << i << endl;
 		}
 	}
 	save("test.model");

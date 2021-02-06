@@ -103,14 +103,18 @@ void SimpleNeuralNetwork(
 	double* loss
 ) {
 	int i, j;
+#pragma omp parallel for
 	for (i = 0; i < HIDDEN_SIZE; ++i) {
+#pragma omp parallel for
 		for (j = 0; j < INPUT_SIZE; ++j) {
 			node_1[i] += x[j] * weight_1[i][j];
 		}
 		node_1[i] += bias_1[i];
 		forward_1(&node_1[i], &node_1[i]);
 	}
+#pragma omp parallel for
 	for (i = 0; i < OUTPUT_SIZE; ++i) {
+#pragma omp parallel for
 		for (j = 0; j < HIDDEN_SIZE; ++j) {
 			node_2[i] += node_1[j] * weight_2[i][j];
 		}
@@ -119,17 +123,21 @@ void SimpleNeuralNetwork(
 	forward_2(node_2, node_2);
 	lossFunc(t, node_2, loss);
 	backward_2(t, node_2, dbias_2);
+#pragma omp parallel for
 	for (i = 0; i < OUTPUT_SIZE; ++i) {
 		node_2[i] = 0.0;
+#pragma omp parallel for
 		for (j = 0; j < HIDDEN_SIZE; ++j) {
 			dnode_1[j] += dbias_2[i] * weight_2[i][j];
 			dweight_2[i][j] = node_1[j] * dbias_2[i];
 		}
 	}
+#pragma omp parallel for
 	for (i = 0; i < HIDDEN_SIZE; ++i) {
 		backward_1(&node_1[i], &dnode_1[i], &dbias_1[i]);
 		node_1[i] = 0.0;
 		dnode_1[i] = 0.0;
+#pragma omp parallel for
 		for (j = 0; j < INPUT_SIZE; ++j) {
 			dweight_1[i][j] = x[j] * dbias_1[i];
 		}
@@ -208,14 +216,18 @@ void SoftmaxWithLoss_backward(double* t, double* y, double* dx) {
 }
 
 void SGD(double lr = 0.01) {
+#pragma omp parallel for
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
 		bias_1[i] -= lr * dbias_1[i];
+#pragma omp parallel for
 		for (int j = 0; j < INPUT_SIZE; ++j) {
 			weight_1[i][j] -= lr * dweight_1[i][j];
 		}
 	}
+#pragma omp parallel for
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		bias_2[i] -= lr * dbias_2[i];
+#pragma omp parallel for
 		for (int j = 0; j < HIDDEN_SIZE; ++j) {
 			weight_2[i][j] -= lr * dweight_2[i][j];
 		}
@@ -244,17 +256,21 @@ void Momentum(double lr = 0.01, double momentum = 0.9) {
 			}
 		}
 	}
+#pragma omp parallel for
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
 		v_bias1[i] = momentum * v_bias1[i] - lr * dbias_1[i];
 		bias_1[i] += v_bias1[i];
+#pragma omp parallel for
 		for (int j = 0; j < INPUT_SIZE; ++j) {
 			v_weight_1[i][j] = momentum * v_weight_1[i][j] - lr * dweight_1[i][j];
 			weight_1[i][j] += v_weight_1[i][j];
 		}
 	}
+#pragma omp parallel for
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		v_bias2[i] = momentum * v_bias2[i] - lr * dbias_2[i];
 		bias_2[i] += v_bias2[i];
+#pragma omp parallel for
 		for (int j = 0; j < HIDDEN_SIZE; ++j) {
 			v_weight_2[i][j] = momentum * v_weight_2[i][j] - lr * dweight_2[i][j];
 			weight_2[i][j] += v_weight_2[i][j];
@@ -283,17 +299,21 @@ void AdaGrad(double lr = 0.01) {
 			}
 		}
 	}
+#pragma omp parallel for
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
 		h_bias_1[i] += dbias_1[i] * dbias_1[i];
 		bias_1[i] -= lr / sqrt(h_bias_1[i] + 1.0e-300) * dbias_1[i];
+#pragma omp parallel for
 		for (int j = 0; j < INPUT_SIZE; ++j) {
 			h_weight_1[i][j] += dweight_1[i][j] * dweight_1[i][j];
 			weight_1[i][j] -= lr / sqrt(h_weight_1[i][j] + 1.0e-300) * dweight_1[i][j];
 		}
 	}
+#pragma omp parallel for
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		h_bias_2[i] += dbias_2[i] * dbias_2[i];
 		bias_2[i] -= lr / sqrt(h_bias_2[i] + 1.0e-300) * dbias_2[i];
+#pragma omp parallel for
 		for (int j = 0; j < HIDDEN_SIZE; ++j) {
 			h_weight_2[i][j] += dweight_2[i][j] * dweight_2[i][j];
 			weight_2[i][j] -= lr / sqrt(h_weight_2[i][j] + 1.0e-300) * dweight_2[i][j];
@@ -322,20 +342,24 @@ void RMSProp(double lr = 0.01, double decay_rate = 0.99) {
 			}
 		}
 	}
+#pragma omp parallel for
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
 		h_bias_1[i] *= decay_rate;
 		h_bias_1[i] += (1 - decay_rate) * dbias_1[i] * dbias_1[i];
 		bias_1[i] -= lr * dbias_1[i] / sqrt(h_bias_1[i] + 1.0e-300);
+#pragma omp parallel for
 		for (int j = 0; j < INPUT_SIZE; ++j) {
 			h_weight_1[i][j] *= decay_rate;
 			h_weight_1[i][j] += (1 - decay_rate) * dweight_1[i][j] * dweight_1[i][j];
 			weight_1[i][j] -= lr * dweight_1[i][j] / sqrt(h_weight_1[i][j] + 1.0e-300);
 		}
 	}
+#pragma omp parallel for
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		h_bias_2[i] *= decay_rate;
 		h_bias_2[i] += (1 - decay_rate) * dbias_2[i] * dbias_2[i];
 		bias_2[i] -= lr * dbias_2[i] / sqrt(h_bias_2[i] + 1.0e-300);
+#pragma omp parallel for
 		for (int j = 0; j < HIDDEN_SIZE; ++j) {
 			h_weight_2[i][j] *= decay_rate;
 			h_weight_2[i][j] += (1 - decay_rate) * dweight_2[i][j] * dweight_2[i][j];
@@ -374,20 +398,24 @@ void Adam(double lr = 0.001, double beta1 = 0.9, double beta2 = 0.999) {
 	}
 	iter += 1.0;
 	double lr_t = lr * sqrt(1.0 - pow(beta2, iter)) / (1.0 - pow(beta1, iter));
+#pragma omp parallel for
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
 		m_bias_1[i] += (1 - beta1) * (dbias_1[i] - m_bias_1[i]);
 		v_bias_1[i] += (1 - beta2) * (dbias_1[i] * dbias_1[i] - v_bias_1[i]);
 		bias_1[i] -= lr_t * m_bias_1[i] / sqrt(v_bias_1[i] + 1.0e-300);
+#pragma omp parallel for
 		for (int j = 0; j < INPUT_SIZE; ++j) {
 			m_weight_1[i][j] += (1 - beta1) * (dweight_1[i][j] - m_weight_1[i][j]);
 			v_weight_1[i][j] += (1 - beta2) * (dweight_1[i][j] * dweight_1[i][j] - v_weight_1[i][j]);
 			weight_1[i][j] -= lr_t * m_weight_1[i][j] / sqrt(v_weight_1[i][j] + 1.0e-300);
 		}
 	}
+#pragma omp parallel for
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		m_bias_2[i] += (1 - beta1) * (dbias_2[i] - m_bias_2[i]);
 		v_bias_2[i] += (1 - beta2) * (dbias_2[i] * dbias_2[i] - v_bias_2[i]);
 		bias_2[i] -= lr_t * m_bias_2[i] / sqrt(v_bias_2[i] + 1.0e-300);
+#pragma omp parallel for
 		for (int j = 0; j < HIDDEN_SIZE; ++j) {
 			m_weight_2[i][j] += (1 - beta1) * (dweight_2[i][j] - m_weight_2[i][j]);
 			v_weight_2[i][j] += (1 - beta2) * (dweight_2[i][j] * dweight_2[i][j] - v_weight_2[i][j]);
