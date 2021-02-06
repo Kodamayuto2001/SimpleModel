@@ -1,4 +1,5 @@
 # SimpleModel
+### OpenMPを使用させていただいています。
 
 ### Activation func
 - Sigmoid
