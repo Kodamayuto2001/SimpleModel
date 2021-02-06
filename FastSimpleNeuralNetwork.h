@@ -47,6 +47,7 @@ void SimpleNeuralNetwork(
 	double*,
 	double*
 );
+double* predict(void(*)(double*, double*), void(*)(double*, double*), double*);
 void SGD(double);
 void Momentum(double, double);
 void AdaGrad(double);
@@ -134,6 +135,29 @@ void SimpleNeuralNetwork(
 		}
 	}
 }
+
+double* predict(
+	void(*forward_1)(double*, double*),
+	void(*forward_2)(double*, double*), 
+	double* x) {
+	int i, j;
+	for (i = 0; i < HIDDEN_SIZE; ++i) {
+		for (j = 0; j < INPUT_SIZE; ++j) {
+			node_1[i] += x[j] * weight_1[i][j];
+		}
+		node_1[i] += bias_1[i];
+		forward_1(&node_1[i], &node_1[i]);
+	}
+	for (i = 0; i < OUTPUT_SIZE; ++i) {
+		for (j = 0; j < HIDDEN_SIZE; ++j) {
+			node_2[i] += node_1[j] * weight_2[i][j];
+		}
+		node_2[i] += bias_2[i];
+	}
+	forward_2(node_2, node_2);
+	return node_2;
+}
+
 void Flatten(int label, double x[]) {
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		x[i] = 0;
@@ -206,6 +230,7 @@ void Momentum(double lr = 0.01, double momentum = 0.9) {
 	static double v_bias1[HIDDEN_SIZE];
 	static double v_bias2[OUTPUT_SIZE];
 	if (flag == 0) {
+		flag = 1;
 		for (int i = 0; i < HIDDEN_SIZE; ++i) {
 			v_bias1[i] = 0;
 			for (int j = 0; j < INPUT_SIZE; ++j) {
@@ -235,8 +260,6 @@ void Momentum(double lr = 0.01, double momentum = 0.9) {
 			weight_2[i][j] += v_weight_2[i][j];
 		}
 	}
-
-	flag = 1;
 }
 
 void AdaGrad(double lr = 0.01) {
@@ -246,6 +269,7 @@ void AdaGrad(double lr = 0.01) {
 	static double h_bias_1[HIDDEN_SIZE];
 	static double h_bias_2[OUTPUT_SIZE];
 	if (flag == 0) {
+		flag = 1;
 		for (int i = 0; i < HIDDEN_SIZE; ++i) {
 			h_bias_1[i] = 0;
 			for (int j = 0; j < INPUT_SIZE; ++j) {
@@ -284,6 +308,7 @@ void RMSProp(double lr = 0.01, double decay_rate = 0.99) {
 	static double h_bias_1[HIDDEN_SIZE];
 	static double h_bias_2[OUTPUT_SIZE];
 	if (flag == 0) {
+		flag = 1;
 		for (int i = 0; i < HIDDEN_SIZE; ++i) {
 			h_bias_1[i] = 0;
 			for (int j = 0; j < INPUT_SIZE; ++j) {
@@ -317,8 +342,6 @@ void RMSProp(double lr = 0.01, double decay_rate = 0.99) {
 			weight_2[i][j] -= lr * dweight_2[i][j] / sqrt(h_weight_2[i][j] + 1.0e-300);
 		}
 	}
-
-	flag = 1;
 }
 
 void Adam(double lr = 0.001, double beta1 = 0.9, double beta2 = 0.999) {
@@ -376,7 +399,7 @@ void Adam(double lr = 0.001, double beta1 = 0.9, double beta2 = 0.999) {
 
 void save(const char* fileName = "test.model") {
 	FILE* fp;
-	fopen_s(&fp,fileName, "wb");
+	fopen_s(&fp, fileName, "wb");
 	if (fp == NULL) {
 		printf("ファイルが開けませんでした。\n");
 		exit(1);

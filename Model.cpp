@@ -6,7 +6,7 @@
 #define IMG_WIDTH	160
 #define INPUT_SIZE  CHANNEL*IMG_HEIGHT*IMG_WIDTH
 #define HIDDEN_SIZE 320
-#define OUTPUT_SIZE 100
+#define OUTPUT_SIZE 10
 #include "FastSimpleNeuralNetwork.h"
 
 
@@ -19,8 +19,8 @@ int main(void) {
 
 	double loss;
 	SimpleNeuralNetwork_init();
-	for (int e = 0; e < 1; ++e) {
-		for (int i = 0; i < DATAMAX; ++i) {
+	for (int e = 0; e < 100; ++e) {
+		for (int i = 0; i < DATAMAX-1; ++i) {
 			SimpleNeuralNetwork(
 				Sigmoid_forward,
 				Softmax_forward,
@@ -31,13 +31,12 @@ int main(void) {
 				t,
 				&loss
 			);
-			AdaGrad();
+			Adam();
 			cout << loss << endl;
 		}
 	}
 	save("test.model");
 	dl.del();
 
-	load("test.model");
 	return 0;
 }
