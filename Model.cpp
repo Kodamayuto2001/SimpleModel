@@ -1,5 +1,4 @@
 #include "dataset.hpp"
-#include "dataloader.hpp"
 #define DATAMAX		100
 #define CHANNEL		1
 #define IMG_HEIGHT	160
@@ -8,11 +7,12 @@
 #define HIDDEN_SIZE 320
 #define OUTPUT_SIZE 10
 #include "FastSimpleNeuralNetwork.h"
+#include "dataloader.hpp"
+
+double x[DATAMAX][INPUT_SIZE];
 
 int main(void) {
-	DataLoader dl("DataSet/", DATAMAX, CHANNEL, IMG_HEIGHT, IMG_WIDTH);
-	dl.load();
-	double** x = dl.vecImg();
+	dataloader("DataSet/", DATAMAX, CHANNEL, IMG_HEIGHT, IMG_WIDTH, x);
 	double t[OUTPUT_SIZE];
 	Flatten(0, t);
 
@@ -30,13 +30,12 @@ int main(void) {
 				t,
 				&loss
 			);
-			SGD();
+			Adam();
 			// cout << loss << endl;
 			cout << i << endl;
 		}
 	}
 	save("test.model");
-	dl.del();
 
 	return 0;
 }

@@ -15,117 +15,39 @@ using namespace cv;
 using namespace std;
 namespace fs = filesystem;
 
-/****************************************************************************************
-	DataLoader
+#ifndef DATAMAX
+#define DATAMAX		100
+#endif // !DATAMAX
+#ifndef CHANNEL
+#define CHANNEL		1
+#endif // !CHANNEL
+#ifndef IMG_HEIGHT
+#define IMG_HEIGHT	160
+#endif // !IMG_HEIGHT
+#ifndef IMG_WIDTH
+#define IMG_WIDTH	160
+#endif // !IMG_WIDTH
+#ifndef INPUT_SIZE
+#define INPUT_SIZE  CHANNEL*IMG_HEIGHT*IMG_WIDTH
+#endif // !INPUT_SIZE
 
-	DataLoaderコンストラクタ
-		#	string dirPath		データセットのフォルダを指定する
-		#	int dataSize		データの個数を指定する
-		#	int height			画像データの縦の長さをリサイズする
-		#	int width			画像データの横の長さをリサイズする
-
-	load関数
-		戻り値			画像データdataSize枚の4次元配列
-
-	vecImg関数	
-		戻り値			それぞれの画像データを1次元配列に変形した2次元配列
-
-****************************************************************************************/
-class DataLoader {
-public:
-	double**** imgList;
-	double** Vimages;
-	DataLoader(
-		string dirPath,
-		int dataSize,
-		int channelSize,
-		int height,
-		int width
-	) {
-		DataLoader::dirPath = dirPath;
-		DataLoader::dataSize = dataSize;
-		DataLoader::channelSize = channelSize;
-		DataLoader::height = height;
-		DataLoader::width = width;
-
-		imgList = new double*** [dataSize];
-		Vimages = new double* [dataSize];
-		int i, j, k, l, vectorSize = height * width * channelSize;
-		for (i = 0; i < dataSize; i++) {
-			Vimages[i] = new double[vectorSize];
-			imgList[i] = new double** [height];
-			for (j = 0; j < height; j++) {
-				imgList[i][j] = new double* [width];
-				for (k = 0; k < width; k++) {
-					imgList[i][j][k] = new double[channelSize];
-					for (l = 0; l < channelSize; l++) {
-						imgList[i][j][k][l] = 0.0;
-					}
+void dataloader(string dirPath, int dataSize, int channelSize, int img_height, int img_width, double vecImg[DATAMAX][INPUT_SIZE]) {
+	Mat img;
+	int v = 0, i = 0;
+	for (const auto& f : fs::directory_iterator(dirPath)) {
+		img = imread(f.path().string(), 0);
+		resize(img, img, Size(), (double)img_width / img.cols, (double)img_height / img.rows);
+		v = 0;
+		for (int j = 0; j < img_height; ++j) {
+			for (int k = 0; k < img_width; ++k) {
+				for (int l = 0; l < channelSize; ++l) {
+					vecImg[i][v] = (double)img.ptr<Vec3b>(j)[k][l] / 255;
+					v++;
 				}
 			}
 		}
+		i++;
 	}
-
-
-	double**** load() {
-		Mat img;
-
-		int x;
-		if (channelSize == 1) { x = 0; }
-		else { x = 1; }
-
-		int i = 0, j, k, l, v;
-		for (const auto& f : fs::directory_iterator(dirPath)) {
-			img = imread(f.path().string(), x);
-
-			resize(img, img, Size(), (double)width / img.cols, (double)height / img.rows);
-
-			v = 0;
-			for (j = 0; j < height; j++) {
-				for (k = 0; k < width; k++) {
-					for (l = 0; l < img.channels(); l++) {
-						imgList[i][j][k][l] = (double)img.ptr<Vec3b>(j)[k][l];
-						imgList[i][j][k][l] /= 255;
-						Vimages[i][v] = imgList[i][j][k][l];
-						// printf("%d %d %lf\n", i, v, (double)img.ptr<Vec3b>(j)[k][l]);
-						v++;
-					}
-				}
-			}
-			i++;
-			//	エラーが発生するためいまはこうしている
-			if (i == dataSize) { break; }
-		}
-		return imgList;
-	}
-
-	double** vecImg() {
-		return Vimages;
-	}
-
-	void del() {
-		int i, j, k;
-		for (i = 0; i < dataSize; i++) {
-			for (j = 0; j < height; j++) {
-				for (k = 0; k < width; k++) {
-					delete[] imgList[i][j][k];
-				}
-				delete[] imgList[i][j];
-			}
-			delete[] imgList[i];
-			delete[] Vimages[i];
-		}
-		delete[] imgList;
-		delete[] Vimages;
-		cout << "正常に解放しました（DataLoader）" << endl;
-	}
-
-private:
-	string dirPath;
-	int dataSize;
-	int channelSize;
-	int height;
-	int width;
-};
+}
 
 #endif // !_DATALOADER_H_
