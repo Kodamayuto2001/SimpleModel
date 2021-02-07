@@ -127,17 +127,17 @@ int main(void) {
 			for (int j = 0; j < DATAMAX; ++j) {
 				//	‡“`”d‹t“`”d
 				SimpleNeuralNetwork(
-					ReLU_forward,
+					Sigmoid_forward,
 					Softmax_forward,
 					CrossEntropyError_forward,
 					SoftmaxWithLoss_backward,
-					ReLU_backward,
+					Sigmoid_backward,
 					x[j],
 					t,
 					&loss
 				);
 				//	Å“K‰»
-				Adam();
+				Adam(0.0001, 0.9, 0.999);
 				//	•\Ž¦
 				printf("\r[%2d] [%3d] [%10f]", i, j, loss);
 			}
@@ -147,7 +147,7 @@ int main(void) {
 			dataloader(test_path[i], x);
 			for (int j = 0; j < TEST_DATASET_MAX; ++j) {
 				double* p = predict(ReLU_forward, Softmax_forward, x[j]);
-				printf("%10f\n", p[i]);
+				printf("%7f“\n", p[i] * 100);
 			}
 		}
 	}
