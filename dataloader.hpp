@@ -31,16 +31,17 @@ namespace fs = filesystem;
 #define INPUT_SIZE  CHANNEL*IMG_HEIGHT*IMG_WIDTH
 #endif // !INPUT_SIZE
 
-void dataloader(string dirPath, int dataSize, int channelSize, int img_height, int img_width, double vecImg[DATAMAX][INPUT_SIZE]) {
+void dataloader(string dirPath, double vecImg[DATAMAX][INPUT_SIZE]) {
 	Mat img;
 	int v = 0, i = 0;
 	for (const auto& f : fs::directory_iterator(dirPath)) {
 		img = imread(f.path().string(), 0);
-		resize(img, img, Size(), (double)img_width / img.cols, (double)img_height / img.rows);
+		resize(img, img, Size(), (double)IMG_WIDTH / img.cols, (double)IMG_HEIGHT / img.rows);
 		v = 0;
-		for (int j = 0; j < img_height; ++j) {
-			for (int k = 0; k < img_width; ++k) {
-				for (int l = 0; l < channelSize; ++l) {
+#pragma omp parallel for
+		for (int j = 0; j < IMG_HEIGHT; ++j) {
+			for (int k = 0; k < IMG_WIDTH; ++k) {
+				for (int l = 0; l < CHANNEL; ++l) {
 					vecImg[i][v] = (double)img.ptr<Vec3b>(j)[k][l] / 255;
 					v++;
 				}

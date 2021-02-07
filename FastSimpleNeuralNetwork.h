@@ -167,6 +167,7 @@ double* predict(
 }
 
 void Flatten(int label, double x[]) {
+#pragma omp parallel for
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
 		x[i] = 0;
 	}
