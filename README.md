@@ -1,4 +1,5 @@
 # SimpleModel
+# ミニバッチ学習を実装できていないため、ミニバッチ学習ができるようにしたいです。
 
 ### Activation func
 - Sigmoid
