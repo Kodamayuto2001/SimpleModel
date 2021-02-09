@@ -146,7 +146,7 @@ void SimpleNeuralNetwork(
 
 double* predict(
 	void(*forward_1)(double*, double*),
-	void(*forward_2)(double*, double*), 
+	void(*forward_2)(double*, double*),
 	double* x) {
 	int i, j;
 	for (i = 0; i < HIDDEN_SIZE; ++i) {
@@ -434,13 +434,13 @@ void save(const char* fileName = "test.model") {
 		exit(1);
 	}
 
-	fwrite((char*)bias_1, sizeof(bias_1[0]), HIDDEN_SIZE, fp);
+	fwrite(bias_1, sizeof(bias_1[0]), HIDDEN_SIZE, fp);
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
-		fwrite((char*)weight_1[i], sizeof(weight_1[i][0]), INPUT_SIZE, fp);
+		fwrite(weight_1[i], sizeof(weight_1[i][0]), INPUT_SIZE, fp);
 	}
-	fwrite((char*)bias_2, sizeof(bias_2[0]), OUTPUT_SIZE, fp);
+	fwrite(bias_2, sizeof(bias_2[0]), OUTPUT_SIZE, fp);
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
-		fwrite((char*)weight_2[i], sizeof(weight_2[i][0]), OUTPUT_SIZE, fp);
+		fwrite(weight_2[i], sizeof(weight_2[i][0]), OUTPUT_SIZE, fp);
 	}
 	fclose(fp);
 	printf("パラメータを保存しました。\n");
@@ -454,13 +454,13 @@ void load(const char* fileName = "test.model") {
 		exit(1);
 	}
 
-	fread((char*)bias_1, sizeof(bias_1[0]), HIDDEN_SIZE, fp);
+	fread(bias_1, sizeof(bias_1[0]), HIDDEN_SIZE, fp);
 	for (int i = 0; i < HIDDEN_SIZE; ++i) {
-		fread((char*)weight_1[i], sizeof(weight_1[i][0]), INPUT_SIZE, fp);
+		fread(weight_1[i], sizeof(weight_1[i][0]), INPUT_SIZE, fp);
 	}
-	fread((char*)bias_2, sizeof(bias_2[0]), OUTPUT_SIZE, fp);
+	fread(bias_2, sizeof(bias_2[0]), OUTPUT_SIZE, fp);
 	for (int i = 0; i < OUTPUT_SIZE; ++i) {
-		fread((char*)weight_2[i], sizeof(weight_2[i][0]), OUTPUT_SIZE, fp);
+		fread(weight_2[i], sizeof(weight_2[i][0]), OUTPUT_SIZE, fp);
 	}
 	fclose(fp);
 }
