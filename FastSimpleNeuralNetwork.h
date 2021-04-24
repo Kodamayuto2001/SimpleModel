@@ -167,6 +167,9 @@ float dbias_2[OUTPUT];
 		１．中間層の活性化関数のアドレス
 */
 void SimpleNeuralNetwork_init(void(*activation_func)(float*, float*) = ReLU_forward) {
+#ifdef PREDICT
+	printf("初期化していません！\n");
+#else
 	float a = 0.01;
 	if (activation_func == Sigmoid_forward) {
 		srand(time(NULL));
@@ -226,6 +229,8 @@ void SimpleNeuralNetwork_init(void(*activation_func)(float*, float*) = ReLU_forw
 			}
 		}
 	}
+#endif // PREDICT
+
 }
 /*
 	勾配を求める。順伝播の予測値を表示することもできる（#define PREDICT）
@@ -389,10 +394,12 @@ void MiniBatchSimpleNeuralNetwork(
 		}
 	}
 }
+
+float ganma = 1;
+float beta_ = 0;
+float dganma= 0;
+float dbeta_= 0;
 /*
-	完全ではない
-	テストしていない
-	あまり詳しく理解できていない
 	Batch Normalization付きのミニバッチ版のSimpleNeuralNetwork
 */
 void MiniBatchSimpleNeuralNetwork_BatchNorm(
@@ -409,7 +416,10 @@ void MiniBatchSimpleNeuralNetwork_BatchNorm(
 	static float yDw2[MINI_BATCH_SIZE][OUTPUT];
 	static float tmp[MINI_BATCH_SIZE][HIDDEN];
 
-	static float bn_mean[HIDDEN];
+	float bn_mean[HIDDEN];
+	float bn_variance[HIDDEN];
+	static float bn_norm[MINI_BATCH_SIZE][HIDDEN];
+	static float y__1[MINI_BATCH_SIZE][HIDDEN];
 
 	for (int n = 0; n < MINI_BATCH_SIZE; ++n) {
 		for (int i = 0; i < HIDDEN; ++i) {
@@ -431,9 +441,79 @@ void MiniBatchSimpleNeuralNetwork_BatchNorm(
 //	-----	mini-batch mean (div)	-----
 	for (int i = 0; i < HIDDEN; ++i) {
 		bn_mean[i] /= MINI_BATCH_SIZE;
-		bn_mean[i] *= (-1);
 	}
 
+//	-----	mini-batch variance(sum)-----
+	for (int n = 0; n < MINI_BATCH_SIZE; ++n) {
+		for (int i = 0; i < HIDDEN; ++i) {
+			bn_variance[i] = pow(xDw1[n][i] - bn_mean[i], 2);
+		}
+	}
+
+//	-----	mini-batch variance(div)-----
+	for (int i = 0; i < HIDDEN; ++i) {
+		bn_variance[i] /= MINI_BATCH_SIZE;
+	}
+
+//	-----	mini-batch normalize	-----
+	for (int n = 0; n < MINI_BATCH_SIZE; ++n) {
+		for (int i = 0; i < HIDDEN; ++i) {
+			bn_norm[n][i] = (xDw1[n][i] - bn_mean[i]);
+			bn_norm[n][i] /= sqrt(bn_variance[i] + 1.0e-10);
+		}
+	}
+
+	for (int n = 0; n < MINI_BATCH_SIZE; ++n) {
+		for (int i = 0; i < HIDDEN; ++i) {
+			//	-----	scale and shift		-----
+			y__1[n][i] = ganma * bn_norm[n][i] + beta_;
+		
+			//	活性化関数１
+			fc_1(&y__1[n][i], &y__1[n][i]);
+		}
+
+		for (int i = 0; i < OUTPUT; ++i) {
+			dbias_2[i] = 0;
+			yDw2[n][i] = 0;
+			for (int j = 0; j < HIDDEN; ++j) {
+				dweight_2[n][j] = 0;
+				yDw2[n][i] += y__1[n][j] * weight_2[i][j];
+			}
+			yDw2[n][i] += bias_2[i];
+		}
+		//	活性化関数２
+		fc_2(yDw2[n], yDw2[n]);
+
+#ifdef PREDICT
+		printf("\n\n----------[予測値] [正解ラベル]----------\n");
+		for (int i = 0; i < OUTPUT; ++i) {
+			printf("p[%d] = %f t[%d] = %d\n", i, yDw2[n][i], i, t[n][i]);
+		}
+#endif // PREDICT
+	}
+
+	miniBatchLossF(yDw2, t, loss);
+
+	for (int n = 0; n < MINI_BATCH_SIZE; ++n) {
+		gc_2(yDw2[n], yDw2[n], t[n]);
+
+		for (int i = 0; i < OUTPUT; ++i) {
+			dbias_2[i] += yDw2[n][i];
+			for (int j = 0; j < HIDDEN; ++j) {
+				dweight_2[i][j] += yDw2[n][i] * xDw1[n][j];
+				tmp[n][j] += yDw2[n][i] * weight_2[i][j];
+			}
+		}
+
+		for (int i = 0; i < HIDDEN; ++i) {
+			gc_1(&tmp[n][i], &y__1[n][i], &tmp[n][i]);
+			
+			dbeta_ += tmp[n][i];
+			dganma += bn_norm[n][i] * tmp[n][i];
+			bn_norm[n][i] = ganma * tmp[n][i];
+			bn_norm[n][i] /= (bn_variance[i] + 1.0e-10);
+		}
+	}
 }
 
 #endif // MINI_BATCH_SIZE
