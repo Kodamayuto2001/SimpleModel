@@ -401,6 +401,8 @@ float dganma= 0;
 float dbeta_= 0;
 /*
 	Batch Normalization付きのミニバッチ版のSimpleNeuralNetwork
+	うまくできていないです。
+	まだ完成していません。
 */
 void MiniBatchSimpleNeuralNetwork_BatchNorm(
 	float x[MINI_BATCH_SIZE][INPUT],
@@ -507,7 +509,7 @@ void MiniBatchSimpleNeuralNetwork_BatchNorm(
 
 		for (int i = 0; i < HIDDEN; ++i) {
 			gc_1(&tmp[n][i], &y__1[n][i], &tmp[n][i]);
-			
+
 			dbeta_ += tmp[n][i];
 			dganma += bn_norm[n][i] * tmp[n][i];
 			bn_norm[n][i] = ganma * tmp[n][i];
